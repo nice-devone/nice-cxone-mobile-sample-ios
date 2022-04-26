@@ -17,15 +17,15 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 	// MARK: - Public properties
 	/// The `BasicAudioController` control the AVAudioPlayer state (play, pause, stop) and update audio cell UI accordingly.
 	lazy var audioController = BasicAudioController(messageCollectionView: messagesCollectionView)
-	var threadIndex: Int
+//	var threadIndex: Int
 	//var slackInputBar = SlackInputBar()
 	var thread: ThreadObject
 	var sdkClient = CXOneChat.shared
     private let refreshControl = UIRefreshControl()
 	
-	public init(threadIndex: Int) {
-		self.threadIndex = threadIndex
-		self.thread = CXOneChat.shared.threads[self.threadIndex]
+	public init(thread: ThreadObject) {
+		
+		self.thread = thread
         print("threadID:",thread.id)
 		super.init(nibName: nil, bundle: nil)
 	}
@@ -256,13 +256,17 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
         sdkClient.onAgentChange = { [weak self] in
             guard let self = self else {return}
             DispatchQueue.main.async {
-                self.navigationItem.title = CXOneChat.shared.threads[self.threadIndex].threadAgent.displayName
+                self.navigationItem.title = self.thread.threadAgent.displayName
             }
         }
         sdkClient.onMessageAddedToChatView = { [weak self] message in
            // self?.insertMessage(message)
             DispatchQueue.main.async {
                 self?.hideActivityIndicator()
+                guard let nThread = self?.sdkClient.threads.first(where: {
+                    $0.id == self?.thread.id
+                }) else {return}
+                self?.thread = nThread
                 self?.messagesCollectionView.reloadData()
                 (self?.inputAccessoryView as? InputBarAccessoryView)?.sendButton.stopAnimating()
                 (self?.inputAccessoryView as? InputBarAccessoryView)?.inputTextView.placeholder = "Aa"
@@ -293,6 +297,10 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
         sdkClient.onMessageAddedToThread = { [weak self] message in
             DispatchQueue.main.async {
                 self?.hideActivityIndicator()
+                guard let nThread = self?.sdkClient.threads.first(where: {
+                    $0.id == self?.thread.id
+                }) else {return}
+                self?.thread = nThread
                 self?.messagesCollectionView.reloadData()
                 self?.scrollToBottom()
             }
@@ -305,6 +313,10 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
             DispatchQueue.main.async {
                 guard let self = self else {return}
                 self.refreshControl.endRefreshing()
+                guard let nThread = self.sdkClient.threads.first(where: {
+                    $0.id == self.thread.id
+                }) else {return}
+                self.thread = nThread
                 self.messagesCollectionView.reloadData()
             }
         }
@@ -390,8 +402,7 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 	/// - Parameters:
 	///   - messagesCollectionView: The current `CollectionView`
 	public func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
-		guard let convoIndex = sdkClient.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform}) else { return 0 }
-		return sdkClient.threads[convoIndex].messages.count
+		return thread.messages.count
 	}
 	
 	/// Determines the information in the cell.
@@ -399,7 +410,7 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 		guard sdkClient.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform}) != nil else {
             return Message(messageType: .text, plugin: [], text: "", user: Customer(senderId: "", displayName: ""), messageId: UUID(), date: Date(), threadId: self.thread.idOnExternalPlatform, isRead: false)
 		}
-		var message = sdkClient.threads[threadIndex].messages[indexPath.section]
+		var message = thread.messages[indexPath.section]
 		if message.messageType == .plugin {
 			message.kind = .custom(nil)
 		}

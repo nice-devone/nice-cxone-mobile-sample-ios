@@ -21,6 +21,7 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
     var config: ChannelConfiguration?
     var recoverTHreadFailed = false
     var reconnectFailedNumber = 0
+    var threads = [ThreadObject]()
     override func viewDidLoad() {
 		super.viewDidLoad()
 		self.tableView.register(ThreadCell.self, forCellReuseIdentifier: "threadCell")        
@@ -73,31 +74,32 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
 	}
 	
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        sdkClient.setCurrentThread(idOnExternalPlatform: sdkClient.threads[indexPath.row].idOnExternalPlatform)
+        sdkClient.setCurrentThread(idOnExternalPlatform: threads[indexPath.row].idOnExternalPlatform)
         goToThread(index: indexPath.row)
 	}
     
     func goToThread(index: Int) {
-        let vc: AdvancedExampleViewController = AdvancedExampleViewController(threadIndex: index)
+        let thread = threads[index]
+        let vc: AdvancedExampleViewController = AdvancedExampleViewController(thread: thread)
         vc.closure = closure
         self.navigationController?.pushViewController(vc, animated: true)
     }
 	
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return self.sdkClient.threads.count
+        return threads.count
 	}
 	
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "threadCell") as! ThreadCell
-        cell.nameLabel.text = sdkClient.threads[indexPath.row].threadAgent.displayName.isEmpty ? "No Agent" : sdkClient.threads[indexPath.row].threadAgent.displayName
+        cell.nameLabel.text = threads[indexPath.row].threadAgent.displayName.isEmpty ? "No Agent" : threads[indexPath.row].threadAgent.displayName
         
-        let names = self.sdkClient.threads[indexPath.row].threadAgent.displayName.components(separatedBy: " ")
+        let names = threads[indexPath.row].threadAgent.displayName.components(separatedBy: " ")
         var initials = ""
         for name in names {
             initials += String(name.first ?? Character.init("S"))
         }
         cell.avatarView.initials = initials
-        let kind = self.sdkClient.threads[indexPath.row].messages.last?.kind
+        let kind = threads[indexPath.row].messages.last?.kind
         switch kind {
         case .text(let string):
             cell.lastMessageLabel.text = string
@@ -118,13 +120,14 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
             self.deleteClosure = { [indexPath]  in
                 DispatchQueue.main.async {
                     self.hideActivityIndicator()
+                    self.threads.remove(at: indexPath.row)
                     self.sdkClient.delete(at: indexPath.row)
                     self.tableView.deleteRows(at:[indexPath] , with: .automatic)
                     completionHandler(true)
                 }
             }
             do {
-                try self.sdkClient.archiveThread(threadId: sdkClient.threads[indexPath.row].idOnExternalPlatform)
+                try self.sdkClient.archiveThread(threadId: threads[indexPath.row].idOnExternalPlatform)
             }catch {
                 print(error.localizedDescription)
             }
@@ -181,7 +184,8 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
                         DispatchQueue.main.async {
                             self.hideActivityIndicator()
                             self.sdkClient.setCurrentThread(idOnExternalPlatform: self.sdkClient.threads[0].idOnExternalPlatform)
-                            self.navigationController?.pushViewController(AdvancedExampleViewController(threadIndex: 0), animated: true)
+                            let thread = self.sdkClient.threads[0]
+                            self.navigationController?.pushViewController(AdvancedExampleViewController(thread: thread), animated: true)
                         }
                     }
                 }
@@ -205,6 +209,9 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
         
         sdkClient.onThreadInfoLoad = {[weak self] in
             DispatchQueue.main.async {
+                self?.threads = self?.sdkClient.threads.filter({
+                    $0.canAddMoreMessages
+                }) ?? []
                 self?.hideActivityIndicator()
                 self?.tableView.reloadData()
             }
@@ -245,6 +252,9 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
                     self?.createNewThread()
                 }else {
                     self?.updateMetadata()
+                    self?.threads = self?.sdkClient.threads.filter({
+                        $0.canAddMoreMessages
+                    }) ?? []
                     self?.tableView.reloadData()
                 }
                 if (self?.sdkClient.customer?.firstName.isEmpty ?? true || self?.sdkClient.customer?.familyName.isEmpty ?? true ) {
@@ -257,7 +267,8 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
                 guard let self = self else {return}
                 self.hideActivityIndicator()
                 if self.addedThread {
-                    let vc: AdvancedExampleViewController = AdvancedExampleViewController(threadIndex: self.sdkClient.threads.count - 1)
+                    guard let thread = self.sdkClient.threads.last else { return }
+                    let vc: AdvancedExampleViewController = AdvancedExampleViewController(thread: thread)
                     self.addedThread = false
                     print("closure:", self.closure == nil)
                     vc.closure = self.closure

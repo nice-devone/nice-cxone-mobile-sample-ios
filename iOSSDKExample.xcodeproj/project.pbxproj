@@ -62,6 +62,7 @@
 		11F6137527BEBB71007BD941 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F6137427BEBB71007BD941 /* LoginViewController.swift */; };
 		11F6137827BEC084007BD941 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 11F6137627BEC084007BD941 /* Login.storyboard */; };
 		270322CA27C99B0300B1F9E0 /* PKCE in Frameworks */ = {isa = PBXBuildFile; productRef = 270322C927C99B0300B1F9E0 /* PKCE */; };
+		27294B312818855A00E18A18 /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 27294B302818855A00E18A18 /* awsconfiguration.json */; };
 		27A0175F27A305AD00F3D6C5 /* iOSSDKExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A0175E27A305AD00F3D6C5 /* iOSSDKExampleTests.swift */; };
 		27A0176C27A305C400F3D6C5 /* iOSSDKExampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A0176B27A305C400F3D6C5 /* iOSSDKExampleUITests.swift */; };
 		27A0176E27A305C400F3D6C5 /* iOSSDKExampleUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A0176D27A305C400F3D6C5 /* iOSSDKExampleUITestsLaunchTests.swift */; };
@@ -138,6 +139,7 @@
 		11F1C81927AB0FB40018BD19 /* ConfigChooser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigChooser.swift; sourceTree = "<group>"; };
 		11F6137427BEBB71007BD941 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		11F6137727BEC084007BD941 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = iOSSDKExample/Base.lproj/Login.storyboard; sourceTree = "<group>"; };
+		27294B302818855A00E18A18 /* awsconfiguration.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = awsconfiguration.json; sourceTree = "<group>"; };
 		27A0175C27A305AD00F3D6C5 /* iOSSDKExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSSDKExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27A0175E27A305AD00F3D6C5 /* iOSSDKExampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSDKExampleTests.swift; sourceTree = "<group>"; };
 		27A0176927A305C400F3D6C5 /* iOSSDKExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSSDKExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -319,6 +321,14 @@
 			path = Extension;
 			sourceTree = "<group>";
 		};
+		27294B2F2818853300E18A18 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				27294B302818855A00E18A18 /* awsconfiguration.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		27A0175D27A305AD00F3D6C5 /* iOSSDKExampleTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -369,6 +379,7 @@
 		D4D4EE4426E11A3E002BE857 /* iOSSDKExample */ = {
 			isa = PBXGroup;
 			children = (
+				27294B2F2818853300E18A18 /* Resources */,
 				110AC6EF27C5B4D000ADA6EB /* LoginWithAmazon.framework */,
 				11151785278E051900BBBB0D /* Controller */,
 				11151788278E051900BBBB0D /* Views */,
@@ -519,6 +530,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27294B312818855A00E18A18 /* awsconfiguration.json in Resources */,
 				1193DCEB2795D9640087AB5F /* Fragment.png in Resources */,
 				1193DCEA2795D9640087AB5F /* Sparkle.png in Resources */,
 				D4D4EE5226E11A3F002BE857 /* LaunchScreen.storyboard in Resources */,

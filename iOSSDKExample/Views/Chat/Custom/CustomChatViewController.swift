@@ -207,7 +207,7 @@ final class AdvancedExampleViewController: ChatViewController {
 		}
 
 		let message = messagesDataSource.messageForItem(at: indexPath, in: messagesCollectionView)
-		let messageData = CXOneChat.shared.threads[threadIndex].messages[indexPath.section]
+		let messageData = thread.messages[indexPath.section]
 		if case .custom = message.kind {
 			let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
 			let carouselView = CarouselView()

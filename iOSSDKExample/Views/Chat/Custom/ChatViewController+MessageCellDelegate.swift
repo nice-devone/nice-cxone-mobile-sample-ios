@@ -21,7 +21,7 @@ extension ChatViewController: MessageCellDelegate {
 				print("Failed to identify message when audio cell receive tap gesture")
 				return
 		}
-		let message = sdkClient.threads[threadIndex].messages[indexPath.section]
+		let message = thread.messages[indexPath.section]
 		if message.messageType == .plugin {
 			AlertService.showAlert(style: .alert, title: "Alert", message: "Plugin has been tapped")
 		}
