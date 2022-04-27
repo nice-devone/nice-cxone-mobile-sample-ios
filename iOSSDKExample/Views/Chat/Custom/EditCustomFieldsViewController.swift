@@ -48,7 +48,7 @@ class EditCustomFieldsViewController: UIViewController {
 		return button
 	}()
 	
-	var customValues = [CustomField(ident: "firstname", value: ""),CustomField(ident: "email", value: ""),CustomField(ident: "lastname ", value: "")]
+	var customValues = [CustomField(ident: "firstname", value: ""),CustomField(ident: "email", value: ""),CustomField(ident: "lastname", value: "")]
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()

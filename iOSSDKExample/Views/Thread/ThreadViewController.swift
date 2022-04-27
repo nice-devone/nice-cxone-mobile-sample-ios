@@ -35,9 +35,13 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
         if sdkClient.getChannelConfiguration() != nil && sdkClient.getChannelConfiguration()?.settings.hasMultipleThreadsPerEndUser ?? false {
             addCreateThreadButton()
         }
+        
 	}
 	
 	override func viewDidAppear(_ animated: Bool) {
+        self.threads = sdkClient.threads.filter({
+            $0.canAddMoreMessages
+        })
 		self.tableView.reloadData()
 	}
 	
@@ -50,6 +54,11 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
         vc.closure = { [weak self] customFields in
             print("closure poput call")
             DispatchQueue.main.async {
+                guard let thread = self?.sdkClient.threads.first(where: {
+                    $0.active
+                }) else { return }
+                print("pass here")
+                self?.threads.append(thread)
                 self?.tableView.reloadData()
                 self?.closure = { [weak self] in
                     do {
@@ -59,7 +68,7 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
                         print(error.localizedDescription)
                     }
                 }
-                guard let index = self?.sdkClient.threads.firstIndex(where: {$0.active}) else {return}
+                guard let index = self?.threads.firstIndex(where: {$0.active}) else {return}
                 self?.goToThread(index: index)
             }
             
@@ -194,11 +203,11 @@ class ThreadViewController: UITableViewController, CreateNewThreadDelegate {
         }
         sdkClient.onMessageAddedToThread = {[weak self] message in
             guard let self = self else {return}
-            let index = self.sdkClient.threads.firstIndex(where: {
+            let index = self.threads.firstIndex(where: {
                 $0.idOnExternalPlatform == message.threadId
             })
             DispatchQueue.main.async {
-                if self.sdkClient.threads[index ?? 0].messages.isEmpty {
+                if self.threads[index ?? 0].messages.isEmpty {
                     self.updateMetadata()
                 }else {
                     self.hideActivityIndicator()
