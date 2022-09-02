@@ -1,10 +1,3 @@
-//
-//  CameraInputBarAccessoryView.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 10/11/21.
-//
-
 import Foundation
 import UIKit
 import InputBarAccessoryView
@@ -73,7 +66,7 @@ class CameraInputBarAccessoryView: InputBarAccessoryView {
 			}.onDeselected {
 				$0.tintColor = UIColor.lightGray
 			}.onTouchUpInside { _ in
-				print("Item Tapped")
+                // Handle tap
 			}
 	}
 	

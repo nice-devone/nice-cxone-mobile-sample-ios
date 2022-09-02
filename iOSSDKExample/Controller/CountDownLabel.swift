@@ -1,10 +1,3 @@
-//
-//  CountDownLabel.swift
-//  iOSSDKExample
-//
-//  Created by kjoe on 1/17/22.
-//
-
 import UIKit
 
 @objc public protocol CountdownLabelDelegate {

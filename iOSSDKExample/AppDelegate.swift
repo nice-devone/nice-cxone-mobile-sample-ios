@@ -1,10 +1,3 @@
-//
-//  AppDelegate.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 9/2/21.
-//
-
 import UIKit
 import CXOneChatSDK
 import IQKeyboardManagerSwift
@@ -19,10 +12,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.shared.enable = true
         IQKeyboardManager.shared.disabledDistanceHandlingClasses.append(ChatViewController.self)
         IQKeyboardManager.shared.disabledDistanceHandlingClasses.append(AdvancedExampleViewController.self)
-        CXOneChatClient.configurePinpoint(launchOptions: launchOptions)
-        CXOneChatClient.connect(environment: .NA1, brandId: 1386, channelId: "chat_51eafb4e-8829-4efe-b58c-3bc9febf18c4")
-
-        
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .badge, .sound]) { (success, error) in
             if error == nil {
@@ -33,7 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             } 
         }
-        
 		return true
 	}
 
@@ -52,12 +40,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	}
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        CXOneChatClient.registerDeviceToken(deviceToken: deviceToken)
+        do {
+            try CXOneChatClient.registerDeviceToken(deviceToken: deviceToken)
+        } catch {
+            print(error)
+        }
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("error registering for remote notificatinos")
+        print("Error registering for remote notifications")
     }
-
 }
-

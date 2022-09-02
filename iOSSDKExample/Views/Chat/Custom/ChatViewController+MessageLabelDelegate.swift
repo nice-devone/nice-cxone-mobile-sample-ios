@@ -1,7 +1,3 @@
-//
-//  Created by Customer Dynamics Development on 9/10/21.
-//
-
 import UIKit
 import SwiftUI
 import MessageKit
@@ -26,6 +22,10 @@ extension ChatViewController: MessageLabelDelegate {
 	
 	public func didSelectURL(_ url: URL) {
 		print("URL Selected: \(url)")
+        let webVC = WkWebViewController(url: url)
+        let navigationController = UINavigationController(rootViewController: webVC)
+        navigationController.modalPresentationStyle = .fullScreen
+        self.present(navigationController, animated: true)
 	}
 	
 	public func didSelectTransitInformation(_ transitInformation: [String: String]) {

@@ -1,7 +1,3 @@
-//
-//  Created by Customer Dynamics Development on 9/2/21.
-//
-
 import UIKit
 import SwiftUI
 import MessageKit
@@ -13,102 +9,170 @@ import UserNotifications
 /// A base class for the example controllers
 @available(iOS 13.0, *)
 public class ChatViewController: MessagesViewController, MessagesDataSource {
-	
-	// MARK: - Public properties
-	/// The `BasicAudioController` control the AVAudioPlayer state (play, pause, stop) and update audio cell UI accordingly.
-	lazy var audioController = BasicAudioController(messageCollectionView: messagesCollectionView)
-//	var threadIndex: Int
-	//var slackInputBar = SlackInputBar()
-	var thread: ThreadObject
-	var sdkClient = CXOneChat.shared
+    
+    var observation: NSKeyValueObservation?
+    /// Instance for interacting with the CXone SDK.
+    var cxOneChat = CXOneChat.shared
+
+    /// The thread that is currently being viewed.
+    var thread: ChatThread
+
+    var closure: (()->Void)?
+    
+    var textInputWaitTime: Int = 0
+    var timer: Timer?
+
+    lazy var editCustomFieldsButton: UIBarButtonItem = {
+        var button = UIBarButtonItem(image: UIImage(systemName: "pencil") ,style: .plain, target: self, action: #selector(editCustomField))
+        return button
+    }()
+    lazy var editThreadNameButton: UIBarButtonItem = {
+        var button = UIBarButtonItem(image: UIImage.init(systemName: "square.and.pencil"), style: .plain, target: self, action: #selector(editThreadName))
+        return button
+    }()
+    
+    public override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+
     private let refreshControl = UIRefreshControl()
+    
+    private let formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }()
 	
-	public init(thread: ThreadObject) {
-		
+    public init(thread: ChatThread) {
 		self.thread = thread
-        print("threadID:",thread.id)
 		super.init(nibName: nil, bundle: nil)
 	}
-    var closure: (()->Void)?
-	
-	required init?(coder: NSCoder) {
-		fatalError("init(coder:) has not been implemented")
-	}
 
-	
-	lazy var editCustomFieldsButton: UIBarButtonItem = {
-        var button = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editCustomField))
-		return button
-	}()
-	
-	// MARK: - Private properties
-	private let formatter: DateFormatter = {
-		let formatter = DateFormatter()
-		formatter.dateStyle = .medium
-		return formatter
-	}()
-	
-	@objc func editCustomField() {
-		let popupVC = PopupViewController(contentController: EditCustomFieldsViewController(thread: self.thread.id), popupWidth: 300, popupHeight: 400)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
-		present(popupVC, animated: true)
-	}
-	
-	// MARK: - Lifecycle
 	public override func viewDidLoad() {
 		super.viewDidLoad()
-		
-		title = thread.threadAgent.displayName
-		
+        self.navigationItem.rightBarButtonItem = editCustomFieldsButton
+        if !cxOneChat.channelConfig!.settings.hasMultipleThreadsPerEndUser {
+            self.navigationItem.hidesBackButton = true
+            let signOutButton = UIBarButtonItem(title: "Sign Out", style: .plain, target: self, action: #selector(self.signOut))
+            self.navigationItem.leftBarButtonItem = signOutButton
+            title = thread.threadAgent?.fullName ?? ""
+        } else {
+            self.navigationItem.rightBarButtonItems = [editCustomFieldsButton,editThreadNameButton]
+            if let threadName =  thread.threadName {
+                title = threadName
+            } else {
+                title = ""
+            }
+        }
+
 		configureMessageCollectionView()
 		configureMessageInputBar()
-		scrollToBottom()
-        navigationItem.rightBarButtonItem = editCustomFieldsButton
         refreshControl.addTarget(self, action: #selector(didPullToRefresh(_:)), for: .valueChanged)
         messagesCollectionView.alwaysBounceVertical = true
         messagesCollectionView.refreshControl = refreshControl
 //        collectionView.alwaysBounceVertical = true
-//        collectionView.refreshControl = refreshControl
-		self.scrollToBottom()
-		self.navigationItem.rightBarButtonItem = editCustomFieldsButton
-		//loadFirstMessages()
+		scrollToBottom()
+		
+        
         closure?()
-        if thread.messages.count < 2 {
-            do {
-                self.showActivityIndicator(color: .green)
-                try sdkClient.loadThread(threadId: thread.idOnExternalPlatform)
-            }catch {
-                print(error.localizedDescription)
-            }
+        
+        do {
+            self.showActivityIndicator(color: .white)
+            try cxOneChat.loadThread(threadIdOnExternalPlatform: thread.idOnExternalPlatform)
+        } catch {
+            print(error.localizedDescription)
         }
-        subscribeToEvents()    
+        subscribeToEvents()
 	}
 	
 	public override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
+        do {
+            try cxOneChat.reportPageView(title: "ChatView", uri: "chat-view")
+        } catch {
+            print(error.localizedDescription)
+        }
 	}
 	
 	public override func viewDidDisappear(_ animated: Bool) {
 		super.viewDidDisappear(animated)
-		audioController.stopAnyOngoingPlaying()
 	}
-	
-	public override var preferredStatusBarStyle: UIStatusBarStyle {
-		return .lightContent
-	}
-	
-	/// Configures the `MessagesCollectionView`
-	public func configureMessageCollectionView() {
-		messagesCollectionView.messagesDataSource = self
-		messagesCollectionView.messageCellDelegate = self
-		scrollsToLastItemOnKeyboardBeginsEditing = true // default false
-//		maintainPositionOnKeyboardFrameChanged = true // default false
-		showMessageTimestampOnSwipeLeft = true // default false
-		//messagesCollectionView.refreshControl = refreshControl
-	}
+
+    @objc func signOut() {
+        CXOneChat.signOut()
+        let nc = UINavigationController()
+        nc.viewControllers.append(ConfigViewController())
+        view.window?.rootViewController = nc
+    }
+    
+    /// Configures the `MessagesCollectionView`
+    public func configureMessageCollectionView() {
+        messagesCollectionView.messagesDataSource = self
+        messagesCollectionView.messageCellDelegate = self
+        scrollsToLastItemOnKeyboardBeginsEditing = true // default false
+//        maintainPositionOnKeyboardFrameChanged = true // default false
+        showMessageTimestampOnSwipeLeft = true // default false
+        //messagesCollectionView.refreshControl = refreshControl
+    }
+    
+    public func configureMessageInputBar() {
+        //super.configureMessageInputBar()
+        
+        messageInputBar = CameraInputBarAccessoryView()
+        messageInputBar.delegate = self
+        messageInputBar.inputTextView.tintColor = .primaryColor
+        messageInputBar.sendButton.setTitleColor(.primaryColor, for: .normal)
+        messageInputBar.sendButton.setTitleColor(
+            UIColor.primaryColor.withAlphaComponent(0.3),
+            for: .highlighted)
+        
+        
+        messageInputBar.isTranslucent = true
+        messageInputBar.separatorLine.isHidden = true
+        messageInputBar.inputTextView.tintColor = .primaryColor
+        messageInputBar.inputTextView.backgroundColor = UIColor(red: 245/255, green: 245/255, blue: 245/255, alpha: 1)
+        messageInputBar.inputTextView.placeholderTextColor = UIColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)
+        messageInputBar.inputTextView.textContainerInset = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 36)
+        messageInputBar.inputTextView.placeholderLabelInsets = UIEdgeInsets(top: 8, left: 20, bottom: 8, right: 36)
+        messageInputBar.inputTextView.layer.borderColor = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1).cgColor
+        messageInputBar.inputTextView.layer.borderWidth = 1.0
+        messageInputBar.inputTextView.layer.cornerRadius = 16.0
+        messageInputBar.inputTextView.layer.masksToBounds = true
+        messageInputBar.inputTextView.scrollIndicatorInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+        configureInputBarItems()
+    }
+    
+    @objc private func editCustomField() {
+        let popupVC = PopupViewController(contentController: EditCustomFieldsViewController(threadId: self.thread.idOnExternalPlatform), popupWidth: 300, popupHeight: 400)
+        present(popupVC, animated: true)
+    }
+    
+    @objc func editThreadName() {
+        let alert = UIAlertController(title: "Update Thread Name", message: "Enter a name for this thread.", preferredStyle: .alert)
+        alert.addTextField(configurationHandler: { (textField : UITextField!) -> Void in
+            textField.placeholder = "Thread name"
+        })
+        let saveAction = UIAlertAction(title: "Confirm", style: .default, handler: {[weak self] action -> Void in
+            guard let title = (alert.textFields![0] as UITextField).text else { return }
+            guard let self = self else {return}
+            do {
+                try self.cxOneChat.updateThreadName(threadName: title, threadIdOnExternalPlatform: self.thread.idOnExternalPlatform)
+            } catch {
+                print(error.localizedDescription)
+            }
+        })
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel)
+        alert.addAction(saveAction)
+        alert.addAction(cancel)
+        self.present(alert, animated: true)
+    }
 	
 	/// Scrolls to the bottom of the `MessagesCollectionView`
-	public func scrollToBottom() {
+	private func scrollToBottom() {
 		DispatchQueue.main.async {
             let lastSection = self.messagesCollectionView.numberOfSections - 1
             guard lastSection > -1 else {return}
@@ -117,35 +181,7 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 			self.messagesCollectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
 		}
 	}
-	
-	// MARK: -  InputView
-	func configureMessageInputBar() {
-		//super.configureMessageInputBar()
-		
-		messageInputBar = CameraInputBarAccessoryView()
-		messageInputBar.delegate = self
-		messageInputBar.inputTextView.tintColor = .primaryColor
-		messageInputBar.sendButton.setTitleColor(.primaryColor, for: .normal)
-		messageInputBar.sendButton.setTitleColor(
-			UIColor.primaryColor.withAlphaComponent(0.3),
-			for: .highlighted)
-		
-		
-		messageInputBar.isTranslucent = true
-		messageInputBar.separatorLine.isHidden = true
-		messageInputBar.inputTextView.tintColor = .primaryColor
-		messageInputBar.inputTextView.backgroundColor = UIColor(red: 245/255, green: 245/255, blue: 245/255, alpha: 1)
-		messageInputBar.inputTextView.placeholderTextColor = UIColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)
-		messageInputBar.inputTextView.textContainerInset = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 36)
-		messageInputBar.inputTextView.placeholderLabelInsets = UIEdgeInsets(top: 8, left: 20, bottom: 8, right: 36)
-		messageInputBar.inputTextView.layer.borderColor = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1).cgColor
-		messageInputBar.inputTextView.layer.borderWidth = 1.0
-		messageInputBar.inputTextView.layer.cornerRadius = 16.0
-		messageInputBar.inputTextView.layer.masksToBounds = true
-		messageInputBar.inputTextView.scrollIndicatorInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
-		configureInputBarItems()
-	}
-	
+    
 	private func configureInputBarItems() {
 		messageInputBar.setRightStackViewWidthConstant(to: 36, animated: false)
 		messageInputBar.sendButton.imageView?.backgroundColor = UIColor(white: 0.85, alpha: 1)
@@ -210,18 +246,44 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 	///  - NOTE: This should be placed somewhere else
 	@objc
 	public func textEditingDidBegin() {
-		self.sdkClient.reportTypingStart()
+        do {
+            try self.cxOneChat.reportTypingStart(threadIdOnExternalPlatform: self.thread.idOnExternalPlatform)
+        } catch {
+            print(error)
+        }
+        
 	}
 	
 	/// Calls the `CXOneChat` and tells it the the user ended typing
 	///  - NOTE: This should be placed somewhere else
 	@objc
 	public func textEditingDidEnd() {
-		self.sdkClient.reportTypingEnd()
+        do {
+            try self.cxOneChat.reportTypingEnd(threadIdOnExternalPlatform: self.thread.idOnExternalPlatform)
+        } catch {
+            print(error)
+        }
 	}
-	
-	var textInputWaitTime: Int = 0
-	var timer: Timer?
+    
+    @objc private func didPullToRefresh(_ sender: Any) {
+        if thread.hasMoreMessagesToLoad {
+            do {
+                try cxOneChat.loadMoreMessages(threadIdOnExternalPlatform: self.thread.idOnExternalPlatform)
+            } catch {
+                print(error.localizedDescription)
+            }
+        } else {
+            self.refreshControl.endRefreshing()
+        }
+    }
+
+    public func loadedMoreMessage() {
+        DispatchQueue.main.async {
+            self.refreshControl.endRefreshing()
+            self.messagesCollectionView.reloadData()
+        }
+    }
+
 	
 	public func inputBar(_ inputBar: InputBarAccessoryView, textViewTextDidChangeTo text: String) {
 		if timer != nil {
@@ -246,103 +308,111 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 	}
 	
 	@objc func delaySearch(with: String) {	}
-    
-    // MARK: - IOSSDKController -
-    
-    func subscribeToEvents() {
-        sdkClient.onData = { [weak self] data in
-            self?.parsePluginData(data)
+        
+    private func subscribeToEvents() {
+        cxOneChat.onCustomPluginMessage = { [weak self] pluginMessage in
+            self?.parsePluginMessage(pluginMessage)
         }
-        sdkClient.onAgentChange = { [weak self] in
+
+        cxOneChat.onAgentChange = { [weak self] agent, _ in
             guard let self = self else {return}
-            DispatchQueue.main.async {
-                self.navigationItem.title = self.thread.threadAgent.displayName
-            }
-        }
-        sdkClient.onMessageAddedToChatView = { [weak self] message in
-           // self?.insertMessage(message)
-            DispatchQueue.main.async {
-                self?.hideActivityIndicator()
-                guard let nThread = self?.sdkClient.threads.first(where: {
-                    $0.id == self?.thread.id
-                }) else {return}
-                self?.thread = nThread
-                self?.messagesCollectionView.reloadData()
-                (self?.inputAccessoryView as? InputBarAccessoryView)?.sendButton.stopAnimating()
-                (self?.inputAccessoryView as? InputBarAccessoryView)?.inputTextView.placeholder = "Aa"
-                self?.scrollToBottom()
-            }
-        }
-        sdkClient.onAgentTypingStart = { [weak self] in
-            guard let self = self else {return}
-            if self.timer == nil {
+            self.thread.threadAgent = agent
+            if !(CXOneChat.shared.channelConfig?.settings.hasMultipleThreadsPerEndUser ?? true) {
                 DispatchQueue.main.async {
-                    self.setTypingIndicatorViewHidden(false, animated: true, whilePerforming: {
-                        self.scrollToBottom()
-                    }, completion: nil)
+                    self.navigationItem.title = agent.fullName
                 }
             }
         }
-        sdkClient.onAgentTypingEnd = { [weak self] in
-            guard let self = self else {return}
-            if self.timer == nil {
-                DispatchQueue.main.async {
-                    self.setTypingIndicatorViewHidden(true, animated: true, whilePerforming: {
-                        self.scrollToBottom()
-                    }, completion: nil)
+
+        cxOneChat.onAgentTypingStart = { [weak self] threadId in
+            guard let self = self else { return }
+            if threadId == self.thread.idOnExternalPlatform {
+                if self.timer == nil {
+                    DispatchQueue.main.async {
+                        self.setTypingIndicatorViewHidden(false, animated: true, whilePerforming: {
+                            self.scrollToBottom()
+                        }, completion: nil)
+                    }
                 }
+
+            }
+        }
+
+        cxOneChat.onAgentTypingEnd = { [weak self] threadId in
+            guard let self = self else { return }
+            if threadId == self.thread.idOnExternalPlatform {
+                if self.timer == nil {
+                    DispatchQueue.main.async {
+                        self.setTypingIndicatorViewHidden(true, animated: true)
+                    }
+                }
+
             }
         }
         
-        sdkClient.onMessageAddedToThread = { [weak self] message in
+        cxOneChat.onThreadLoad = { [weak self] _ in
             DispatchQueue.main.async {
+                self?.updateThreadData()
                 self?.hideActivityIndicator()
-                guard let nThread = self?.sdkClient.threads.first(where: {
-                    $0.id == self?.thread.id
-                }) else {return}
-                self?.thread = nThread
-                self?.messagesCollectionView.reloadData()
                 self?.scrollToBottom()
             }
         }
         
-        sdkClient.onMessageAddedToOtherThread = { [weak self] message in
-            self?.onMessageReceivedFromOtherThread(message: message)
+        cxOneChat.onNewMessage = { [weak self] message in
+            if message.threadIdOnExternalPlatform == self?.thread.idOnExternalPlatform {
+                DispatchQueue.main.async {
+                    self?.updateThreadData()
+                    (self?.inputAccessoryView as? InputBarAccessoryView)?.sendButton.stopAnimating()
+                    (self?.inputAccessoryView as? InputBarAccessoryView)?.inputTextView.placeholder = "Aa"
+                    self?.scrollToBottom()
+                }
+            } else {
+                self?.onMessageReceivedFromOtherThread(message: message)
+            }
         }
-        sdkClient.onLoadMoreMessages = { [weak self] in
+        cxOneChat.onLoadMoreMessages = { [weak self] _ in
             DispatchQueue.main.async {
                 guard let self = self else {return}
                 self.refreshControl.endRefreshing()
-                guard let nThread = self.sdkClient.threads.first(where: {
-                    $0.id == self.thread.id
-                }) else {return}
-                self.thread = nThread
-                self.messagesCollectionView.reloadData()
+                self.updateThreadData()
             }
         }
-        sdkClient.onError = { _ in
+        cxOneChat.onError = {[weak self] error in
             DispatchQueue.main.async {
-                self.hideActivityIndicator()
+//                print(error)
+                self?.hideActivityIndicator()
+            }
+        }
+        cxOneChat.onAgentReadMessage = { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.updateThreadData()
+            }
+        }
+        cxOneChat.onThreadUpdate = { [weak self] in
+            guard let self = self else {return }
+            DispatchQueue.main.async {
+                guard let index = self.cxOneChat.threads.firstIndex(where: {
+                    $0.idOnExternalPlatform == self.thread.idOnExternalPlatform
+                }) else { return }
+                self.thread = self.cxOneChat.threads[index]
+                self.title = self.thread.threadName
             }
         }
     }
     
-    
-    
-	
 	/// Inserts a message into the `MessagesCollectionView`
 	///
 	/// - Parameters:
 	///   - message: The `Message` object to add into the `MessagesCollectionView`
 	public func insertMessage(_ message: Message) {
-        if let convoIndex = self.sdkClient.threads.firstIndex(where: {$0.idOnExternalPlatform == message.threadId}) {
+        if let convoIndex = self.cxOneChat.threads.firstIndex(where: {$0.idOnExternalPlatform == message.threadIdOnExternalPlatform}) {
 			// Reload last section to update header/footer labels and insert a new one
-            if self.thread.idOnExternalPlatform == message.threadId {
+            if self.thread.idOnExternalPlatform == message.threadIdOnExternalPlatform {
                 DispatchQueue.main.async {
                     self.messagesCollectionView.performBatchUpdates({
-                        self.messagesCollectionView.insertSections([self.sdkClient.threads[convoIndex].messages.count - 1])
-                        if self.sdkClient.threads[convoIndex].messages.count >= 2 {
-                            self.messagesCollectionView.reloadSections([self.sdkClient.threads[convoIndex].messages.count - 2])
+                        self.messagesCollectionView.insertSections([self.cxOneChat.threads[convoIndex].messages.count - 1])
+                        if self.cxOneChat.threads[convoIndex].messages.count >= 2 {
+                            self.messagesCollectionView.reloadSections([self.cxOneChat.threads[convoIndex].messages.count - 2])
                         }
                     }, completion: { [weak self] _ in
                         if self?.isLastSectionVisible() == true {
@@ -356,45 +426,24 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 	}
     
     public func onMessageReceivedFromOtherThread(message: Message) {
-        print("message:", message)
-        var messageText = ""
-//        if case let .audio(audioItem) = message.kind {
-//            durationLabel.text = displayDelegate.audioProgressTextFormat(audioItem.duration, for: self, in: messagesCollectionView)
-//        }
-        
+        var messageText = ""        
         if case let .text(text) = message.kind {
             messageText = text
         }
-        self.view.makeToast(messageText, duration: 2.0, position: .top, title: "message from: \(message.user.displayName)", image: nil, style: ToastStyle(), completion: nil)
-//        let notificationContent = UNMutableNotificationContent()
-//        notificationContent.title = "Message from: \(message.user.displayName)"
-//        notificationContent.body = messageText
-//        
-//        
-//        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.3,
-//                                                        repeats: false)
-//        let request = UNNotificationRequest(identifier: "testNotification",
-//                                            content: notificationContent,
-//                                            trigger: trigger)
-//        
-//        UNUserNotificationCenter.current().add(request) { (error) in
-//            if let error = error {
-//                print("Notification Error: ", error)
-//            }
-//        }
+        self.view.makeToast(messageText, duration: 2.0, position: .top, title: "New message from \(message.senderInfo.fullName)", image: nil, style: ToastStyle(), completion: nil)
     }
 	
 	/// Auto scrolls if message is received while user is on the bottom of the view.
 	public func isLastSectionVisible() -> Bool {
-		guard let convoIndex = sdkClient.threads.firstIndex(where: {$0.id == self.thread.id}) else { return false }
-		let lastIndexPath = IndexPath(item: 0, section: sdkClient.threads[convoIndex].messages.count - 1)
+		guard let convoIndex = cxOneChat.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform}) else { return false }
+		let lastIndexPath = IndexPath(item: 0, section: cxOneChat.threads[convoIndex].messages.count - 1)
 		return messagesCollectionView.indexPathsForVisibleItems.contains(lastIndexPath)
 	}
 	
 	/// Determines the current sender.
 	public func currentSender() -> SenderType {
-        let currentSender: Customer = CXOneChat.shared.customer ?? Customer(senderId: "", displayName: "")
-        return currentSender
+        let customer = CXOneChat.shared.customer ?? Customer(id: "", firstName: "", lastName: "")
+        return customer
 	}
 	
 	/// Determines the `numberOfSections` based on the messages in a thread.
@@ -407,13 +456,7 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 	
 	/// Determines the information in the cell.
 	public func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-		guard sdkClient.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform}) != nil else {
-            return Message(messageType: .text, plugin: [], text: "", user: Customer(senderId: "", displayName: ""), messageId: UUID(), date: Date(), threadId: self.thread.idOnExternalPlatform, isRead: false)
-		}
-		var message = thread.messages[indexPath.section]
-		if message.messageType == .plugin {
-			message.kind = .custom(nil)
-		}
+		let message = thread.messages[indexPath.section]
 		return message
 	}
 	
@@ -424,15 +467,6 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 			return NSAttributedString(string: MessageKitDateFormatter.shared.string(from: message.sentDate), attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
 		}
 		return nil
-	}
-	
-	public func cellBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        let index = sdkClient.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform})
-        
-        let currentMessage = sdkClient.threads[index ?? 0].messages[indexPath.row]
-        return NSAttributedString(string: currentMessage.isRead ? "✓✓" : "✓",
-                                  attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10),
-                                               NSAttributedString.Key.foregroundColor: currentMessage.isRead ? UIColor.blue : UIColor.darkGray])
 	}
 	
 	public func messageTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
@@ -448,21 +482,39 @@ public class ChatViewController: MessagesViewController, MessagesDataSource {
 	public func textCell(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UICollectionViewCell? {
 		return nil
 	}
-    public func didReceiveMetaData() { }
+    
+    /// Find the updated thread in the SDK and updates the thread for the view.
+    private func updateThreadData() {
+        guard let updatedThread = self.cxOneChat.threads.first(where: {
+            $0.idOnExternalPlatform == self.thread.idOnExternalPlatform
+        }) else {
+            print("Unable to find updated thread for \(self.thread.idOnExternalPlatform)")
+            return
+        }
+        var messages = [Message]()
+        for message in updatedThread.messages {
+            if message.attachments.isEmpty {
+                messages.append(message)
+            } else {
+                if !message.messageContent.payload.text.isEmpty {
+                    messages.append(message)
+                    let newImageMessage = Message(idOnExternalPlatform: UUID(), threadIdOnExternalPlatform: message.threadIdOnExternalPlatform, messageContent: message.messageContent, createdAt: message.createdAt, attachments: [], direction: message.direction, userStatistics: message.userStatistics, authorUser: message.authorUser, authorEndUserIdentity: message.authorEndUserIdentity)
+                    messages.append(newImageMessage)
+                } else {
+                    for attachment in message.attachments {
+                        let newMessage = Message(idOnExternalPlatform: UUID(), threadIdOnExternalPlatform: message.threadIdOnExternalPlatform, messageContent: message.messageContent, createdAt: message.createdAt, attachments: [attachment], direction: message.direction, userStatistics: message.userStatistics, authorUser: message.authorUser, authorEndUserIdentity: message.authorEndUserIdentity)
+                        messages.append(newMessage)
+                    }
+                }
+            }
+        }
+        self.thread = updatedThread
+        self.thread.messages = messages
+        self.messagesCollectionView.reloadData()
+    }
 }
-
-public enum pluginTypes {
-	case menu
-}
-
-
-extension UIColor {
-	static let primaryColor = UIColor(red: 69/255, green: 193/255, blue: 89/255, alpha: 1)
-}
-
 
 extension ChatViewController: CameraInputBarAccessoryViewDelegate {
-	
 	func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith attachments: [AttachmentManager.Attachment]) {
 		let finalAttachments = attachments.map { attachment -> UIImage in
 			switch attachment {
@@ -500,54 +552,61 @@ extension ChatViewController: CameraInputBarAccessoryViewDelegate {
 		inputBar.inputTextView.placeholder = "Sending..."
         inputBar.sendButton.stopAnimating()
         do {
-            try self.sdkClient.sendMessage(message: text)
+            try self.cxOneChat.sendMessage(message: text, threadIdOnExternalPlatform: self.thread.idOnExternalPlatform)
         }catch {
             print(error.localizedDescription)
         }
-        
-//		DispatchQueue.global(qos: .default).async {
-//			sleep(1)
-//			DispatchQueue.main.async { [weak self] in
-//                guard let self = self else {return}
-//
-//                self.sdkClient.sendMessage(message: text)//sendMessage(message: text, thread: self.thread.idOnExternalPlatform)
-//			}
-//		}
 	}
 	
 	func sendImageMessage(message: String, photos : [UIImage], completion: @escaping(_ didSend: Bool) -> ())  {
-        self.sdkClient.sendAttachments(with: photos)
-        
-//        send(message: message, with: photos, in: thread.idOnExternalPlatform) //sendMessageWithAttachments(message: message, images: photos, thread: self.thread.idOnExternalPlatform)
-		completion(true)
+        var attachments: [AttachmentUpload] = []
+        for photo in photos {
+            let data = photo.jpegData(compressionQuality: 0.7) ?? Data()
+            let mime = data.mimeType
+            let attachUpload: AttachmentUpload = AttachmentUpload(attachmentData: data, mimeType: mime, fileName: UUID().uuidString + ".\(data.fileExtension)")
+            attachments.append(attachUpload)
+        }
+        Task {
+            try await self.cxOneChat.sendMessageWithAttachments(message: message, at: thread.idOnExternalPlatform, with: attachments)
+            completion(true)
+        }
 	}
 }
+extension Data {
+    private static let mimeTypeSignatures: [UInt8 : String] = [
+        0xFF : "image/jpeg",
+        0x89 : "image/png",
+        0x47 : "image/gif",
+        0x49 : "image/tiff",
+        0x4D : "image/tiff",
+        0x25 : "application/pdf",
+        0xD0 : "application/vnd",
+        0x46 : "text/plain",
+        ]
 
-extension ChatViewController {
-    public func loadedMoreMessage() {
-        DispatchQueue.main.async {
-            self.refreshControl.endRefreshing()
-            self.messagesCollectionView.reloadData()
-        }
+    var mimeType: String {
+        var c: UInt8 = 0
+        copyBytes(to: &c, count: 1)
+        return Data.mimeTypeSignatures[c] ?? "application/octet-stream"
     }
-}
-
-extension MessagesDataSource {
-    public func isFromCurrentSender(message: MessageType) -> Bool {
-       return message.sender.senderId.lowercased() == currentSender().senderId.lowercased()
-    }
-}
-
-extension ChatViewController {
-    @objc private func didPullToRefresh(_ sender: Any) {
-        if sdkClient.hasMoreMessagesInThread {
-            do {
-                try sdkClient.loadMoreMessages()
-            }catch {
-                print(error.localizedDescription)
+    var fileExtension: String {
+            switch mimeType {
+            case "image/jpeg":
+                return "jpeg"
+            case "image/png":
+                return "png"
+            case "image/gif":
+                return "gif"
+            case "image/tiff":
+                return "tiff"
+            case "application/pdf":
+                return "pdf"
+            case "application/vnd":
+                return "vnd"
+            case "text/plain":
+                return "txt"
+            default:
+                return "uknown"
             }
-        }else {
-            self.refreshControl.endRefreshing()
         }
-    }
 }

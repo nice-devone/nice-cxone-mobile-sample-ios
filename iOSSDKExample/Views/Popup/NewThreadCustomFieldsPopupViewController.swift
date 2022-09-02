@@ -1,10 +1,3 @@
-//
-//  NewThreadCustomFieldsPopupViewController.swift
-//  iOSSDKExample
-//
-//  Created by kjoe on 1/24/22.
-//
-
 import UIKit
 import CXOneChatSDK
 
@@ -19,7 +12,7 @@ class NewThreadCustomFieldsPopupViewController: UIViewController {
     var location: UITextField!
     var department: UITextField!
     var doneButton: UIButton!
-    var closure: (([CustomField]) -> Void)?
+    var closure: (([CustomField], UUID) -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -72,6 +65,7 @@ class NewThreadCustomFieldsPopupViewController: UIViewController {
         location.autocorrectionType = .no
         location.keyboardType = .default
         location.autocapitalizationType = .none
+        location.text = "West Coast"
 
         department = UITextField(frame: .zero)
         department.translatesAutoresizingMaskIntoConstraints = false
@@ -106,6 +100,7 @@ class NewThreadCustomFieldsPopupViewController: UIViewController {
         locationPicker.delegate = self
         departmentPicker.dataSource = self
         departmentPicker.delegate = self
+        department.text = "Sales"
     }
     
 
@@ -155,12 +150,14 @@ class NewThreadCustomFieldsPopupViewController: UIViewController {
     
     @objc func doneAction() {
         do {
-            try CXOneChat.shared.createThread()
-        }catch {
-            print(error.localizedDescription)
+            let threadId = try CXOneChat.shared.createThread()
+            closure?(customValues, threadId)
+            dismiss(animated: true)
+        } catch {
+            let alert = UIAlertController(title: "Error", message: "This is not supported with your current channel configuration.", preferredStyle: .alert)
+            self.present(alert, animated: true)
         }
-        closure?(customValues)
-        dismiss(animated: true)
+        
     }
 
 }

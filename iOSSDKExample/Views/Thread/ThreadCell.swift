@@ -1,7 +1,3 @@
-//
-//  Created by Customer Dynamics Development on 9/10/21.
-//
-
 import Foundation
 import UIKit
 import MessageKit

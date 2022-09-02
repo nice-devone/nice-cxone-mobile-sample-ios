@@ -1,21 +1,14 @@
-//
-//  EditCustomFieldsController.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 11/19/21.
-//
-
 import Foundation
 import CXOneChatSDK
 import UIKit	
 
 class EditCustomFieldsViewController: UIViewController {
 	
-	var sdkClient = CXOneChat.shared
-	var thread: String
+	var cxOneChat = CXOneChat.shared
+	var threadId: UUID
 	
-	init(thread: String) {
-		self.thread = thread
+	init(threadId: UUID) {
+		self.threadId = threadId
 		super.init(nibName: nil, bundle: nil)
 	}
 	
@@ -48,7 +41,11 @@ class EditCustomFieldsViewController: UIViewController {
 		return button
 	}()
 	
-	var customValues = [CustomField(ident: "firstname", value: ""),CustomField(ident: "email", value: ""),CustomField(ident: "lastname", value: "")]
+	var customValues = [
+        CustomField(ident: "firstname", value: ""),
+        CustomField(ident: "lastname", value: ""),
+        CustomField(ident: "email", value: ""),
+    ]
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -89,15 +86,15 @@ class EditCustomFieldsViewController: UIViewController {
         for i in 0..<customValues.count {
             customValues[i].value =  (verticalStackView.subviews[i] as! CustomFieldView).textField.text ?? ""
         }
-        let contact = customValues.removeLast()
+        let contact = customValues.remove(at: 1)
         do {
-           try self.sdkClient.setCustomerCustomFields(customFields: self.customValues)
+           try self.cxOneChat.setCustomerCustomFields(customFields: self.customValues)
         }catch {
             print(error.localizedDescription)
         }
         do {
-            try self.sdkClient.setContactCustomFields(customFields: [contact])//setCustomContactFields(customFields: [contact])
-        }catch {
+            try self.cxOneChat.setContactCustomFields(customFields: [contact], threadIdOnExternalPlatform: self.threadId)
+        } catch {
             print(error.localizedDescription)
         }
         

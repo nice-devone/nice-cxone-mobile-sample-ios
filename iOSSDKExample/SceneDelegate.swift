@@ -1,35 +1,27 @@
-//
-//  SceneDelegate.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 9/2/21.
-//
-
 import UIKit
 import LoginWithAmazon
 import CXOneChatSDK
-import KeychainSwift
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 	var window: UIWindow?
-
 
 	func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 		// Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
 		// If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
 		// This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
 		guard let _ = (scene as? UIWindowScene) else { return }
-        let user = KeychainSwift().getData("user")
-        let run = UserDefaults.standard.bool(forKey: "run")
+//        let run = UserDefaults.standard.bool(forKey: "run")
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        let window = UIWindow(windowScene: windowScene)
         
-        
-        if user != nil  && run{
-            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()
-            window?.rootViewController = vc
-        } else {
-            let vc = UIStoryboard(name: "Login", bundle: nil).instantiateInitialViewController()
-            window?.rootViewController = vc
-        }
+        let viewController = CXOneChat.shared.customer != nil ? ThreadViewController() : ConfigViewController()
+        let nc = UINavigationController()
+        nc.viewControllers.append(viewController)
+        window.rootViewController = nc
+        self.window = window
+        self.window?.layer.backgroundColor = UIColor.clear.cgColor
+        window.makeKeyAndVisible()
 	}
 
 	func sceneDidDisconnect(_ scene: UIScene) {
@@ -75,11 +67,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
 }
-
-// Swift
-//
-// SceneDelegate.swift
-
-
-
-    

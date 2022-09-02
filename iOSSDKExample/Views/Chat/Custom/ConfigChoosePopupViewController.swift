@@ -1,27 +1,15 @@
-//
-//  ConfigChooser.swift
-//  iOSSDKExample
-//
-//  Created by kjoe on 2/2/22.
-//
-
 import UIKit
 import CXOneChatSDK
-protocol CreateNewThreadDelegate: AnyObject {
-    func createNewThread()
-}
 
 class ConfigChoosePopupViewController: UIViewController {
     let locationPicker = UIPickerView()
     let departmentPicker = UIPickerView()
     
-    
     var nameTextField: UITextField!
-//    var lastnameTextField: UITextField!
     var lastNameTextField: UITextField!
     var doneButton: UIButton!
+
     weak var delegate: CreateNewThreadDelegate!
-    var env: Environment!
     var customer: Customer?
 
     override func viewDidLoad() {
@@ -47,8 +35,6 @@ class ConfigChoosePopupViewController: UIViewController {
         title.topAnchor.constraint(equalTo: popup.topAnchor, constant: 25).isActive = true
         title.leadingAnchor.constraint(equalTo: popup.leadingAnchor, constant: 10).isActive = true
         title.trailingAnchor.constraint(equalTo: popup.trailingAnchor,constant: -10).isActive = true
-        //title.bottomAnchor.constraint(equalTo: location.topAnchor, constant: 15).isActive = true
-        //title.heightAnchor.constraint(equalToConstant: 20).isActive = true
         title.numberOfLines = 0
         title.lineBreakMode = .byWordWrapping
         title.textAlignment = .center
@@ -75,29 +61,13 @@ class ConfigChoosePopupViewController: UIViewController {
         lastNameTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 15).isActive = true
         lastNameTextField.leadingAnchor.constraint(equalTo: nameTextField.leadingAnchor).isActive = true
         lastNameTextField.trailingAnchor.constraint(equalTo: nameTextField.trailingAnchor).isActive = true
-        
         lastNameTextField.placeholder = "Last name"
         lastNameTextField.borderStyle = .line
         lastNameTextField.autocorrectionType = .no
         lastNameTextField.keyboardType = .default
         lastNameTextField.autocapitalizationType = .none
         lastNameTextField.height(constant: 40)
-        
-//        enviromentTextField = UITextField(frame: .zero)
-//        enviromentTextField.translatesAutoresizingMaskIntoConstraints = false
-//        popup.addSubview(enviromentTextField)
-//        enviromentTextField.inputView = departmentPicker
-//        let doneDepButton =  UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.enviromentDone))
-//        let departmentTB  = createToolBar()
-//        departmentTB.items?.append(doneDepButton)
-//
-//        enviromentTextField.inputAccessoryView = departmentTB
-//        enviromentTextField.topAnchor.constraint(equalTo: lastNameTextField.bottomAnchor, constant: 15).isActive = true
-//        enviromentTextField.leadingAnchor.constraint(equalTo: nameTextField.leadingAnchor).isActive = true
-//        enviromentTextField.trailingAnchor.constraint(equalTo: nameTextField.trailingAnchor).isActive = true
-//        enviromentTextField.heightAnchor.constraint(equalToConstant: 40).isActive = true
-//        enviromentTextField.borderStyle = .line
-//        enviromentTextField.placeholder = "Choose an enviroment"
+
         doneButton = UIButton(frame: .zero)
         doneButton.translatesAutoresizingMaskIntoConstraints = false
         popup.addSubview(doneButton)
@@ -117,18 +87,11 @@ class ConfigChoosePopupViewController: UIViewController {
         locationPicker.delegate = self
         departmentPicker.dataSource = self
         departmentPicker.delegate = self
-        guard let user = customer else {
+        guard let customer = customer else {
             return
         }
-       // let personComponents = PersonNameComponents()
-        
-        let person = PersonNameComponentsFormatter()
-        let names = person.personNameComponents(from: user.displayName)
-        guard let names = names else {
-            return
-        }
-        nameTextField.text = names.givenName
-        lastNameTextField.text = names.familyName
+        nameTextField.text = customer.firstName
+        lastNameTextField.text = customer.lastName
     }
     
     func createToolBar() -> UIToolbar {
@@ -148,15 +111,7 @@ class ConfigChoosePopupViewController: UIViewController {
         toolBar.setItems([textBtn, flexSpace], animated: true)
         return  toolBar
     }
-    
-    
-    @objc func enviromentDone() {
-        self.view.endEditing(true)
-        let ind = departmentPicker.selectedRow(inComponent: 0)
-        env = Environment.allCases[ind]
-       // lastnameTextField.text = EnvConfig.allCases[ind].location
-    }
-    
+
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         1
     }
@@ -169,22 +124,17 @@ class ConfigChoosePopupViewController: UIViewController {
     }
     
     @objc func doneAction() {
-        var person = PersonNameComponents()
-        person.givenName = nameTextField.text ?? ""
-        person.familyName = lastNameTextField.text ?? ""
-        
-        CXOneChat.shared.setCustomerName(firstName: person.givenName!, lastName: person.familyName!)
-
+        let firstName = nameTextField.text ?? ""
+        let lastName = lastNameTextField.text ?? ""
+        CXOneChat.shared.setCustomerName(firstName: firstName, lastName: lastName)
         dismiss(animated: true)
         delegate.createNewThread()
-        
     }
 }
 
 extension ConfigChoosePopupViewController: UIPickerViewDataSource, UIPickerViewDelegate { }
+extension ConfigChoosePopupViewController: UITextFieldDelegate {}
 
-
-extension ConfigChoosePopupViewController: UITextFieldDelegate {
+protocol CreateNewThreadDelegate: AnyObject {
+    func createNewThread()
 }
-
-

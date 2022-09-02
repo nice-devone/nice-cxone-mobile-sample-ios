@@ -1,11 +1,3 @@
-//
-//  LTMorphingLabel.h
-//  LTMorphingLabel
-//
-//  Created by Lex Tang on 1/8/15.
-//  Copyright (c) 2015 lexrus.com. All rights reserved.
-//
-
 #import <UIKit/UIKit.h>
 
 //! Project version number for LTMorphingLabel.

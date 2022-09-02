@@ -1,10 +1,3 @@
-//
-//  FunButton.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 12/2/21.
-//
-
 import Foundation
 import UIKit
 import UIKit

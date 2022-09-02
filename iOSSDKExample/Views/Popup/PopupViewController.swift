@@ -1,10 +1,3 @@
-//
-//  PopupViewController.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 11/19/21.
-//
-
 import Foundation
 import UIKit
 

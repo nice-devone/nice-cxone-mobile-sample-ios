@@ -1,17 +1,9 @@
-//
-//  CustomChatViewController.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 12/2/21.
-//
-
 import Foundation
 import UIKit
 import MapKit
 import MessageKit
 import InputBarAccessoryView
 import Kingfisher
-import CXOneChatSDK
 
 final class AdvancedExampleViewController: ChatViewController {
 		
@@ -148,15 +140,13 @@ final class AdvancedExampleViewController: ChatViewController {
 	}
 	
 	func isPreviousMessageSameSender(at indexPath: IndexPath) -> Bool {
-		guard let convoIndex = sdkClient.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform}) else { return false }
 		guard indexPath.section - 1 >= 0 else { return false }
-        return sdkClient.threads[convoIndex].messages[indexPath.section].user.senderId.lowercased() == sdkClient.threads[convoIndex].messages[indexPath.section - 1].user.senderId.lowercased()
+        return thread.messages[indexPath.section].sender.senderId.lowercased() == thread.messages[indexPath.section - 1].sender.senderId.lowercased()
 	}
 	
 	func isNextMessageSameSender(at indexPath: IndexPath) -> Bool {
-		guard let convoIndex = sdkClient.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform}) else { return false }
-		guard indexPath.section + 1 < sdkClient.threads[convoIndex].messages.count else { return false }
-        return sdkClient.threads[convoIndex].messages[indexPath.section].user.senderId.lowercased() == sdkClient.threads[convoIndex].messages[indexPath.section + 1].user.senderId.lowercased()
+		guard indexPath.section + 1 < thread.messages.count else { return false }
+        return thread.messages[indexPath.section].sender.senderId.lowercased() == thread.messages[indexPath.section + 1].sender.senderId.lowercased()
 	}
 	
 	func setTypingIndicatorViewHidden(_ isHidden: Bool, performUpdates updates: (() -> Void)? = nil) {
@@ -179,7 +169,6 @@ final class AdvancedExampleViewController: ChatViewController {
 			}.onDeselected {
 				$0.tintColor = UIColor(white: 0.8, alpha: 1)
 			}.onTouchUpInside {
-				print("Item Tapped")
 				let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 				let action = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
 				actionSheet.addAction(action)
@@ -210,15 +199,15 @@ final class AdvancedExampleViewController: ChatViewController {
 		let messageData = thread.messages[indexPath.section]
 		if case .custom = message.kind {
 			let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-			let carouselView = CarouselView()
-			cell.contentView.addSubview(carouselView)
-			carouselView.translatesAutoresizingMaskIntoConstraints = false
-			carouselView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 5).isActive = true
-			carouselView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -5).isActive = true
-			carouselView.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 5).isActive = true
-			carouselView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -5).isActive = true
-			carouselView.configure(elements: messageData.plugin)
-			carouselView.width(constant: 200)
+			let pluginMessageView = PluginMessageView()
+			cell.contentView.addSubview(pluginMessageView)
+            pluginMessageView.translatesAutoresizingMaskIntoConstraints = false
+            pluginMessageView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 5).isActive = true
+            pluginMessageView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -5).isActive = true
+            pluginMessageView.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 5).isActive = true
+            pluginMessageView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -5).isActive = true
+            pluginMessageView.configure(elements: messageData.messageContent.payload.elements)
+            pluginMessageView.width(constant: 200)
 			cell.layoutIfNeeded()
 			return cell
 		}
@@ -243,18 +232,12 @@ final class AdvancedExampleViewController: ChatViewController {
 	}
 
 	override func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        let index = sdkClient.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform})
-        let currentMessage = sdkClient.threads[index ?? 0].messages[indexPath.row]
-        let image1Attachment = NSTextAttachment()
-        image1Attachment.image = currentMessage.isRead ? UIImage(named: "readed") : UIImage(named: "check")
-        if currentMessage.isRead == false {
-            return nil
-        }
-        let fullString = NSMutableAttributedString(string: "")
-        let image1String = NSAttributedString(attachment: image1Attachment)
-        fullString.append(image1String)
-        return fullString
-
+//        let index = cxOneChat.threads.firstIndex(where: {$0.idOnExternalPlatform == self.thread.idOnExternalPlatform})
+        let currentMessage = thread.messages[indexPath.section]
+        
+        return NSAttributedString(string: (currentMessage.userStatistics.readAt != nil) ? "Read" : "Delivered",
+                                  attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10),
+                                               NSAttributedString.Key.foregroundColor: UIColor.darkGray])
 	}
 }
 
@@ -276,6 +259,8 @@ extension AdvancedExampleViewController: MessagesDisplayDelegate {
 			} else {
 				return [.foregroundColor: UIColor.primaryColor]
 			}
+        case .url :
+            return [ .foregroundColor: UIColor.link, NSAttributedString.Key.underlineColor: UIColor.link, .underlineStyle: NSNumber(value: NSUnderlineStyle.double.rawValue)]
 		default: return MessageLabel.defaultAttributes
 		}
 	}
@@ -325,12 +310,31 @@ extension AdvancedExampleViewController: MessagesDisplayDelegate {
 	
 	func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
 		
-		let avatar = sdkClient.getAvatarFor(sender: message.sender)
+		let avatar = getAvatarFor(sender: message.sender)
 		avatarView.set(avatar: avatar)
 		avatarView.isHidden = isNextMessageSameSender(at: indexPath)
 		avatarView.layer.borderWidth = 2
 		avatarView.layer.borderColor = UIColor.primaryColor.cgColor
 	}
+    
+    func getInitialsFromSender(sender: SenderType) -> String {
+        let formatter = PersonNameComponentsFormatter()
+        if let components = formatter.personNameComponents(from: sender.displayName) {
+             formatter.style = .abbreviated
+             return formatter.string(from: components)
+        }
+        return "??"
+    }
+    
+    func getAvatarFor(sender: SenderType) -> Avatar {
+        let initials = getInitialsFromSender(sender: sender)
+        switch sender.senderId {
+        case "000000":
+            return Avatar(image: nil, initials: "??")
+        default:
+            return Avatar(image: nil, initials: initials)
+        }
+    }
 	
 //	func configureAccessoryView(_ accessoryView: UIView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
 //		// Cells are reused, so only add a button here once. For real use you would need to
@@ -352,13 +356,15 @@ extension AdvancedExampleViewController: MessagesDisplayDelegate {
 
 	func configureMediaMessageImageView(_ imageView: UIImageView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
 		if case MessageKind.photo(let media) = message.kind, let imageURL = media.url {
-            imageView.kf.indicatorType = .activity
-			imageView.kf.setImage(with: imageURL)
-		}
-//        else {
-//			imageView.kf.cancelDownloadTask()
-//		}
+            if imageURL.pathExtension != "jpg" || imageURL.pathExtension != "png" || imageURL.pathExtension != "heic" {
+                imageView.kf.indicatorType = .activity
+                imageView.kf.setImage(with: imageURL)
+            } else {                
+                imageView.kf.setImage(with: AVAssetImageDataProvider(assetURL: imageURL, seconds: 1))
+            }
+        }
 	}
+    
 	
 	// MARK: - Location Messages
 	
@@ -388,10 +394,6 @@ extension AdvancedExampleViewController: MessagesDisplayDelegate {
 
 	func audioTintColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
 		return self.isFromCurrentSender(message: message) ? .white : .primaryColor
-	}
-
-	func configureAudioCell(_ cell: AudioMessageCell, message: MessageType) {
-		audioController.configureAudioCell(cell, message: message) // this is needed especially when the cell is reconfigure while is playing sound
 	}
 	
 }
@@ -483,8 +485,7 @@ class CustomTextLayoutSizeCalculator: CustomLayoutSizeCalculator {
 					  height: height)
 	}
 	
-	func messageLabelSize(for message: MessageType,
-						  at indexPath: IndexPath) -> CGSize {
+	func messageLabelSize(for message: MessageType, at indexPath: IndexPath) -> CGSize {
 		let attributedText: NSAttributedString
 
 		let textMessageKind = message.kind
@@ -498,17 +499,11 @@ class CustomTextLayoutSizeCalculator: CustomLayoutSizeCalculator {
 		default:
 			fatalError("messageLabelSize received unhandled MessageDataType: \(message.kind)")
 		}
-		
-		let maxWidth = self.messageContainerMaxWidth -
-			self.cellMessageContentHorizontalPadding -
-			self.cellMessageContainerRightSpacing
-		
-        let size = attributedText.size(consideringWidth: maxWidth)
+        let size = attributedText.size()
 		return size
 	}
 	
-	func messageLabelFrame(for message: MessageType,
-						   at indexPath: IndexPath) -> CGRect {
+	func messageLabelFrame(for message: MessageType, at indexPath: IndexPath) -> CGRect {
 		let origin = CGPoint(x: self.cellMessageContentHorizontalPadding / 2,
 							 y: self.cellMessageContentVerticalPadding / 2)
         let size = self.messageLabelSize(for: message,
@@ -560,62 +555,48 @@ class CustomLayoutSizeCalculator: CellSizeCalculator {
 					  height: itemHeight)
 	}
 
-	func cellContentHeight(for message: MessageType,
-						   at indexPath: IndexPath) -> CGFloat {
-		self.cellTopLabelSize(for: message,
-							  at: indexPath).height +
-			self.cellMessageBottomLabelSize(for: message,
-								   at: indexPath).height +
-			self.messageContainerSize(for: message,
-									  at: indexPath).height
+	func cellContentHeight(for message: MessageType, at indexPath: IndexPath) -> CGFloat {
+        let cellToplabelSize: CGSize = cellTopLabelSize(for: message, at: indexPath)
+        let cellMessageBottomLabelSize =  cellMessageBottomLabelSize(for: message, at: indexPath)
+        let  messageContainerSize = messageContainerSize(for: message, at: indexPath)
+        return cellToplabelSize.height + cellMessageBottomLabelSize.height  + messageContainerSize.height
 	}
 	
 	// MARK: - Top cell Label
 
-	func cellTopLabelSize(for message: MessageType,
-						  at indexPath: IndexPath) -> CGSize {
+	func cellTopLabelSize(for message: MessageType, at indexPath: IndexPath) -> CGSize {
 		guard let attributedText = self.messagesDataSource.cellTopLabelAttributedText(for: message,
 																					  at: indexPath) else {
 			return .zero
 		}
 		
 		let maxWidth = self.messagesLayout.itemWidth - self.cellTopLabelHorizontalPadding
-		let size = attributedText.size(consideringWidth: maxWidth)
+		let size = attributedText.size()
 		let height = size.height + self.cellTopLabelVerticalPadding
 		
 		return CGSize(width: maxWidth,
 					  height: height)
 	}
 	
-	func cellTopLabelFrame(for message: MessageType,
-						   at indexPath: IndexPath) -> CGRect {
-		let size = self.cellTopLabelSize(for: message,
-										 at: indexPath)
+	func cellTopLabelFrame(for message: MessageType, at indexPath: IndexPath) -> CGRect {
+		let size = self.cellTopLabelSize(for: message, at: indexPath)
 		guard size != .zero else {
 			return .zero
 		}
 		
-		let origin = CGPoint(x: self.cellTopLabelHorizontalPadding / 2,
-							 y: 0)
-		
-		
-		return CGRect(origin: origin,
-					  size: size)
+		let origin = CGPoint(x: self.cellTopLabelHorizontalPadding / 2, y: 0)
+		return CGRect(origin: origin, size: size)
 	}
 	
-	func cellMessageBottomLabelSize(for message: MessageType,
-									at indexPath: IndexPath) -> CGSize {
+	func cellMessageBottomLabelSize(for message: MessageType, at indexPath: IndexPath) -> CGSize {
 		guard let attributedText = self.messagesDataSource.messageBottomLabelAttributedText(for: message,
 																							at: indexPath) else {
 			return .zero
 		}
-		let maxWidth = self.messageContainerMaxWidth - self.cellDateLabelHorizontalPadding
-		
-		return attributedText.size(consideringWidth: maxWidth)
+		return attributedText.size()
 	}
 	
-	func cellMessageBottomLabelFrame(for message: MessageType,
-									 at indexPath: IndexPath) -> CGRect {
+	func cellMessageBottomLabelFrame(for message: MessageType, at indexPath: IndexPath) -> CGRect {
 		let messageContainerSize = self.messageContainerSize(for: message,
 															 at: indexPath)
 		let labelSize = self.cellMessageBottomLabelSize(for: message,
@@ -625,14 +606,12 @@ class CustomLayoutSizeCalculator: CellSizeCalculator {
 		let origin = CGPoint(x: x,
 							 y: y)
 		
-		return CGRect(origin: origin,
-					  size: labelSize)
+		return CGRect(origin: origin, size: labelSize)
 	}
 	
 	// MARK: - MessageContainer
 
-	func messageContainerSize(for message: MessageType,
-							  at indexPath: IndexPath) -> CGSize {
+	func messageContainerSize(for message: MessageType, at indexPath: IndexPath) -> CGSize {
 		let labelSize = self.cellMessageBottomLabelSize(for: message,
 											   at: indexPath)
 		let width = labelSize.width +
@@ -645,25 +624,19 @@ class CustomLayoutSizeCalculator: CellSizeCalculator {
 					  height: height)
 	}
 	
-	func messageContainerFrame(for message: MessageType,
-							   at indexPath: IndexPath,
-							   fromCurrentSender: Bool) -> CGRect {
+	func messageContainerFrame(for message: MessageType, at indexPath: IndexPath, fromCurrentSender: Bool) -> CGRect {
 		let y = self.cellTopLabelSize(for: message,
 									  at: indexPath).height
 		let size = self.messageContainerSize(for: message,
 											 at: indexPath)
 		let origin: CGPoint
 		if fromCurrentSender {
-			let x = self.messagesLayout.itemWidth -
-				size.width -
-				(self.cellMessageContainerHorizontalPadding / 2)
+			let x = self.messagesLayout.itemWidth - size.width - (self.cellMessageContainerHorizontalPadding / 2)
 			origin = CGPoint(x: x, y: y)
 		} else {
-			origin = CGPoint(x: self.cellMessageContainerHorizontalPadding / 2,
-							 y: y)
+			origin = CGPoint(x: self.cellMessageContainerHorizontalPadding / 2, y: y)
 		}
 		
-		return CGRect(origin: origin,
-					  size: size)
+		return CGRect(origin: origin, size: size)
 	}
 }

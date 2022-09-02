@@ -1,10 +1,3 @@
-//
-//  Extension.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 11/11/21.
-//
-
 import Foundation
 import UIKit
 

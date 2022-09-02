@@ -1,10 +1,3 @@
-//
-//  AlertService.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 10/11/21.
-//
-
 import Foundation
 import UIKit
 

@@ -1,11 +1,3 @@
-//
-//  MorphingText.swift
-//  LTMorphingLabel
-//
-//  Created by Lex on 2020/5/10.
-//  Copyright © 2020 lexrus.com. All rights reserved.
-//
-
 #if canImport(SwiftUI)
 import SwiftUI
 #endif

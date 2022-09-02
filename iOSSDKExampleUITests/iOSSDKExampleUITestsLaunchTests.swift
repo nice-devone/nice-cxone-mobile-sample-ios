@@ -1,10 +1,3 @@
-//
-//  iOSSDKExampleUITestsLaunchTests.swift
-//  iOSSDKExampleUITests
-//
-//  Created by Tyler Hendrickson on 1/27/22.
-//
-
 import XCTest
 
 class iOSSDKExampleUITestsLaunchTests: XCTestCase {

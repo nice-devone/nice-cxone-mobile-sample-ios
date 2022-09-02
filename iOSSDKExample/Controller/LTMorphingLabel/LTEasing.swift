@@ -1,11 +1,3 @@
-//
-//  LTEasing.swift
-//  LTMorphingLabelDemo
-//
-//  Created by Lex on 7/1/14.
-//  Copyright (c) 2015 lexrus.com. All rights reserved.
-//
-
 import Foundation
 
 // http://gsgd.co.uk/sandbox/jquery/easing/jquery.easing.1.3.js

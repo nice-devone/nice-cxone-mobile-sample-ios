@@ -1,17 +1,10 @@
-//
-//  CustomCell.swift
-//  iOSSDKExample
-//
-//  Created by Customer Dynamics Development on 12/2/21.
-//
-
 import Foundation
 import UIKit
 import MessageKit
 import CXOneChatSDK
 
 class CustomMessageContentCell: MessageCollectionViewCell {
-	func callBackFirstDisplayView(_ stackView: UIStackView, _ url: [MessagePayloadElement?], _ index: Int) {
+	func callBackFirstDisplayView(_ stackView: UIStackView, _ url: [MessageElement?], _ index: Int) {
 		
 	}
 	
@@ -218,12 +211,11 @@ class CustomTextMessageContentCell: CustomMessageContentCell {
 			let calculator = sizeCalculator as? CustomTextLayoutSizeCalculator
 			self.messageLabel.frame = calculator?.messageLabelFrame(for: message,
 																	at: indexPath) ?? .zero
-			print(self.messageLabel.frame)
 			
 			print("CUSTOM", fullMessage)
-			for plugin in fullMessage.plugin {
-				if plugin?.type == "MENU" {
-					guard let elements = plugin?.elements else { return }
+            for plugin in fullMessage.messageContent.payload.elements {
+                if plugin.type == ElementType.menu {
+					guard let elements = plugin.elements else { return }
 //					if fullMessage.plugin.count > 1 {
 //						for plugin in fullMessage.plugin {
 //							var pathArray: [String] = []
@@ -238,14 +230,14 @@ class CustomTextMessageContentCell: CustomMessageContentCell {
 //						}
 //					} else {
 					for element in elements {
-						if element.type == "TEXT" {
+                        if element.type == .text {
 							let label = UILabel()
 							label.numberOfLines = 0
 							label.font = UIFont.preferredFont(forTextStyle: .body)
 							label.text = element.text
 							label.height(constant: 40)
 							self.stackView.addArrangedSubview(label)
-						} else if element.type == "BUTTON" {
+                        } else if element.type == .button {
                             let button = PressableButton()
 							button.colors = .init(
 									button: UIColor(red: 52/255, green: 152/255, blue: 219/255, alpha: 1),
@@ -255,7 +247,7 @@ class CustomTextMessageContentCell: CustomMessageContentCell {
 							button.addTarget(self, action: #selector(doSomething), for: .touchUpInside)
 							button.height(constant: 40)
 							self.stackView.addArrangedSubview(button)
-						} else if element.type == "FILE" {
+                        } else if element.type == .file {
 							if let url = element.url {
                                 let imageView = UIImageView()
 								imageView.contentMode = .scaleToFill
@@ -272,18 +264,9 @@ class CustomTextMessageContentCell: CustomMessageContentCell {
 			}
 		}
 	}
-	
-//	let carouselView: AACarousel = AACarousel()
-//
-//	func downloadImages(_ url: String, _ index: Int) {
-//		let imageView = UIImageView()
-//		imageView.load(url: URL(string: url)!, completion: {
-//			image in
-//			self.carouselView.images[index] = imageView.image ?? UIImage()
-//		})
-//	}
+
 	
 	@objc func doSomething() {
-		print("Do Something")
+		// Handle action
 	}
 }

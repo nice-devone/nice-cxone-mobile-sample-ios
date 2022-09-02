@@ -1,15 +1,4 @@
-//
-//  Extensions.swift
-//  iOSSDKExample
-//
-//  Created by kjoe on 1/7/22.
-//
-
 import UIKit
-
-//extension UIColor {
-//    static let primaryColor = UIColor(red: 69/255, green: 193/255, blue: 89/255, alpha: 1)
-//}
 
 extension Int {
     /**
@@ -60,5 +49,20 @@ private extension UInt {
             
             return min + result
         }
+    }
+}
+extension String {
+    func height(withConstrainedWidth width: CGFloat, font: UIFont) -> CGFloat {
+        let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let boundingBox = self.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [.font: font], context: nil)
+    
+        return ceil(boundingBox.height)
+    }
+
+    func width(withConstrainedHeight height: CGFloat, font: UIFont) -> CGFloat {
+        let constraintRect = CGSize(width: .greatestFiniteMagnitude, height: height)
+        let boundingBox = self.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [.font: font], context: nil)
+
+        return ceil(boundingBox.width)
     }
 }

@@ -1,0 +1,95 @@
+{
+  "pins" : [
+    {
+      "identity" : "activityindicator",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kjoe07/ActivityIndicator",
+      "state" : {
+        "revision" : "b4384ed8f9a788fc915ff0af647347e8e3fb6cab",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "alprogressview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/alxrguz/ALProgressView",
+      "state" : {
+        "revision" : "54f42cb339924de1b37fe8ecdbe72a3336cbc73d",
+        "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "inputbaraccessoryview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nathantannar4/InputBarAccessoryView",
+      "state" : {
+        "revision" : "2843b4454cfb6de5b4d1e5939fef2dd6257b69ee",
+        "version" : "5.5.0"
+      }
+    },
+    {
+      "identity" : "ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://customerdynamics@dev.azure.com/customerdynamics/NICE%20Mobile%20SDK/_git/iOS-SDK",
+      "state" : {
+        "branch" : "env/dev",
+        "revision" : "fca4b26c23f41d77ffdd6ffa5c8e854fd9fb884c"
+      }
+    },
+    {
+      "identity" : "iqkeyboardmanager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hackiftekhar/IQKeyboardManager",
+      "state" : {
+        "revision" : "9ab144a1a6c6ae8dad25840610c072709b15d8b5",
+        "version" : "6.5.10"
+      }
+    },
+    {
+      "identity" : "keychain-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/evgenyneu/keychain-swift",
+      "state" : {
+        "revision" : "d108a1fa6189e661f91560548ef48651ed8d93b9",
+        "version" : "20.0.0"
+      }
+    },
+    {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher.git",
+      "state" : {
+        "revision" : "be1a1acb283a702b99b630f586877ba02234b4cb",
+        "version" : "7.3.2"
+      }
+    },
+    {
+      "identity" : "messagekit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/MessageKit/MessageKit",
+      "state" : {
+        "revision" : "4e97e02d85a69a8af609b6861a8d176c4387aaea",
+        "version" : "3.5.1"
+      }
+    },
+    {
+      "identity" : "swift-pkce",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hendrickson-tyler/swift-pkce",
+      "state" : {
+        "revision" : "86673632fc26948377a32a9f4fd5786008be86d1",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "toast-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scalessec/Toast-Swift",
+      "state" : {
+        "revision" : "0c9493eeacb102cc614da385cfaaf475379f4ab4",
+        "version" : "5.0.1"
+      }
+    }
+  ],
+  "version" : 2
+}

@@ -47,6 +47,7 @@
                     </view>
                     <connections>
                         <outlet property="guestButton" destination="6WC-kU-Xch" id="mu8-Iy-vh8"/>
+                        <outlet property="oAuthButton" destination="jEa-po-dh4" id="PLk-Wd-h6o"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6dX-c4-uhL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
