@@ -28,15 +28,6 @@
       }
     },
     {
-      "identity" : "ios-sdk",
-      "kind" : "remoteSourceControl",
-      "location" : "https://customerdynamics@dev.azure.com/customerdynamics/NICE%20Mobile%20SDK/_git/iOS-SDK",
-      "state" : {
-        "branch" : "env/dev",
-        "revision" : "fca4b26c23f41d77ffdd6ffa5c8e854fd9fb884c"
-      }
-    },
-    {
       "identity" : "iqkeyboardmanager",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hackiftekhar/IQKeyboardManager",
@@ -70,6 +61,15 @@
       "state" : {
         "revision" : "4e97e02d85a69a8af609b6861a8d176c4387aaea",
         "version" : "3.5.1"
+      }
+    },
+    {
+      "identity" : "nice-cxone-mobile-sdk-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nice-devone/nice-cxone-mobile-sdk-ios.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "d5fdc4ca0b75a63e42c2252404bcfb4b906d1052"
       }
     },
     {

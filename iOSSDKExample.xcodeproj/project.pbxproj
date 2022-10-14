@@ -56,7 +56,6 @@
 		1193DCF82795D9650087AB5F /* MorphingText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1193DCE42795D9640087AB5F /* MorphingText.swift */; };
 		1194B9F927BC65CF005AADCE /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1194B9F827BC65CF005AADCE /* IQKeyboardManagerSwift */; };
 		119A393C27888E0200002408 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119A393B27888E0200002408 /* Extensions.swift */; };
-		119D055128946D3B00A98A13 /* CXOneChatSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 119D055028946D3B00A98A13 /* CXOneChatSDK */; };
 		11A3930127BC614D0030B02B /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		11A3930227BC614D0030B02B /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		11B4E36C27B6F30E00EBC3E7 /* CXOneChatSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 11B4E36B27B6F30E00EBC3E7 /* CXOneChatSDK */; };
@@ -80,6 +79,7 @@
 		27A0176E27A305C400F3D6C5 /* iOSSDKExampleUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A0176D27A305C400F3D6C5 /* iOSSDKExampleUITestsLaunchTests.swift */; };
 		27AB6A3428808A4A0045A3A8 /* ConnectionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27AB6A3328808A4A0045A3A8 /* ConnectionConfiguration.swift */; };
 		27AB6A3A2882099F0045A3A8 /* MessageMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27AB6A392882099F0045A3A8 /* MessageMediaItem.swift */; };
+		27CD076C28F9F73F00DF2669 /* CXOneChatSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 27CD076B28F9F73F00DF2669 /* CXOneChatSDK */; };
 		32ADE7F427F2607B00048691 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		D47DFB452714CB9A0085407E /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D47DFB442714CB9A0085407E /* Media.xcassets */; };
 		D4D4EE4626E11A3E002BE857 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D4EE4526E11A3E002BE857 /* AppDelegate.swift */; };
@@ -211,11 +211,11 @@
 				32ADE7F427F2607B00048691 /* (null) in Frameworks */,
 				114BCCE027CD2FA4001BCCF0 /* Toast in Frameworks */,
 				118B058D27BD91AF004D725E /* Kingfisher in Frameworks */,
+				27CD076C28F9F73F00DF2669 /* CXOneChatSDK in Frameworks */,
 				11E5B3C328C16AC300A79611 /* ALProgressView in Frameworks */,
 				110AC6F027C5B4D000ADA6EB /* LoginWithAmazon.framework in Frameworks */,
 				270322CA27C99B0300B1F9E0 /* PKCE in Frameworks */,
 				27107B97287529E800E0AD1F /* MessageKit in Frameworks */,
-				119D055128946D3B00A98A13 /* CXOneChatSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -502,8 +502,8 @@
 				114BCCDF27CD2FA4001BCCF0 /* Toast */,
 				270322C927C99B0300B1F9E0 /* PKCE */,
 				27107B96287529E800E0AD1F /* MessageKit */,
-				119D055028946D3B00A98A13 /* CXOneChatSDK */,
 				11E5B3C228C16AC300A79611 /* ALProgressView */,
+				27CD076B28F9F73F00DF2669 /* CXOneChatSDK */,
 			);
 			productName = iOSSDKExample;
 			productReference = D4D4EE4226E11A3E002BE857 /* iOSSDKExample.app */;
@@ -548,8 +548,8 @@
 				114BCCDE27CD2FA4001BCCF0 /* XCRemoteSwiftPackageReference "Toast-Swift" */,
 				270322C827C99B0300B1F9E0 /* XCRemoteSwiftPackageReference "swift-pkce" */,
 				27107B95287529E800E0AD1F /* XCRemoteSwiftPackageReference "MessageKit" */,
-				119D054F28946D3B00A98A13 /* XCRemoteSwiftPackageReference "iOS-SDK" */,
 				11E5B3C128C16AC300A79611 /* XCRemoteSwiftPackageReference "ALProgressView" */,
+				27CD076A28F9F73F00DF2669 /* XCRemoteSwiftPackageReference "nice-cxone-mobile-sdk-ios" */,
 			);
 			productRefGroup = D4D4EE4326E11A3E002BE857 /* Products */;
 			projectDirPath = "";
@@ -1055,14 +1055,6 @@
 				minimumVersion = 6.5.0;
 			};
 		};
-		119D054F28946D3B00A98A13 /* XCRemoteSwiftPackageReference "iOS-SDK" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://customerdynamics@dev.azure.com/customerdynamics/NICE%20Mobile%20SDK/_git/iOS-SDK";
-			requirement = {
-				branch = env/dev;
-				kind = branch;
-			};
-		};
 		11B4E36A27B6F30E00EBC3E7 /* XCRemoteSwiftPackageReference "iOS-SDK" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://customerdynamics@dev.azure.com/customerdynamics/NICE%20Mobile%20SDK/_git/iOS-SDK";
@@ -1095,6 +1087,14 @@
 				minimumVersion = 3.5.0;
 			};
 		};
+		27CD076A28F9F73F00DF2669 /* XCRemoteSwiftPackageReference "nice-cxone-mobile-sdk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nice-devone/nice-cxone-mobile-sdk-ios.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1123,11 +1123,6 @@
 			package = 1194B9F727BC65CF005AADCE /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
 			productName = IQKeyboardManagerSwift;
 		};
-		119D055028946D3B00A98A13 /* CXOneChatSDK */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 119D054F28946D3B00A98A13 /* XCRemoteSwiftPackageReference "iOS-SDK" */;
-			productName = CXOneChatSDK;
-		};
 		11B4E36B27B6F30E00EBC3E7 /* CXOneChatSDK */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 11B4E36A27B6F30E00EBC3E7 /* XCRemoteSwiftPackageReference "iOS-SDK" */;
@@ -1147,6 +1142,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 27107B95287529E800E0AD1F /* XCRemoteSwiftPackageReference "MessageKit" */;
 			productName = MessageKit;
+		};
+		27CD076B28F9F73F00DF2669 /* CXOneChatSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27CD076A28F9F73F00DF2669 /* XCRemoteSwiftPackageReference "nice-cxone-mobile-sdk-ios" */;
+			productName = CXOneChatSDK;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
