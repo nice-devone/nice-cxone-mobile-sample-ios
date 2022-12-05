@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher.git",
       "state" : {
-        "revision" : "be1a1acb283a702b99b630f586877ba02234b4cb",
-        "version" : "7.3.2"
+        "revision" : "44e891bdb61426a95e31492a67c7c0dfad1f87c5",
+        "version" : "7.4.1"
       }
     },
     {
@@ -66,10 +66,19 @@
     {
       "identity" : "nice-cxone-mobile-sdk-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nice-devone/nice-cxone-mobile-sdk-ios.git",
+      "location" : "https://github.com/nice-devone/nice-cxone-mobile-sdk-ios",
       "state" : {
         "branch" : "main",
-        "revision" : "d5fdc4ca0b75a63e42c2252404bcfb4b906d1052"
+        "revision" : "0781262ef3e8852be711d2e8517e6cf4828712c2"
+      }
+    },
+    {
+      "identity" : "snapkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SnapKit/SnapKit.git",
+      "state" : {
+        "revision" : "f222cbdf325885926566172f6f5f06af95473158",
+        "version" : "5.6.0"
       }
     },
     {
@@ -79,6 +88,24 @@
       "state" : {
         "revision" : "86673632fc26948377a32a9f4fd5786008be86d1",
         "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "swinject",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Swinject/Swinject.git",
+      "state" : {
+        "revision" : "11e65d83ba100459a41837119a8af32f182339f1",
+        "version" : "2.8.2"
+      }
+    },
+    {
+      "identity" : "swinjectautoregistration",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Swinject/SwinjectAutoregistration",
+      "state" : {
+        "revision" : "9936170fd1a5e8c141a21de987c48cc4e0d6c943",
+        "version" : "2.8.1"
       }
     },
     {
