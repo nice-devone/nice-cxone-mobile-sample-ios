@@ -1,6 +1,5 @@
 import AuthenticationServices
 import CXoneChatSDK
-import LoginWithAmazon
 import SwiftUI
 import UIKit
 
@@ -49,7 +48,9 @@ internal class LoginViewController: BaseViewController, ViewRenderable {
         case .loading:
             showLoading()
         case .loaded(let isOAuthHidden):
-            myView.oAuthButton.isHidden = isOAuthHidden
+            // OAuth button is hidden if it's hidden by configuration *or* if there's no
+            // configured oauth authenticator.
+            myView.oAuthButton.isHidden = isOAuthHidden || OAuthenticators.authenticator == nil
         case .error(let title, let message):
             showAlert(title: title, message: message)
         }

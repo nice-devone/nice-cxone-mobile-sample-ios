@@ -3,73 +3,45 @@ import SafariServices
 import UIKit
 
 
+protocol PluginMessageDelegate: AnyObject {
+    func pluginMessageView(_ view: PluginMessageView, quickReplySelected text: String)
+    func pluginMessageView(_ view: PluginMessageView, subElementDidTap subElement: PluginMessageSubElementType)
+}
+
 /// View to display for the plugin messages.
-class PluginMessageView: UIView, UIScrollViewDelegate {
+class PluginMessageView: UIView {
     
-    // MARK: - Views
+    // MARK: - Properties
     
-    let scrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: 320, height: 300))
-    var elements: [MessageElement] = []
+    private var messageType: PluginMessageType?
+    
+    private var stackView = UIStackView()
+    
+    weak var delegate: PluginMessageDelegate?
+    
+    static let fileImageHeight: CGFloat = 100
+    
+    
+    // MARK: - Init
+    
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    init() {
+        super.init(frame: .zero)
+        
+        setupStackView()
+    }
     
     
     // MARK: - Methods
     
-    func configure(elements: [MessageElement]) {
-        addSubview(scrollView)
-        
-        scrollView.contentSize = CGSize(
-            width: scrollView.frame.size.width * CGFloat(elements.count),
-            height: scrollView.frame.size.height
-        )
-        scrollView.delegate = self
-        scrollView.layer.cornerRadius = 20
-        scrollView.isPagingEnabled = elements.count > 1
-        scrollView.isScrollEnabled = true
-        
-        configurePlugin(elements: elements)
-    }
-}
-
-
-// MARK: - Actions
-
-private extension PluginMessageView {
-    
-    @objc
-    func handleButtonAction(sender: UIButton) {
-        guard let postback = elements[safe: sender.tag]?.postback else {
-            Log.error(CommonError.unableToParse("postback", from: elements[safe: sender.tag]))
+    func configure(with messageType: PluginMessageType) {
+        guard self.messageType == nil else {
             return
         }
         
-        if elements[safe: sender.tag]?.type == .satisfactionSurvey {
-            guard let urlString = elements[safe: sender.tag]?.elements?.last?.url, let url = URL(string: urlString) else {
-                Log.error(CommonError.unableToParse("url", from: elements[safe: sender.tag]?.elements?.last?.url))
-                return
-            }
-            
-            UIApplication.shared.rootViewController?.present(SFSafariViewController(url: url), animated: true)
-        } else if elements[safe: 0]?.type == .button {
-            guard let controller = UIStoryboard(name: "DeepLinkStoryBoard", bundle: nil).instantiateInitialViewController() else {
-                Log.error("Could not init DeepLinkStoryBoard")
-                return
-            }
-            
-            UIApplication.shared.rootViewController?.show(controller, sender: self)
-        } else if postback == "" {
-            guard let url = URL(string: "https://www.google.com") else {
-                Log.error(CommonError.unableToParse("url"))
-                return
-            }
-            UIApplication.shared.rootViewController?.present(SFSafariViewController(url: url), animated: true)
-        } else {
-            guard let url = URL(string: postback) else {
-                Log.error(CommonError.unableToParse("url", from: postback))
-                return
-            }
-            
-            UIApplication.shared.rootViewController?.present(SFSafariViewController(url: url), animated: true)
-        }
+        self.messageType = messageType
+        
+        handleMessageType(messageType, in: &stackView)
     }
 }
 
@@ -78,123 +50,211 @@ private extension PluginMessageView {
 
 private extension PluginMessageView {
     
-    func configurePlugin(elements: [MessageElement]) {
-        self.elements = elements
-        var index = 0
-        
-        for element in elements {
-            var stackView = UIStackView()
-            stackView.axis = .vertical
-            stackView.distribution = .fillEqually
-            stackView.spacing = 10
-            stackView.isLayoutMarginsRelativeArrangement = true
-            stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
+    func handleMessageType(_ type: PluginMessageType, in stackView: inout UIStackView) {
+        switch type {
+        case .textAndButtons(let entity):
+            setupTextAndButtons(entity, in: &stackView)
+        case .satisfactionSurvey(let entity):
+            setupSatisfactionSurvey(entity, in: &stackView)
+        case .menu(let entity):
+            setupMenu(entity, in: &stackView)
+        case .quickReplies(let entity):
+            setupQuickReplies(entity, in: &stackView)
+        case .gallery(let entities):
+            let scrollView = UIScrollView()
+            scrollView.isUserInteractionEnabled = true
+            scrollView.showsHorizontalScrollIndicator = false
+            addSubview(scrollView)
             
-            switch element.type {
-            case .menu, .quickReplies, .inactivityPopup, .satisfactionSurvey:
-                guard let subElements = element.elements else {
-                    Log.error(CommonError.unableToParse("subElements", from: element))
+            scrollView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+            
+            stackView.removeFromSuperview()
+            stackView.snp.removeConstraints()
+            scrollView.addSubview(stackView)
+            stackView.axis = .horizontal
+            stackView.distribution = .fill
+            
+            stackView.snp.makeConstraints { make in
+                make.edges.height.equalToSuperview()
+            }
+            
+            setupGallery(entities, in: &stackView)
+        case .subElements(let subElements):
+            subElements.forEach { subElement in
+                setupSubElement(subElement, into: &stackView)
+            }
+        case .custom(let entity):
+            setupCustomVariables(entity.variables, in: &stackView)
+        }
+    }
+    
+    func setupTextAndButtons(_ element: PluginMessageTextAndButtons, in stackView: inout UIStackView) {
+        element.elements.forEach { subElement in
+            setupSubElement(subElement, into: &stackView)
+        }
+    }
+    
+    func setupSatisfactionSurvey(_ element: PluginMessageSatisfactionSurvey, in stackView: inout UIStackView) {
+        element.elements.forEach { subElement in
+            setupSubElement(subElement, into: &stackView)
+        }
+    }
+    
+    func setupMenu(_ element: PluginMessageMenu, in stackView: inout UIStackView) {
+        element.elements.forEach { subElement in
+            setupSubElement(subElement, into: &stackView)
+        }
+    }
+    
+    func setupQuickReplies(_ element: PluginMessageQuickReplies, in stackView: inout UIStackView) {
+        element.elements.forEach { subElement in
+            guard case .button(let entity) = subElement else {
+                setupSubElement(subElement, into: &stackView)
+                return
+            }
+            
+            var config = UIButton.Configuration.bordered()
+            config.buttonSize = .medium
+            config.cornerStyle = .capsule
+            
+            let button = UIButton(configuration: config, primaryAction: UIAction(title: entity.text) { [weak self, weak delegate] _ in
+                guard let self else {
                     return
                 }
                 
-                for subElement in subElements {
-                    setupSubElement(subElement, withIndex: index, in: &stackView)
-                }
+                self.isUserInteractionEnabled = false
                 
-                if element.type == .satisfactionSurvey {
-                    scrollView.frame = CGRect(x: 0, y: 0, width: 320, height: 150)
-                    stackView.distribution = .fillProportionally
-                }
-            case .button:
-                setupDeeplinkButton(with: element, in: &stackView)
-            default:
-                Log.warning("Trying to handle unsupported element type - \(element.type)")
-            }
+                delegate?.pluginMessageView(self, quickReplySelected: entity.text)
+            })
             
-            stackView.frame = CGRect.init(x: 0, y: 0, width: scrollView.frame.size.width, height: scrollView.frame.size.height)
-            stackView.frame.origin.x = scrollView.frame.size.width * CGFloat(index)
-            stackView.backgroundColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
-            
-            scrollView.addSubview(stackView)
-            
-            index += 1
+            stackView.addArrangedSubview(button)
         }
     }
     
-    func setupSubElement(_ subElement: MessageElement, withIndex index: Int, in stackView: inout UIStackView) {
-        switch subElement.type {
-        case .text:
-            let label = UILabel()
-            stackView.addArrangedSubview(label)
+    func setupGallery(_ elements: [PluginMessageType], in stackView: inout UIStackView) {
+        elements.forEach { entity in
+            var subStackView = UIStackView()
+            stackView.addArrangedSubview(subStackView)
+            subStackView.axis = .vertical
+            subStackView.distribution = .fillProportionally
+            subStackView.spacing = 10
             
+            handleMessageType(entity, in: &subStackView)
+        }
+    }
+    
+    func setupCustomVariables(_ variables: [String: Any], in stackView: inout UIStackView) {
+        // Currently support only buttons
+        guard let buttons = variables["buttons"] as? [[String: String]] else {
+            Log.error("Only buttons with color and size are currently supported for a custom plugin.")
+            return
+        }
+        guard let color = variables["color"] as? String else {
+            Log.error(.unableToParse("color", from: variables))
+            return
+        }
+        guard let size = variables["size"] as? [String: String] else {
+            Log.error(.unableToParse("color", from: variables))
+            return
+        }
+        
+        buttons.forEach { button in
+            guard let id = button["id"] else {
+                Log.error(.unableToParse("id", from: button))
+                return
+            }
+            guard let title = button["name"]else {
+                Log.error(.unableToParse("name", from: button))
+                return
+            }
+            
+            var config = UIButton.Configuration.filled()
+            config.buttonSize = .get(for: size["ios"])
+            config.baseBackgroundColor = UIColor(hexString: color)
+            
+            let button = UIButton(configuration: config, primaryAction: UIAction(title: title) { [weak delegate] _ in
+                delegate?.pluginMessageView(self, subElementDidTap: .button(.init(id: id, text: title, postback: nil, url: nil, displayInApp: false)))
+            })
+            
+            stackView.addArrangedSubview(button)
+        }
+    }
+    
+    func setupSubElement(_ subElement: PluginMessageSubElementType, into stackView: inout UIStackView) {
+        switch subElement {
+        case .text(let entity):
+            let label = UILabel()
             label.numberOfLines = 0
             label.font = .preferredFont(forTextStyle: .body)
-            label.text = subElement.text
+            label.text = entity.text
             
-            label.snp.makeConstraints { make in
-                make.height.equalTo(40)
-            }
-        case .title:
-            let label = UILabel()
             stackView.addArrangedSubview(label)
-            
+        case .title(let entity):
+            let label = UILabel()
             label.numberOfLines = 0
             label.font = .preferredFont(forTextStyle: .title2)
-            label.text = subElement.text
+            label.textAlignment = .center
+            label.text = entity.text
             
-            label.snp.makeConstraints { make in
-                make.height.equalTo(40)
-            }
-        case .button, .iFrameButton:
-            let button = PressableButton()
-            stackView.addArrangedSubview(button)
-            
-            button.colors = .init(button: .primaryColor, shadow: UIColor(rgb: 41, 128, 185))
-            button.setTitle(subElement.text, for: .normal)
-            button.addTarget(self, action: #selector(handleButtonAction(sender:)), for: .touchUpInside)
-            button.tag = index
-            
-            button.snp.makeConstraints { make in
-                make.height.equalTo(subElement.type == .iFrameButton ? 40 : 60)
-            }
-        case .file:
-            if let urlString = subElement.url, let url = URL(string: urlString) {
-                let imageView = UIImageView()
-                stackView.addArrangedSubview(imageView)
-                
-                imageView.contentMode = .scaleAspectFit
-                imageView.load(url: url)
-                imageView.layer.cornerRadius = 5
-                
-                
-                imageView.snp.makeConstraints { make in
-                    make.height.equalTo(60)
+            stackView.addArrangedSubview(label)
+        case .button(let entity):
+            let button = UIButton(configuration: .filled(), primaryAction: UIAction(title: entity.text) { [weak self, weak delegate] _ in
+                guard let self else {
+                    return
                 }
+                
+                self.isUserInteractionEnabled = false
+                
+                delegate?.pluginMessageView(self, subElementDidTap: subElement)
+            })
+            
+            stackView.addArrangedSubview(button)
+        case .file(let entity):
+            let imageView = UIImageView()
+            imageView.contentMode = .scaleAspectFit
+            imageView.load(url: entity.url)
+            imageView.layer.cornerRadius = 5
+
+            imageView.snp.makeConstraints { make in
+                make.height.equalTo(Self.fileImageHeight)
             }
-        default:
-            Log.warning("Trying to handle unsupported subelement type - \(subElement.type)")
+            
+            stackView.addArrangedSubview(imageView)
         }
     }
     
-    func setupDeeplinkButton(with element: MessageElement, in stackView: inout UIStackView) {
-        let label = UILabel()
-        label.numberOfLines = 0
-        label.lineBreakMode = .byWordWrapping
-        label.font = UIFont.systemFont(ofSize: 17)
-        label.text = element.text
-        
-        let textHeight = element.text.height(withConstrainedWidth: 320, font: UIFont.systemFont(ofSize: 17))
-        stackView.addArrangedSubview(label)
-        
-        var config = UIButton.Configuration.plain()
-        config.title = "Deep Link"
-        
-        let button = UIButton(configuration: config)
-        button.addTarget(self, action: #selector(handleButtonAction), for: .touchUpInside)
-        stackView.addArrangedSubview(button)
-        
-        stackView.distribution = textHeight < 22 ? .fillProportionally : .equalSpacing
-        
-        scrollView.frame = CGRect(x: 0, y: 0, width: 320, height: textHeight + 50 + 22)
+    func setupStackView() {
+        addSubview(stackView)
+        stackView.isUserInteractionEnabled = true
+        stackView.axis = .vertical
+        stackView.distribution = .equalSpacing
+        stackView.spacing = 10
+
+        stackView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(10)
+            make.top.bottom.lessThanOrEqualToSuperview().inset(10)
+        }
+    }
+}
+
+
+// MARK: - Helpers
+
+private extension UIButton.Configuration.Size {
+
+    static func get(for value: String?) -> UIButton.Configuration.Size {
+        switch value {
+        case "big":
+            return .large
+        case "middle":
+            return .medium
+        case "small":
+            return .small
+        default:
+            return .mini
+        }
     }
 }

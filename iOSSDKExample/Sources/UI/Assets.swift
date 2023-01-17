@@ -43,6 +43,7 @@ enum Assets {
     
     static let pencil: UIImage = .systemImage(named: "pencil")
     static let squareAndPencil: UIImage = .systemImage(named: "square.and.pencil")
+    static let debug: UIImage = .systemImage(named: "tray.full")
 }
 
 

@@ -148,7 +148,7 @@ private extension FormView {
         }
         
         textField.snp.makeConstraints { make in
-            make.height.equalTo(40)
+            make.height.equalTo(44)
         }
         
         return textField
@@ -167,15 +167,15 @@ private extension FormView {
     }
     
     func addAllSubviews() {
-        addSubviews([titleLabel, contentStackView, buttonStackView])
-        buttonStackView.addArrangedSubviews([cancelButton, confirmButton])
+        addSubviews(titleLabel, contentStackView, buttonStackView)
+        buttonStackView.addArrangedSubviews(cancelButton, confirmButton)
     }
     
     func setupSubviews() {
         backgroundColor = .systemBackground
         
         titleLabel.textAlignment = .center
-        titleLabel.font = .systemFont(ofSize: 17, weight: .medium)
+        titleLabel.font = .preferredFont(forTextStyle: .title3)
         titleLabel.textColor = .lightGray
         
         contentStackView.axis = .vertical

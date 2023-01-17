@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kjoe07/ActivityIndicator",
       "state" : {
-        "revision" : "b4384ed8f9a788fc915ff0af647347e8e3fb6cab",
-        "version" : "1.1.0"
+        "revision" : "68024d734ddc4de8b545d31638c6ecb938a55b1e",
+        "version" : "1.2.0"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nathantannar4/InputBarAccessoryView",
       "state" : {
-        "revision" : "2843b4454cfb6de5b4d1e5939fef2dd6257b69ee",
-        "version" : "5.5.0"
+        "revision" : "039a9cb3ae8c5bc4d39242a6aa688b88023633d3",
+        "version" : "6.2.0"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hackiftekhar/IQKeyboardManager",
       "state" : {
-        "revision" : "9ab144a1a6c6ae8dad25840610c072709b15d8b5",
-        "version" : "6.5.10"
+        "revision" : "0ea3febb36cfcec2afb5841fd8809a9c0fa545b3",
+        "version" : "6.5.11"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher.git",
       "state" : {
-        "revision" : "44e891bdb61426a95e31492a67c7c0dfad1f87c5",
-        "version" : "7.4.1"
+        "revision" : "af4be924ad984cf4d16f4ae4df424e79a443d435",
+        "version" : "7.6.2"
       }
     },
     {
@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/MessageKit/MessageKit",
       "state" : {
-        "revision" : "4e97e02d85a69a8af609b6861a8d176c4387aaea",
-        "version" : "3.5.1"
+        "revision" : "14bfa7eb9f93267c3d7b8cdf58615bba27be672a",
+        "version" : "4.1.1"
       }
     },
     {
@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nice-devone/nice-cxone-mobile-sdk-ios",
       "state" : {
-        "branch" : "main",
-        "revision" : "0781262ef3e8852be711d2e8517e6cf4828712c2"
+        "revision" : "7c062a266d8525e99aa02a1b08ad4f6fa938b191",
+        "version" : "1.0.0"
       }
     },
     {
@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Swinject/Swinject.git",
       "state" : {
-        "revision" : "11e65d83ba100459a41837119a8af32f182339f1",
-        "version" : "2.8.2"
+        "revision" : "8bc503e60965298984fb58cf47b71c541449fe2a",
+        "version" : "2.8.3"
       }
     },
     {
@@ -104,8 +104,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Swinject/SwinjectAutoregistration",
       "state" : {
-        "revision" : "9936170fd1a5e8c141a21de987c48cc4e0d6c943",
-        "version" : "2.8.1"
+        "revision" : "2f37415084584d0aa97007e43eb7a2498ccf770e",
+        "version" : "2.8.3"
       }
     },
     {

@@ -7,8 +7,6 @@ class ThreadListView: UIView {
     
     let segmentedControl: UISegmentedControl = {
         let view = UISegmentedControl()
-        view.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.black], for: .selected)
-        view.selectedSegmentTintColor = .white
         view.insertSegment(withTitle: "Current", at: 0, animated: true)
         view.insertSegment(withTitle: "Archived", at: 1, animated: true)
         view.selectedSegmentIndex = 0
@@ -40,9 +38,9 @@ class ThreadListView: UIView {
 private extension ThreadListView {
     
     func addAllSubviews() {
-        addSubviews([emptyView, headerView, tableView])
+        addSubviews(emptyView, headerView, tableView)
         
-        headerView.addSubviews([segmentedControl, separator])
+        headerView.addSubviews(segmentedControl, separator)
     }
 
     func setupSubviews() {

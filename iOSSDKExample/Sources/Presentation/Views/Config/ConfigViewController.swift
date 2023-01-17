@@ -12,10 +12,7 @@ class ConfigViewController: BaseViewController, ViewRenderable {
     
     // MARK: - Properties
     
-    let cxOneChat = CXoneChat.shared
-    
-    private var configurations = [ConnectionConfiguration]()
-    private var environments = [ConnectionConfiguration]()
+    private var configurations = [Configuration]()
     
     
     // MARK: - Init
@@ -49,6 +46,16 @@ class ConfigViewController: BaseViewController, ViewRenderable {
         
         myView.configurationToggleButton.addTarget(self, action: #selector(onButtonTapped), for: .touchUpInside)
         myView.continueButton.addTarget(self, action: #selector(onButtonTapped), for: .touchUpInside)
+        
+        if FeatureFlag.enableDebugButtonInConfig.isActive {
+            guard navigationItem.rightBarButtonItem == nil else {
+                return
+            }
+            
+            navigationItem.rightBarButtonItem = .init(image: Assets.debug, style: .plain, target: presenter, action: #selector(presenter.onDebugTapped))
+        } else {
+            navigationItem.rightBarButtonItem = nil
+        }
     }
     
     func render(state: ConfigViewState) {
@@ -61,7 +68,6 @@ class ConfigViewController: BaseViewController, ViewRenderable {
             showLoading(title: title)
         case .loaded(let entity):
             self.configurations = entity.configurations
-            self.environments = entity.environmnets
             myView.setupView(entity: entity)
         case .error(let title, let message):
             showAlert(title: title, message: message)
@@ -112,28 +118,20 @@ private extension ConfigViewController {
     @objc
     func onChangeConfigurationTapped() {
         var actions = configurations.compactMap { configuration -> UIAlertAction? in
-            guard let type = configuration.connectionConfigurationType else {
-                return nil
-            }
-            
-            return UIAlertAction(title: type.rawValue, style: .default) { _ in
+            UIAlertAction(title: configuration.title, style: .default) { _ in
                 self.presenter.onConfigurationChanged(configuration)
             }
         }
         actions.append(UIAlertAction(title: "Cancel", style: .cancel))
         
-        UIAlertController.show(.actionSheet, title: "Environments", message: nil, actions: actions)
+        UIAlertController.show(.actionSheet, title: myView.isCustomConfigurationHidden ? "Configuration" : "Environment", message: nil, actions: actions)
     }
     
     @objc
     func onChangeEnvironmentTapped() {
-        var actions = environments.compactMap { configuration -> UIAlertAction? in
-            guard let type = configuration.connectionEnvironmentType else {
-                return nil
-            }
-            
-            return UIAlertAction(title: type.rawValue, style: .default) { _ in
-                self.presenter.onConfigurationChanged(configuration)
+        var actions = CXoneChatSDK.Environment.allCases.compactMap { environment -> UIAlertAction? in
+            UIAlertAction(title: environment.rawValue, style: .default) { _ in
+                self.presenter.onEnvironmentChanged(environment)
             }
         }
         actions.append(UIAlertAction(title: "Cancel", style: .cancel))

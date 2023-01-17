@@ -34,7 +34,7 @@ private extension ThreadListEmptyView {
         
         titleLabel.text = "Your thread list is empty."
         titleLabel.textColor = .darkGray
-        titleLabel.font = .systemFont(ofSize: 17, weight: .medium)
+        titleLabel.font = .preferredFont(forTextStyle: .title3)
     }
     
     func setupConstraints() {

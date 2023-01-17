@@ -21,21 +21,25 @@ class CustomTextfield: UITextField {
         separator.backgroundColor = UIColor.darkGray
         separator.translatesAutoresizingMaskIntoConstraints = false
         
-        separator.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        separator.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-        separator.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16).isActive = true
-        separator.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
+        separator.snp.makeConstraints { make in
+            make.trailing.leading.bottom.equalToSuperview()
+            make.height.equalTo(0.5)
+        }
     }
 
     
     // MARK: - Internal methods
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        textColor = UIApplication.isDarkModeActive ? .white : .lightGray
+    }
+    
     override func textRect(forBounds bounds: CGRect) -> CGRect {
-        bounds.insetBy(dx: 20, dy: 13)
+        bounds.insetBy(dx: 0, dy: 14)
     }
     
     override func editingRect(forBounds bounds: CGRect) -> CGRect {
-        bounds.insetBy(dx: 20, dy: 13)
+        bounds.insetBy(dx: 0, dy: 14)
     }
     
     override func clearButtonRect(forBounds bounds: CGRect) -> CGRect {

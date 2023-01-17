@@ -5,11 +5,6 @@ import UIKit
 
 class ProActiveActionPopup: UIView {
     
-    // MARK: - Views
-    
-    private let closeButton = UIButton(type: .close)
-    
-    
     // MARK: - Properties
     
     private var timer: Timer?
@@ -51,7 +46,7 @@ private extension ProActiveActionPopup {
         timerFired = true
         
         do {
-            try CXoneChat.shared.analytics.proactiveActionSuccess(false, data: actionDetails)
+            try CXoneChat.shared.analytics.proactiveActionSuccess(true, data: actionDetails)
         } catch {
             error.logError()
         }
@@ -80,24 +75,33 @@ private extension ProActiveActionPopup {
         layer.cornerRadius = 18
         
         let label = UILabel(frame: .zero)
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.text = data["headingText"] as? String
-        label.font = .systemFont(ofSize: 17, weight: .bold)
+        label.font = .preferredFont(forTextStyle: .title3, compatibleWith: .init(legibilityWeight: .bold))
         addSubview(label)
         
+        label.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview().inset(18)
+        }
+        
         let headeLineLabel = UILabel(frame: .zero)
-        headeLineLabel.translatesAutoresizingMaskIntoConstraints = false
         headeLineLabel.text = data["bodyText"] as? String
         headeLineLabel.numberOfLines = 0
         headeLineLabel.lineBreakMode = .byWordWrapping
         addSubview(headeLineLabel)
         
+        headeLineLabel.snp.makeConstraints { make in
+            make.top.equalTo(label.snp.bottom).offset(4)
+            make.leading.trailing.equalToSuperview().inset(18)
+        }
+        
+        let closeButton = UIButton(type: .close)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.addTarget(self, action: #selector(close), for: .touchUpInside)
         addSubview(closeButton)
         
-        closeButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -9).isActive = true
-        closeButton.topAnchor.constraint(equalTo: self.topAnchor, constant: 9).isActive = true
-        closeButton.addTarget(self, action: #selector(close), for: .touchUpInside)
+        closeButton.snp.makeConstraints { make in
+            make.top.trailing.equalToSuperview().inset(10)
+        }
         
         let action = data["action"] as? [String: String]
         let text = action?["text"]
@@ -114,20 +118,15 @@ private extension ProActiveActionPopup {
             
             self.timer?.invalidate()
         })
+        
         button.setTitle(text, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
         addSubview(button)
         
-        NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: topAnchor, constant: 18),
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 18),
-            headeLineLabel.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 5),
-            headeLineLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 18),
-            headeLineLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -18),
-            button.topAnchor.constraint(equalTo: headeLineLabel.bottomAnchor, constant: 5),
-            button.centerXAnchor.constraint(equalTo: headeLineLabel.centerXAnchor),
-            button.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -18)
-        ])
+        button.snp.makeConstraints { make in
+            make.top.equalTo(headeLineLabel.snp.bottom).offset(4)
+            make.centerX.equalToSuperview()
+            make.bottom.equalToSuperview().inset(18)
+        }
         
         try? CXoneChat.shared.analytics.proactiveActionDisplay(data: actionDetails)
         

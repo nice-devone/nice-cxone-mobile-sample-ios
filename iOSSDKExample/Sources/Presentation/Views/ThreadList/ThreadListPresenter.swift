@@ -13,7 +13,7 @@ class ThreadListPresenter: BasePresenter<
     // MARK: - Structs
     
     struct Input {
-        let connectionConfiguration: ConnectionConfiguration
+        let configuration: Configuration
     }
 
     struct Navigation {
@@ -157,17 +157,6 @@ extension ThreadListPresenter: CXoneChatDelegate {
         fetchThreads()
     }
     
-    func onThreadLoadFail(_ error: Error) {
-        // "RecoveringThreadFailed" is a soft error.
-        if error.localizedDescription == "RecoveringThreadFailed" {
-            Log.info(error.localizedDescription)
-        } else {
-            error.logError()
-        }
-        
-        viewState.toLoaded(documentState: documentState)
-    }
-    
     func onNewMessage(_ message: Message) {
         documentState.threads = CXoneChat.shared.threads.get().filter(\.canAddMoreMessages)
         
@@ -224,6 +213,17 @@ extension ThreadListPresenter: CXoneChatDelegate {
     func onProactivePopupAction(data: [String: Any], actionId: UUID) {
         navigation.showProactiveActionPopup(data, actionId)
     }
+    
+    func onError(_ error: Error) {
+        // "recoveringThreadFailed" is a soft error.
+        if let error = error as? CXoneChatError, error == CXoneChatError.recoveringThreadFailed {
+            Log.info(error.localizedDescription)
+        } else {
+            error.logError()
+        }
+        
+        viewState.toLoaded(documentState: documentState)
+    }
 }
 
 
@@ -247,21 +247,15 @@ private extension ThreadListPresenter {
     
     @MainActor
     func connect() async throws {
-        let config = input.connectionConfiguration
-        
-        if config.isCustomEnvironment {
-            try await CXoneChat.shared.connection.connect(
-                chatURL: config.chatUrl,
-                socketURL: config.socketUrl,
-                brandId: config.brandId,
-                channelId: config.channelId
-            )
+        if let env = input.configuration.environment {
+            try await CXoneChat.shared.connection.connect(environment: env, brandId: input.configuration.brandId, channelId: input.configuration.channelId)
         } else {
-            guard let environment = config.environment else {
-                throw CommonError.unableToParse("environment", from: config)
-            }
-            
-            try await CXoneChat.shared.connection.connect(environment: environment, brandId: config.brandId, channelId: config.channelId)
+            try await CXoneChat.shared.connection.connect(
+                chatURL: input.configuration.chatUrl,
+                socketURL: input.configuration.socketUrl,
+                brandId: input.configuration.brandId,
+                channelId: input.configuration.channelId
+            )
         }
     }
     

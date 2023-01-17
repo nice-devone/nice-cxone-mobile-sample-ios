@@ -5,6 +5,7 @@ import InputBarAccessoryView
 import Kingfisher
 import MapKit
 import MessageKit
+import SafariServices
 import Toast
 import UIKit
 
@@ -65,11 +66,9 @@ class ThreadDetailViewController: MessagesViewController, ViewRenderable {
         
         myView.refreshControl.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
         
-        if !CXoneChat.shared.connection.channelConfiguration.hasMultipleThreadsPerEndUser {
-            title = presenter.documentState.thread.assignedAgent?.fullName.mapNonEmpty { $0 } ?? "No Agent"
-        } else {
-            title = presenter.documentState.thread.name.mapNonEmpty { $0 } ?? "No Agent"
-        }
+        title = presenter.documentState.thread.name?.mapNonEmpty { $0 }
+            ?? presenter.documentState.thread.assignedAgent?.fullName.mapNonEmpty { $0 }
+            ?? "No Agent"
     }
     
     func render(state: ThreadDetailViewState) {
@@ -99,19 +98,80 @@ class ThreadDetailViewController: MessagesViewController, ViewRenderable {
             return super.collectionView(collectionView, cellForItemAt: indexPath)
         }
         
-        if case .custom = messagesDataSource.messageForItem(at: indexPath, in: messagesCollectionView).kind {
-            guard let messageData = presenter.documentState.thread.messages[safe: indexPath.section] else {
+        let item = messagesDataSource.messageForItem(at: indexPath, in: messagesCollectionView)
+        
+        switch item.kind {
+        case .custom:
+            return collectionView.dequeue(for: indexPath) as ThreadDetailPluginCell
+        case .linkPreview:
+            return collectionView.dequeue(for: indexPath) as ThreadDetailLinkCell
+        default:
+            return super.collectionView(collectionView, cellForItemAt: indexPath)
+        }
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        switch cell {
+        case let cell as ThreadDetailPluginCell:
+            guard let messageData = presenter.documentState.thread.messages[safe: indexPath.section]
+            else {
                 Log.error(CommonError.unableToParse("messageData", from: presenter.documentState.thread))
-                return UICollectionViewCell()
+                return
             }
             
-            let cell: ThreadDetailCustomCell = collectionView.dequeue(for: indexPath)
-            cell.pluginMessageView.configure(elements: messageData.messageContent.payload.elements)
+            cell.pluginDelegate = self
+            cell.configure(with: messageData, at: indexPath, and: messagesCollectionView)
+        case let cell as ThreadDetailLinkCell:
+            guard let messageData = presenter.documentState.thread.messages[safe: indexPath.section] else {
+                Log.error(CommonError.unableToParse("messageData", from: presenter.documentState.thread))
+                return
+            }
             
-            return cell
+            cell.configure(with: messageData, at: indexPath, and: messagesCollectionView)
+        default:
+            super.collectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
+        }
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemsAt indexPaths: [IndexPath],
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard let indexPath = indexPaths.first, let cell = collectionView.cellForItem(at: indexPath) else {
+            Log.warning(.failed("Could not get first IndexPath or selected cell."))
+            return nil
         }
         
-        return super.collectionView(collectionView, cellForItemAt: indexPath)
+        return .init(identifier: nil, previewProvider: nil) { [weak presenter] _ -> UIMenu? in
+            var menuOptions = [UIAction]()
+            
+            switch cell {
+            case let mediaCell as MediaMessageCell where cell is MediaMessageCell:
+                let share = UIAction(title: "Share", image: .init(systemName: "square.and.arrow.up")) { _ in
+                    presenter?.onShareCellContent(mediaCell.imageView.image)
+                }
+                let copy = UIAction(title: "Copy", image: .init(systemName: "doc.on.doc")) { _ in
+                    presenter?.onCopyCellContent(mediaCell.imageView.image)
+                }
+                
+                menuOptions = [share, copy]
+            case let textCell as TextMessageCell where cell is TextMessageCell:
+                let share = UIAction(title: "Share", image: .init(systemName: "square.and.arrow.up")) { _ in
+                    presenter?.onShareCellContent(textCell.messageLabel.text)
+                }
+                let copy = UIAction(title: "Copy", image: .init(systemName: "doc.on.doc")) { _ in
+                    presenter?.onCopyCellContent(textCell.messageLabel.text)
+                }
+                
+                menuOptions = [share, copy]
+            default:
+                Log.warning(.failed("Unsupported cell content."))
+                return nil
+            }
+            
+            return UIMenu(options: .displayInline, children: menuOptions)
+        }
     }
 }
 
@@ -136,52 +196,73 @@ private extension ThreadDetailViewController {
 }
 
 
-// MARK: - CameraInputBarAccessoryViewDelegate
+// MARK: - PluginMessageDelegate
 
-extension ThreadDetailViewController: CameraInputBarAccessoryViewDelegate {
-    
-    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith attachments: [AttachmentManager.Attachment]) {
-        let message = inputBar.inputTextView.attributedText.string
-        let attachments = attachments.compactMap { attachment -> AttachmentUpload? in
-            guard case .image(let image) = attachment, let data = image.jpegData(compressionQuality: 0.7) else {
-                return nil
+extension ThreadDetailViewController: PluginMessageDelegate {
+
+    func pluginMessageView(_ view: PluginMessageView, subElementDidTap subElement: PluginMessageSubElementType) {
+        switch subElement {
+        case .button(let entity):
+            if let postback = entity.postback {
+                try? CXoneChat.shared.analytics.customVisitorEvent(data: .custom(postback))
+            }
+            guard let url = entity.url else {
+                return
             }
             
-            return .init(data: data, mimeType: data.mimeType, fileName: "\(UUID().uuidString).\(data.fileExtension)")
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+            } else {
+                UIApplication.shared.rootViewController?.present(SFSafariViewController(url: url), animated: true)
+            }
+        default:
+            break
+        }
+    }
+    
+    func pluginMessageView(_ view: PluginMessageView, quickReplySelected text: String) {
+        try? CXoneChat.shared.analytics.customVisitorEvent(data: .custom("Quick Reply tapped."))
+        
+        inputBar(myView.messageInputBar, didPressSendButtonWith: text)
+    }
+}
+
+// MARK: - AttachmentsInputBarAccessoryViewDelegate
+
+extension ThreadDetailViewController: AttachmentsInputBarAccessoryViewDelegate {
+    
+    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith attachments: [ChatAttachmentManager.Attachment]) {
+        let message = inputBar.inputTextView.attributedText.string
+        let attachments = attachments.compactMap { attachment -> AttachmentUpload? in
+            switch attachment {
+            case .image(let image):
+                guard let data = image.jpegData(compressionQuality: 0.7) else {
+                    return nil
+                }
+                
+                return .init(data: data, mimeType: data.mimeType, fileName: "\(UUID().uuidString).\(data.fileExtension)")
+            case .data(let data):
+                return .init(data: data, mimeType: data.mimeType, fileName: "\(UUID().uuidString).\(data.fileExtension)")
+            default:
+                return nil
+            }
         }
         
         Task { @MainActor in
             do {
-                try await CXoneChat.shared.threads.messages.send(message, with: attachments, for: presenter.documentState.thread)
-                
-                inputBar.invalidatePlugins()
-                inputBar.inputTextView.text = String()
-                inputBar.inputTextView.resignFirstResponder()
-                inputBar.sendButton.startAnimating()
-                inputBar.inputTextView.placeholder = "Sending..."
-                
-                await Task.sleep(seconds: 1)
-                
-                inputBar.sendButton.stopAnimating()
-                inputBar.inputTextView.placeholder = "Aa"
+                try await sendMessage(message, with: attachments, for: inputBar)
             } catch {
                 error.logError()
+                showAlert(title: "Ops!", message: error.localizedDescription)
             }
         }
     }
     
     @objc
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
-        inputBar.inputTextView.text = String()
-        inputBar.inputTextView.resignFirstResponder()
-        inputBar.invalidatePlugins()
-        inputBar.sendButton.startAnimating()
-        inputBar.inputTextView.placeholder = "Sending..."
-        inputBar.sendButton.stopAnimating()
-        
         Task { @MainActor in
             do {
-                try await CXoneChat.shared.threads.messages.send(text, for: presenter.documentState.thread)
+                try await sendMessage(text, for: inputBar)
             } catch {
                 error.logError()
                 showAlert(title: "Ops!", message: error.localizedDescription)
@@ -227,7 +308,7 @@ extension ThreadDetailViewController: CameraInputBarAccessoryViewDelegate {
 
 extension ThreadDetailViewController: MessagesDataSource {
     
-    func currentSender() -> SenderType {
+    var currentSender: MessageKit.SenderType {
         CXoneChat.shared.customer.get() ?? CustomerIdentity(id: UUID().uuidString, firstName: "", lastName: "")
     }
     
@@ -292,11 +373,7 @@ extension ThreadDetailViewController: MessagesDisplayDelegate {
         isFromCurrentSender(message: message) ? .white : .darkText
     }
     
-    func detectorAttributes(
-        for detector: DetectorType,
-        and message: MessageType,
-        at indexPath: IndexPath
-    ) -> [NSAttributedString.Key: Any] {
+    func detectorAttributes(for detector: DetectorType, and message: MessageType, at indexPath: IndexPath) -> [NSAttributedString.Key: Any] {
         switch detector {
         case .hashtag, .mention:
             let color: UIColor = isFromCurrentSender(message: message) ? .white : .primaryColor
@@ -315,11 +392,7 @@ extension ThreadDetailViewController: MessagesDisplayDelegate {
         }
     }
     
-    func enabledDetectors(
-        for message: MessageType,
-        at indexPath: IndexPath,
-        in messagesCollectionView: MessagesCollectionView
-    ) -> [DetectorType] {
+    func enabledDetectors(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> [DetectorType] {
         [.url, .address, .phoneNumber, .date, .transitInformation, .mention, .hashtag]
     }
     
@@ -329,11 +402,7 @@ extension ThreadDetailViewController: MessagesDisplayDelegate {
         isFromCurrentSender(message: message) ? .primaryColor : UIColor(rgb: 230, 230, 230, alpha: 1)
     }
     
-    func messageStyle(
-        for message: MessageType,
-        at indexPath: IndexPath,
-        in messagesCollectionView: MessagesCollectionView
-    ) -> MessageStyle {
+    func messageStyle(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageStyle {
         var corners: UIRectCorner = []
         
         if isFromCurrentSender(message: message) {
@@ -365,12 +434,7 @@ extension ThreadDetailViewController: MessagesDisplayDelegate {
         }
     }
     
-    func configureAvatarView(
-        _ avatarView: AvatarView,
-        for message: MessageType,
-        at indexPath: IndexPath,
-        in messagesCollectionView: MessagesCollectionView
-    ) {
+    func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
         let formatter = PersonNameComponentsFormatter()
         let initials = message.sender.senderId == "000000"
             ? "??"
@@ -392,31 +456,28 @@ extension ThreadDetailViewController: MessagesDisplayDelegate {
         at indexPath: IndexPath,
         in messagesCollectionView: MessagesCollectionView
     ) {
-        guard case MessageKind.photo(let media) = message.kind else {
-            Log.error(CommonError.unableToParse("media", from: message.kind))
-            return
-        }
-        guard let imageURL = media.url else {
-            Log.error(CommonError.unableToParse("url", from: media))
-            return
-        }
-        
-        if imageURL.pathExtension != "jpg" || imageURL.pathExtension != "png" || imageURL.pathExtension != "heic" {
-            imageView.kf.indicatorType = .activity
-            imageView.kf.setImage(with: imageURL)
-        } else {
-            imageView.kf.setImage(with: AVAssetImageDataProvider(assetURL: imageURL, seconds: 1))
+        switch message.kind {
+        case .photo(let media):
+            guard let imageURL = media.url else {
+                Log.error(CommonError.unableToParse("url", from: media))
+                return
+            }
+            
+            if imageURL.pathExtension != "jpg" || imageURL.pathExtension != "png" || imageURL.pathExtension != "heic" {
+                imageView.kf.indicatorType = .activity
+                imageView.kf.setImage(with: imageURL, placeholder: media.placeholderImage)
+            } else {
+                imageView.kf.setImage(with: AVAssetImageDataProvider(assetURL: imageURL, seconds: 1), placeholder: media.placeholderImage)
+            }
+        default:
+            Log.warning(.failed("Unsupported media message type."))
         }
     }
     
     
     // MARK: - Location Messages
     
-    func annotationViewForLocation(
-        message: MessageType,
-        at indexPath: IndexPath,
-        in messageCollectionView: MessagesCollectionView
-    ) -> MKAnnotationView? {
+    func annotationViewForLocation(message: MessageType, at indexPath: IndexPath, in messageCollectionView: MessagesCollectionView) -> MKAnnotationView? {
         let annotationView = MKAnnotationView(annotation: nil, reuseIdentifier: nil)
         let pinImage = #imageLiteral(resourceName: "ic_map_marker")
         annotationView.image = pinImage
@@ -460,21 +521,13 @@ extension ThreadDetailViewController: MessagesDisplayDelegate {
 
 extension ThreadDetailViewController: MessagesLayoutDelegate {
     
-    func cellTopLabelHeight(
-        for message: MessageType,
-        at indexPath: IndexPath,
-        in messagesCollectionView: MessagesCollectionView
-    ) -> CGFloat {
+    func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         let isTimeLabelVisible = indexPath.section % 3 == 0 && !presenter.isPreviousMessageSameSender(at: indexPath)
         
         return isTimeLabelVisible ? 18 : 0
     }
     
-    func messageTopLabelHeight(
-        for message: MessageType,
-        at indexPath: IndexPath,
-        in messagesCollectionView: MessagesCollectionView
-    ) -> CGFloat {
+    func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         if isFromCurrentSender(message: message) {
             return !presenter.isPreviousMessageSameSender(at: indexPath) ? 20 : 0
         } else {
@@ -482,11 +535,7 @@ extension ThreadDetailViewController: MessagesLayoutDelegate {
         }
     }
     
-    func messageBottomLabelHeight(
-        for message: MessageType,
-        at indexPath: IndexPath,
-        in messagesCollectionView: MessagesCollectionView
-    ) -> CGFloat {
+    func messageBottomLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         (!presenter.isNextMessageSameSender(at: indexPath) && isFromCurrentSender(message: message)) ? 16 : 0
     }
 }
@@ -496,37 +545,20 @@ extension ThreadDetailViewController: MessagesLayoutDelegate {
 
 extension ThreadDetailViewController: CXoneChatDelegate {
     
-    func onCustomPluginMessage(_ messageData: [Any]) {
-        guard let object = messageData[0] as? [String: Any] else {
-            Log.error(CommonError.unableToParse("object", from: messageData))
-            return
-        }
-        guard let variables = object["variables"] as? NSDictionary else {
-            Log.error(CommonError.unableToParse("variables", from: object))
-            return
-        }
-        
-        let message = variables.reduce("") { result, data in
-            result + "\(data.key): \(data.value)\n"
-        }
-        
-        DispatchQueue.main.async {
-            self.showAlert(title: "Plugin received: ", message: message)
-        }
-    }
-    
     func onAgentChange(_ agent: Agent, for threadId: UUID) {
         presenter.documentState.thread.assignedAgent = agent
         
-        if !CXoneChat.shared.connection.channelConfiguration.hasMultipleThreadsPerEndUser {
-            DispatchQueue.main.async {
-                self.navigationItem.title = agent.fullName.mapNonEmpty { $0 } ?? "No Name"
-            }
+        guard self.presenter.documentState.thread.name.isNilOrEmpty else {
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.navigationItem.title = agent.fullName.mapNonEmpty { $0 } ?? "No Name"
         }
     }
     
-    func onAgentTyping(_ didEnd: Bool, id: UUID) {
-        guard id == presenter.documentState.thread.id else {
+    func onAgentTyping(_ isTyping: Bool, threadId: UUID) {
+        guard threadId == presenter.documentState.thread.id else {
             Log.error("Did start typing in unknown thread.")
             return
         }
@@ -535,14 +567,12 @@ extension ThreadDetailViewController: CXoneChatDelegate {
             return
         }
         
-        if didEnd {
-            setTypingIndicatorViewHidden(true, performUpdates: nil)
-        } else {
+        if isTyping {
             setTypingIndicatorViewHidden(false) {
-                DispatchQueue.main.async {
-                    self.scrollToBottomIfNeeded()
-                }
+                self.scrollToBottomIfNeeded()
             }
+        } else {
+            setTypingIndicatorViewHidden(true, performUpdates: nil)
         }
     }
     
@@ -591,8 +621,12 @@ extension ThreadDetailViewController: CXoneChatDelegate {
         }
 
         DispatchQueue.main.async {
-            self.presenter.documentState.thread = CXoneChat.shared.threads.get()[index]
-            self.title = self.presenter.documentState.thread.name ?? "No Agent"
+            let thread = CXoneChat.shared.threads.get()[index]
+            
+            self.presenter.documentState.thread = thread
+            self.title = thread.name?.mapNonEmpty { $0 }
+                ?? thread.assignedAgent?.fullName.mapNonEmpty { $0 }
+                ?? "No Agent"
         }
     }
     
@@ -612,39 +646,67 @@ extension ThreadDetailViewController: CXoneChatDelegate {
 
 private extension ThreadDetailViewController {
     
+    @MainActor
+    func sendMessage(_ message: String, with attachments: [AttachmentUpload] = [], for inputBar: InputBarAccessoryView) async throws {
+        inputBar.invalidatePlugins()
+        inputBar.inputTextView.text = String()
+        inputBar.inputTextView.resignFirstResponder()
+        inputBar.sendButton.startAnimating()
+        inputBar.inputTextView.placeholder = "Sending..."
+        
+        if attachments.isEmpty {
+            try await CXoneChat.shared.threads.messages.send(message, for: presenter.documentState.thread)
+        } else {
+            try await CXoneChat.shared.threads.messages.send(message, with: attachments, for: presenter.documentState.thread)
+        }
+        
+        await Task.sleep(seconds: 1)
+        
+        inputBar.sendButton.stopAnimating()
+        inputBar.inputTextView.placeholder = "Aa"
+    }
+    
     func updateThreadData() {
         presenter.updateThreadData()
         
         DispatchQueue.main.async {
+            self.title = self.presenter.documentState.thread.name?.mapNonEmpty { $0 }
+                ?? self.presenter.documentState.thread.assignedAgent?.fullName.mapNonEmpty { $0 }
+                ?? "No Agent"
+            
             self.messagesCollectionView.reloadData()
         }
     }
     
     func scrollToBottomIfNeeded() {
-        guard messagesCollectionView.numberOfSections > 0 else {
-            Log.info("CollectionView does not contain any sections.")
-            return
-        }
-        
-        let lastSection = messagesCollectionView.numberOfSections - 1
-        let lastRow = messagesCollectionView.numberOfItems(inSection: lastSection)
-        let indexPath = IndexPath(row: lastRow - 1, section: lastSection)
-        
-        messagesCollectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-    }
-    
-    func setTypingIndicatorViewHidden(_ isHidden: Bool, performUpdates updates: (() -> Void)?) {
-        setTypingIndicatorViewHidden(isHidden, animated: true, whilePerforming: updates) { [weak self] isSuccess in
-            guard isSuccess else {
-                Log.error("Operation was not success.")
-                return
-            }
-            guard self?.isLastSectionVisible() ?? false else {
-                Log.error("Last section is not visible.")
+        DispatchQueue.main.async {
+            guard self.messagesCollectionView.numberOfSections > 0 else {
+                Log.info("CollectionView does not contain any sections.")
                 return
             }
             
-            self?.messagesCollectionView.scrollToLastItem(animated: true)
+            let lastSection = self.messagesCollectionView.numberOfSections - 1
+            let lastRow = self.messagesCollectionView.numberOfItems(inSection: lastSection)
+            let indexPath = IndexPath(row: lastRow - 1, section: lastSection)
+            
+            self.messagesCollectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+        }
+    }
+    
+    func setTypingIndicatorViewHidden(_ isHidden: Bool, performUpdates updates: (() -> Void)?) {
+        DispatchQueue.main.async {
+            self.setTypingIndicatorViewHidden(isHidden, animated: true, whilePerforming: updates) { [weak self] isSuccess in
+                guard isSuccess else {
+                    Log.error("Operation was not success.")
+                    return
+                }
+                guard self?.isLastSectionVisible() ?? false else {
+                    Log.error("Last section is not visible.")
+                    return
+                }
+                
+                self?.messagesCollectionView.scrollToLastItem(animated: true)
+            }
         }
     }
 

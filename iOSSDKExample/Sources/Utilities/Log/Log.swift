@@ -5,6 +5,7 @@ class Log {
     
     // MARK: - Properties
     
+    static var isEnabled = false
     static var isWriteToFileEnabled = false
     private static var logContent = ""
     
@@ -96,6 +97,10 @@ class Log {
 private extension Log {
     
     class func write(_ message: String) {
+        guard isEnabled else {
+            return
+        }
+        
         if Self.isWriteToFileEnabled {
             logContent += "\n" + message
         }

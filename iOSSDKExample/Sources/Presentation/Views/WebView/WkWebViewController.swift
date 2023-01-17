@@ -97,7 +97,7 @@ extension WkWebViewController {
 private extension WkWebViewController {
     
     func addAllSubviews() {
-        view.addSubviews([webView, toolbar])
+        view.addSubviews(webView, toolbar)
     }
     
     func setupSubviews() {

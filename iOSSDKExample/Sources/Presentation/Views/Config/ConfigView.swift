@@ -53,20 +53,11 @@ extension ConfigView {
             configurationToggleButton.setTitle("Use a default configuration", for: .normal)
         }
         
-        configSelectButton.setTitle(entity.selectedConfiguration.connectionConfigurationType?.rawValue, for: .normal)
-        environmentSelectButton.setTitle(entity.selectedConfiguration.connectionEnvironmentType?.rawValue, for: .normal)
+        configSelectButton.setTitle(entity.currentConfiguration.title, for: .normal)
+        environmentSelectButton.setTitle(entity.currentConfiguration.environmentName, for: .normal)
         
-        if entity.selectedConfiguration.brandId != 0 {
-            brandIdTextField.text = entity.selectedConfiguration.brandId.description
-        } else {
-            brandIdTextField.text = nil
-        }
-        
-        if !entity.selectedConfiguration.channelId.isEmpty {
-            channelIdTextField.text = entity.selectedConfiguration.channelId
-        } else {
-            channelIdTextField.text = nil
-        }
+        brandIdTextField.text = entity.currentConfiguration.brandId != 0 ? entity.currentConfiguration.brandId.description : nil
+        channelIdTextField.text = !entity.currentConfiguration.channelId.isEmpty ? entity.currentConfiguration.channelId : nil
     }
 }
 
@@ -76,24 +67,12 @@ extension ConfigView {
 private extension ConfigView {
     
     func addAllSubviews() {
-        addSubviews([
-            configurationSetupStack,
-            configurationToggleButton,
-            continueButton
-        ])
+        addSubviews(configurationSetupStack, configurationToggleButton, continueButton)
         
-        configurationSetupStack.addArrangedSubviews([defaultConfigurationView, customConfigurationView])
+        configurationSetupStack.addArrangedSubviews(defaultConfigurationView, customConfigurationView)
         
-        defaultConfigurationView.addSubviews([
-            configSelectLabel,
-            configSelectButton
-        ])
-        customConfigurationView.addSubviews([
-            environmentSelectLabel,
-            environmentSelectButton,
-            brandIdTextField,
-            channelIdTextField
-        ])
+        defaultConfigurationView.addSubviews(configSelectLabel, configSelectButton)
+        customConfigurationView.addSubviews(environmentSelectLabel, environmentSelectButton, brandIdTextField, channelIdTextField)
     }
 
     func setupSubviews() {
@@ -107,7 +86,7 @@ private extension ConfigView {
         defaultConfigurationView.isHidden = false
         
         configSelectLabel.text = "Configuration"
-        configSelectLabel.font = .systemFont(ofSize: 17)
+        configSelectLabel.font = .preferredFont(forTextStyle: .title3)
         
         configSelectButton.setTitleColor(.systemBlue, for: .normal)
         
@@ -125,7 +104,7 @@ private extension ConfigView {
         channelIdTextField.clearButtonMode = .whileEditing
         
         configurationToggleButton.setTitle("Use a custom configuration", for: .normal)
-        configurationToggleButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
+        configurationToggleButton.titleLabel?.font = .preferredFont(forTextStyle: .title3)
         configurationToggleButton.setTitleColor(.systemBlue, for: .normal)
         
         continueButton.setTitle("Continue", for: .normal)
@@ -142,7 +121,7 @@ private extension ConfigView {
         configSelectButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview()
             make.centerY.equalTo(configSelectLabel)
-            make.size.equalTo(50)
+            make.height.equalTo(50)
         }
         environmentSelectLabel.snp.makeConstraints { make in
             make.top.leading.equalToSuperview()
@@ -150,7 +129,7 @@ private extension ConfigView {
         environmentSelectButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview()
             make.centerY.equalTo(environmentSelectLabel)
-            make.size.equalTo(50)
+            make.height.equalTo(50)
         }
         brandIdTextField.snp.makeConstraints { make in
             make.top.equalTo(environmentSelectLabel.snp.bottom).offset(24)

@@ -3,6 +3,7 @@ import MessageKit
 import UIKit
 
 
+/// Entity which handles attachment message type (video, audio, ...)
 class MessageMediaItem: MediaItem {
     
     // MARK: - Properties

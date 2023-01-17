@@ -9,7 +9,7 @@ class ThreadDetailView: UIView {
     // MARK: - Properties
     
     let messagesCollectionView = MessagesCollectionView(frame: .zero, collectionViewLayout: CustomMessagesFlowLayout())
-    let messageInputBar = CameraInputBarAccessoryView()
+    let messageInputBar = AttachmentsInputBarAccessoryView()
     let refreshControl = UIRefreshControl()
     let progressRing = ALProgressRing()
     
@@ -42,7 +42,8 @@ private extension ThreadDetailView {
     }
     
     func setupCollectionView() {
-        messagesCollectionView.register(ThreadDetailCustomCell.self)
+        messagesCollectionView.register(ThreadDetailPluginCell.self)
+        messagesCollectionView.register(ThreadDetailLinkCell.self)
         messagesCollectionView.alwaysBounceVertical = true
         messagesCollectionView.refreshControl = refreshControl
         
@@ -75,15 +76,14 @@ private extension ThreadDetailView {
         messageInputBar.isTranslucent = true
         messageInputBar.setRightStackViewWidthConstant(to: 36, animated: false)
         messageInputBar.padding.bottom = 8
-        messageInputBar.middleContentViewPadding.right = -38
+        messageInputBar.middleContentViewPadding.right = -36
 
         messageInputBar.sendButton.setTitleColor(.primaryColor, for: .normal)
         messageInputBar.sendButton.setTitleColor(.primaryColor.withAlphaComponent(0.3), for: .highlighted)
-        messageInputBar.sendButton.imageView?.backgroundColor = UIColor(white: 0.85, alpha: 1)
-        messageInputBar.sendButton.setSize(CGSize(width: 36, height: 36), animated: false)
+        messageInputBar.sendButton.setSize(CGSize(width: 38, height: 38), animated: false)
         messageInputBar.sendButton.image = Assets.icUp
-        messageInputBar.sendButton.title = nil
-        messageInputBar.sendButton.imageView?.layer.cornerRadius = 16
+        messageInputBar.sendButton.imageView?.backgroundColor = UIApplication.isDarkModeActive ? UIColor.darkGray : UIColor.lightGray
+        messageInputBar.sendButton.imageView?.layer.cornerRadius = 19
         
         setupInputTextView()
         
@@ -95,7 +95,7 @@ private extension ThreadDetailView {
             }
             .onDisabled { item in
                 UIView.animate(withDuration: 0.3) {
-                    item.imageView?.backgroundColor = UIColor(white: 0.85, alpha: 1)
+                    item.imageView?.backgroundColor = UIApplication.isDarkModeActive ? UIColor.darkGray : UIColor.lightGray
                 }
             }
         messageInputBar.separatorLine.isHidden = true
@@ -124,14 +124,11 @@ private extension ThreadDetailView {
     }
     
     func setupInputTextView() {
-        messageInputBar.inputTextView.tintColor = .primaryColor
-        messageInputBar.inputTextView.backgroundColor = .init(rgb: 245, 245, 245)
-        messageInputBar.inputTextView.placeholderTextColor = .init(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)
         messageInputBar.inputTextView.textContainerInset = .init(top: 8, left: 16, bottom: 8, right: 36)
-        messageInputBar.inputTextView.placeholderLabelInsets = .init(top: 8, left: 20, bottom: 8, right: 36)
-        messageInputBar.inputTextView.layer.borderColor = UIColor(rgb: 200, 200, 200).cgColor
-        messageInputBar.inputTextView.layer.borderWidth = 1.0
-        messageInputBar.inputTextView.layer.cornerRadius = 16.0
+        messageInputBar.inputTextView.placeholderLabelInsets = .init(top: 8, left: 16, bottom: 8, right: 36)
+        messageInputBar.inputTextView.layer.borderColor = UIApplication.isDarkModeActive ? UIColor.darkGray.cgColor : UIColor.lightGray.cgColor
+        messageInputBar.inputTextView.layer.borderWidth = 1
+        messageInputBar.inputTextView.layer.cornerRadius = 18
         messageInputBar.inputTextView.layer.masksToBounds = true
         messageInputBar.inputTextView.scrollIndicatorInsets = .init(top: 8, left: 0, bottom: 8, right: 0)
         messageInputBar.inputTextView.textContainerInset.bottom = 8

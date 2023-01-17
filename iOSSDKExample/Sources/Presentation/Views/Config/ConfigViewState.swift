@@ -6,14 +6,7 @@ enum ConfigViewState: HasInitial {
     case loaded(ConfigVO)
     case error(title: String, message: String)
     
-    static var initial: ConfigViewState = .loaded(
-        .init(
-            isCustomConfigurationHidden: false,
-            configurations: [],
-            environmnets: [],
-            selectedConfiguration: .init(connectionConfigurationType: .LS)
-        )
-    )
+    static var initial: ConfigViewState = .loading("Fetching configurations...")
 }
 
 
@@ -43,8 +36,7 @@ extension ConfigViewState {
             ConfigVO(
                 isCustomConfigurationHidden: documentState.isCustomConfigurationHidden,
                 configurations: documentState.configurations,
-                environmnets: documentState.environmnets,
-                selectedConfiguration: documentState.currentConfiguration
+                currentConfiguration: documentState.currentConfiguration
             )
         )
     }

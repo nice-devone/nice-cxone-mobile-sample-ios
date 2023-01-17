@@ -47,6 +47,7 @@ playground.xcworkspace
 # .swiftpm
 
 .build/
+build/
 
 # CocoaPods
 #
@@ -69,6 +70,14 @@ Carthage/Build/
 # Accio dependency management
 Dependencies/
 .accio/
+
+# Android Studio
+.idea/
+
+# xcodegen generated, don't record
+iOSSDKExample.xcodeproj/
+generated/
+local.yml
 
 # fastlane
 #

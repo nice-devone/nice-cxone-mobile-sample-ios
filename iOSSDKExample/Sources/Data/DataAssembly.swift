@@ -2,6 +2,7 @@ import Swinject
 import SwinjectAutoregistration
 
 
+/// The assembler for all related stuff to the Data layer.
 struct DataAssembly: Assembly {
     
     // MARK: - Properties

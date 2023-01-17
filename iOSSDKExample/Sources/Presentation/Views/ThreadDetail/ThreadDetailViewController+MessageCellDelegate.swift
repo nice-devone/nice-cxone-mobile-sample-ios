@@ -16,9 +16,17 @@ extension ThreadDetailViewController: MessageCellDelegate {
             Log.error(CommonError.unableToParse("indexPath", from: messagesCollectionView))
             return
         }
+        guard let message = presenter.documentState.thread.messages[safe: indexPath.section] else {
+            Log.error(CommonError.unableToParse("message", from: messagesCollectionView))
+            return
+        }
         
-        if let message = presenter.documentState.thread.messages[safe: indexPath.section], message.messageContent.type == .plugin {
+        if let attachment = message.attachments.first, let url = URL(string: attachment.url) {
+            present(WkWebViewController(url: url), animated: true)
+        } else if case .plugin = message.contentType {
             UIAlertController.show(.alert, title: "Alert", message: "Plugin has been tapped")
+        } else {
+            Log.warning(.failed("Did tap on unsupported message type."))
         }
     }
     
@@ -70,6 +78,8 @@ extension ThreadDetailViewController: MessageCellDelegate {
             newImageView.addGestureRecognizer(tap)
             
             view.addSubview(newImageView)
+            
+            messageInputBar.isHidden = true
             navigationController?.isNavigationBarHidden = true
         }
     }
@@ -121,7 +131,7 @@ private extension ThreadDetailViewController {
     @objc
     func dismissFullscreenImage(_ sender: UITapGestureRecognizer) {
         navigationController?.isNavigationBarHidden = false
-        tabBarController?.tabBar.isHidden = false
+        messageInputBar.isHidden = false
         
         sender.view?.removeFromSuperview()
     }

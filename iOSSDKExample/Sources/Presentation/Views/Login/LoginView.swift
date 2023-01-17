@@ -31,7 +31,7 @@ private extension LoginView {
     
     func addAllSubviews() {
         addSubview(stackView)
-        stackView.addArrangedSubviews([guestButton, oAuthButton])
+        stackView.addArrangedSubviews(guestButton, oAuthButton)
     }
 
     func setupSubviews() {

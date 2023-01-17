@@ -39,7 +39,7 @@ class ThreadListCell: UITableViewCell {
 extension ThreadListCell {
     
     func configure(thread: ChatThread, isMultiThread: Bool) {
-        let agentName = thread.name?.mapNonEmpty { $0 } ?? thread.assignedAgent?.fullName ?? "No Agent"
+        let agentName = thread.name?.mapNonEmpty { $0 } ?? thread.assignedAgent?.fullName.mapNonEmpty { $0 } ?? "No Agent"
         nameLabel.text = agentName
 
         avatarView.initials = agentName.components(separatedBy: " ").reduce(into: "") { result, name in
@@ -56,8 +56,19 @@ extension ThreadListCell {
                 lastMessageLabel.text = string
             case .photo:
                 lastMessageLabel.text = "Image"
+            case .linkPreview(let item):
+                lastMessageLabel.text = item.teaser
+            case .video:
+                lastMessageLabel.text = "Video"
             case .custom:
-                lastMessageLabel.text = thread.messages.last?.messageContent.fallbackText
+                switch thread.messages.last?.contentType {
+                case .text(let text):
+                    lastMessageLabel.text = text
+                case .plugin(let plugin):
+                    lastMessageLabel.text = plugin.postback?.mapNonEmpty { $0 } ?? "Rich content message"
+                default:
+                    lastMessageLabel.text = "Unsupported content type"
+                }
             default:
                 Log.warning("unknown message kind - \(String(describing: thread.messages.last?.kind))")
             }
@@ -71,13 +82,14 @@ extension ThreadListCell {
 private extension ThreadListCell {
 
     func addAllSubviews() {
-        addSubviews([avatarView, nameLabel, lastMessageLabel])
+        addSubviews(avatarView, nameLabel, lastMessageLabel)
     }
     
     func setupSubviews() {
-        nameLabel.font = .systemFont(ofSize: 16, weight: .bold)
+        nameLabel.font = .preferredFont(forTextStyle: .title3, compatibleWith: .init(legibilityWeight: .bold))
         
-        lastMessageLabel.font = .systemFont(ofSize: 12, weight: .light)
+        lastMessageLabel.numberOfLines = 2
+        lastMessageLabel.font = .preferredFont(forTextStyle: .body)
     }
     
     func setupConstraints() {

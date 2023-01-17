@@ -44,7 +44,7 @@ class CustomFieldView: UIView {
 private extension CustomFieldView {
     
     func setupViews() {
-        self.addSubviews([titleField, textField])
+        addSubviews(titleField, textField)
         
         titleField.translatesAutoresizingMaskIntoConstraints = false
         

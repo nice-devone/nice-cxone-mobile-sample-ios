@@ -27,6 +27,23 @@ class ThreadDetailPresenter: BasePresenter<ThreadDetailPresenter.Input, ThreadDe
 
 extension ThreadDetailPresenter {
     
+    func onShareCellContent(_ content: Any?) {
+        let controller = UIActivityViewController(activityItems: [content as Any], applicationActivities: nil)
+        
+        navigation.showController(controller)
+    }
+    
+    func onCopyCellContent(_ content: Any?) {
+        switch content {
+        case let text as String where content is String:
+            UIPasteboard.general.string = text
+        case let image as UIImage where content is UIImage:
+            UIPasteboard.general.image = image
+        default:
+            Log.warning(.failed("Unsupported cell content."))
+        }
+    }
+    
     @objc
     func onEditCustomField() {
         let locations = ["West Coast", "Northeast", "Southeast", "Midwest"]
@@ -91,14 +108,12 @@ extension ThreadDetailPresenter {
             return
         }
         
-        navigation.showToast("New message from \(message.senderInfo.fullName)", text)
+        Task { @MainActor in
+            self.navigation.showToast("New message from \(message.senderInfo.fullName)", text)
+        }
     }
     
     func onViewWillAppear() {
-        if input.thread.messages.isEmpty {
-            viewState.toLoading()
-        }
-        
         do {
             try CXoneChat.shared.analytics.viewPage(title: "ChatView", uri: "chat-view")
         } catch {
@@ -112,24 +127,7 @@ extension ThreadDetailPresenter {
             return
         }
         
-        var messages = [Message]()
-        for message in updatedThread.messages {
-            if message.attachments.isEmpty {
-                messages.append(message)
-            } else {
-                if !message.messageContent.payload.text.isEmpty {
-                    messages.append(message)
-                    messages.append(MessageMapper.updateOldMessage(message, attachments: []))
-                } else {
-                    for attachment in message.attachments {
-                        messages.append(MessageMapper.updateOldMessage(message, attachments: [attachment]))
-                    }
-                }
-            }
-        }
-        
         documentState.thread = updatedThread
-        documentState.thread.messages = messages
     }
     
     func isPreviousMessageSameSender(at indexPath: IndexPath) -> Bool {

@@ -2,16 +2,16 @@ import MessageKit
 import UIKit
 
 
-open class CustomMessagesFlowLayout: MessagesCollectionViewFlowLayout {
+class CustomMessagesFlowLayout: MessagesCollectionViewFlowLayout {
     
     // MARK: - Properties
     
-    open lazy var customMessageSizeCalculator = CustomMessageSizeCalculator(layout: self)
+    lazy var customMessageSizeCalculator = CustomMessageSizeCalculator(layout: self)
     
-    
+                                                                
     // MARK: - Methods
     
-    open override func cellSizeCalculatorForItem(at indexPath: IndexPath) -> CellSizeCalculator {
+    override func cellSizeCalculatorForItem(at indexPath: IndexPath) -> CellSizeCalculator {
         guard !isSectionReservedForTypingIndicator(indexPath.section) else {
             return typingIndicatorSizeCalculator
         }
@@ -22,7 +22,7 @@ open class CustomMessagesFlowLayout: MessagesCollectionViewFlowLayout {
         return customMessageSizeCalculator
     }
     
-    open override func messageSizeCalculators() -> [MessageSizeCalculator] {
+    override func messageSizeCalculators() -> [MessageSizeCalculator] {
         var superCalculators = super.messageSizeCalculators()
         superCalculators.append(customMessageSizeCalculator)
         

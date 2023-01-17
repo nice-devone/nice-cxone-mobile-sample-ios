@@ -44,7 +44,7 @@ class LoadingViewController: UIViewController {
         
         view.insertSubview(blurEffectView, at: 0)
         view.addSubview(stackView)
-        stackView.addArrangedSubviews([loadingActivityIndicator, titleLabel])
+        stackView.addArrangedSubviews(loadingActivityIndicator, titleLabel)
         
         blurEffectView.frame = self.view.bounds
         
@@ -53,7 +53,7 @@ class LoadingViewController: UIViewController {
         
         titleLabel.textAlignment = .center
         titleLabel.textColor = .white
-        titleLabel.font = .systemFont(ofSize: 17, weight: .medium)
+        titleLabel.font = .preferredFont(forTextStyle: .title3)
         
         stackView.snp.makeConstraints { make in
             make.center.equalToSuperview()

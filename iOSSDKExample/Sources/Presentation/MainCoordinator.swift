@@ -6,6 +6,10 @@ import Toast
 import UIKit
 
 
+/// The main app navigator.
+///
+/// It setups main navigation controller and handles user navigation through top level screens, e.g. Config, Login, Thread List.
+/// In case of TabBar integration to the app, each tab should has its own coordinator.
 class MainCoordinator: Coordinator {
     
     // MARK: - Properties
@@ -38,7 +42,8 @@ private extension MainCoordinator {
     
     func showConfig() {
         let navigation = ConfigPresenter.Navigation(
-            navigateToLogin: { [weak self] in self?.showLogin(connectionConfig: $0, channelConfig: $1) }
+            navigateToLogin: { [weak self] in self?.showLogin(configuration: $0, isAuthorizationEnabled: $1) },
+            showController: { [weak navigationController] controller in navigationController?.present(controller, animated: true) }
         )
         let presenter = ConfigPresenter(input: (), navigation: navigation, services: ())
         let controller = ConfigViewController(presenter: presenter)
@@ -46,8 +51,8 @@ private extension MainCoordinator {
         navigationController.show(controller, sender: self)
     }
     
-    func showLogin(connectionConfig: ConnectionConfiguration, channelConfig: ChannelConfiguration) {
-        let input = LoginPresenter.Input(connectionConfig: connectionConfig, channelConfig: channelConfig)
+    func showLogin(configuration: Configuration, isAuthorizationEnabled: Bool) {
+        let input = LoginPresenter.Input(configuration: configuration, isAuthorizationEnabled: isAuthorizationEnabled)
         let navigation = LoginPresenter.Navigation(
             navigateToThreads: { [weak self] config in self?.showThreadList(configuration: config) }
         )
@@ -57,8 +62,8 @@ private extension MainCoordinator {
         navigationController.show(controller, sender: self)
     }
     
-    func showThreadList(configuration: ConnectionConfiguration) {
-        let input = ThreadListPresenter.Input(connectionConfiguration: configuration)
+    func showThreadList(configuration: Configuration) {
+        let input = ThreadListPresenter.Input(configuration: configuration)
         let navigation = ThreadListPresenter.Navigation(
             presentController: { [weak self] controller in self?.navigationController.present(controller, animated: true) },
             navigateToThread: { [weak self] thread in self?.showThread(thread) },
@@ -85,7 +90,10 @@ private extension MainCoordinator {
             showToast: { title, message in
                 UIApplication.shared.rootViewController?.view.makeToast(message, duration: 2, position: .top, title: title, style: .init())
             },
-            showController: { [weak self] controller in self?.navigationController.present(controller, animated: true) }
+            showController: { [weak self] controller in
+                controller.popoverPresentationController?.sourceView = self?.navigationController.view
+                
+                self?.navigationController.present(controller, animated: true) }
         )
         let presenter = ThreadDetailPresenter(input: input, navigation: navigation, services: ())
         let controller = ThreadDetailViewController(presenter: presenter)
@@ -102,9 +110,7 @@ private extension MainCoordinator {
     func setupNavigationBar() {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .white
-        appearance.titleTextAttributes = [.foregroundColor: UIColor.black]
-        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
+        appearance.backgroundColor = .systemBackground
         appearance.shadowImage = nil
         appearance.shadowColor = nil
 

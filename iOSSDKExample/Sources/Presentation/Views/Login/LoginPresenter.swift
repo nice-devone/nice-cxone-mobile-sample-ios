@@ -1,7 +1,6 @@
 import AuthenticationServices
 import CXoneChatSDK
 import Foundation
-import LoginWithAmazon
 import PKCE
 
 
@@ -10,12 +9,12 @@ class LoginPresenter: BasePresenter<LoginPresenter.Input, LoginPresenter.Navigat
     // MARK: - Structs
     
     struct Input {
-        var connectionConfig: ConnectionConfiguration
-        var channelConfig: ChannelConfiguration
+        var configuration: Configuration
+        var isAuthorizationEnabled: Bool
     }
 
     struct Navigation {
-        var navigateToThreads: (ConnectionConfiguration) -> Void
+        var navigateToThreads: (Configuration) -> Void
     }
     
     struct DocumentState {
@@ -25,9 +24,7 @@ class LoginPresenter: BasePresenter<LoginPresenter.Input, LoginPresenter.Navigat
     
     // MARK: - Properties
     
-    lazy var documentState = DocumentState(
-        isOAuthHidden: !input.channelConfig.isAuthorizationEnabled
-    )
+    lazy var documentState = DocumentState(isOAuthHidden: !input.isAuthorizationEnabled)
     
     
     // MARK: - Init
@@ -46,47 +43,47 @@ extension LoginPresenter {
     
     @objc
     func onContinueAsGuestTapped() {
-        navigation.navigateToThreads(input.connectionConfig)
+        navigation.navigateToThreads(input.configuration)
     }
     
     @objc
     func onLoginTapped() {
         viewState.toLoading()
-        
-        let request = AMZNAuthorizeRequest()
-        request.scopes = [AMZNProfileScope.userID(), AMZNProfileScope.profile()]
-        request.codeChallengeMethod = "S256"
-        request.grantType = .code
-        
+
+        guard let authenticator = OAuthenticators.authenticator else {
+            viewState.toError(title: "Oops!", message: "No available authenticators")
+            return
+        }
+
         do {
-            let codeVerifier = try generateCodeVerifier()
-            request.codeChallenge = try generateCodeChallenge(for: codeVerifier)
-            
-            CXoneChat.shared.customer.setCodeVerifier(codeVerifier)
+            let verifier = try generateCodeVerifier()
+            let challenge = try generateCodeChallenge(for: verifier)
+
+            CXoneChat.shared.customer.setCodeVerifier(verifier)
+
+            authenticator.authorize(withChallenge: challenge) { [weak self] _, result, error in
+                guard let self = self else {
+                    return
+                }
+
+                error?.logError()
+
+                guard let result = result else {
+                    Log.error(CommonError.unableToParse("result"))
+                    self.viewState.toError(title: "Ops!", message: "Something went wrong.")
+                    return
+                }
+
+                CXoneChat.shared.customer.setAuthorizationCode(result.challengeResult)
+
+                self.viewState.toLoaded(isOAuthHidden: self.documentState.isOAuthHidden)
+
+                self.navigation.navigateToThreads(self.input.configuration)
+            }
         } catch {
             error.logError()
             viewState.toError(title: "Ops!", message: "Something went wrong.")
             return
-        }
-        
-        AMZNAuthorizationManager.shared().authorize(request) { [weak self] result, _, error in
-            guard let self = self else {
-                return
-            }
-            
-            error?.logError()
-            
-            guard let result = result else {
-                Log.error(CommonError.unableToParse("result"))
-                self.viewState.toError(title: "Ops!", message: "Something went wrong.")
-                return
-            }
-            
-            CXoneChat.shared.customer.setAuthorizationCode(result.authorizationCode)
-            
-            self.viewState.toLoaded(isOAuthHidden: self.documentState.isOAuthHidden)
-            
-            self.navigation.navigateToThreads(self.input.connectionConfig)
         }
     }
 }

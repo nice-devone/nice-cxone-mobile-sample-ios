@@ -2,6 +2,7 @@ import Swinject
 import SwinjectAutoregistration
 
 
+/// The assembler for all related stuff to the Presentation layer.
 public struct PresentationAssembly: Assembly {
     
     // MARK: - Init

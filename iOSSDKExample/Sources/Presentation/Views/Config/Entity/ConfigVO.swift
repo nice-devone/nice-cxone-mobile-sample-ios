@@ -1,9 +1,9 @@
 import Foundation
 
 
+/// The ViewObject for the Config view.
 struct ConfigVO {
     let isCustomConfigurationHidden: Bool
-    let configurations: [ConnectionConfiguration]
-    let environmnets: [ConnectionConfiguration]
-    let selectedConfiguration: ConnectionConfiguration
+    let configurations: [Configuration]
+    var currentConfiguration: Configuration
 }

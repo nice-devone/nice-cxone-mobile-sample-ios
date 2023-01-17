@@ -1,6 +1,8 @@
 import CXoneChatSDK
 import IQKeyboardManagerSwift
-import LoginWithAmazon
+#if HasLWA
+    import LoginWithAmazon
+#endif
 import UIKit
 
 
@@ -21,15 +23,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         print("===== SESSION STARTED =====")
+
+        #if HasLWA
+        LoginWithAmazonAuthenticator.initialize()
+        #endif
         
+        // Register feature flags defined in the `Root.plist` of the `Settings.bundle`
+        FeatureFlag.registerFeatureFlags()
+        
+        // Setup local Log manager
+        Log.isEnabled = true
         Log.isWriteToFileEnabled = true
         
+        // Setup CXoneChat SDK Log manager
         CXoneChat.configureLogger(level: .trace, verbosity: .full)
         CXoneChat.shared.logDelegate = self
         
+        // Setup Keyboard manager
         IQKeyboardManager.shared.enable = true
         IQKeyboardManager.shared.disabledDistanceHandlingClasses.append(ThreadDetailViewController.self)
         
+        // Setup User Notification Center for real device
         #if !targetEnvironment(simulator)
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (success, error) in
             error?.logError()
@@ -60,7 +74,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        AMZNAuthorizationManager.handleOpen(url, sourceApplication: UIApplication.OpenURLOptionsKey.sourceApplication.rawValue)
+        guard let authenticator = OAuthenticators.authenticator else {
+            Log.error(.failed("Could not get OAuth authenticator."))
+            return false
+        }
+
+        return authenticator.handleOpen(url: url, sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String)
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
@@ -69,6 +88,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         error.logError()
+    }
+    
+    func application(_ application: UIApplication, shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier) -> Bool {
+        extensionPointIdentifier != .keyboard
     }
 }
 

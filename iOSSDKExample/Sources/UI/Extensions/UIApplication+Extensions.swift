@@ -3,6 +3,10 @@ import UIKit
 
 extension UIApplication {
     
+    static var isDarkModeActive: Bool {
+        UITraitCollection.current.userInterfaceStyle == .dark
+    }
+    
     var rootViewController: UIViewController? {
         (connectedScenes.first as? UIWindowScene)?.windows.last?.rootViewController
     }

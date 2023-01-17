@@ -1,5 +1,6 @@
 import CXoneChatSDK
 import Foundation
+import UIKit
 
 
 class ConfigPresenter: BasePresenter<Void, ConfigPresenter.Navigation, Void, ConfigViewState> {
@@ -7,25 +8,18 @@ class ConfigPresenter: BasePresenter<Void, ConfigPresenter.Navigation, Void, Con
     // MARK: - Structs
 
     struct Navigation {
-        var navigateToLogin: (ConnectionConfiguration, ChannelConfiguration) -> Void
+        var navigateToLogin: (Configuration, _ isAuthorizationEnabled: Bool) -> Void
+        var showController: (UIViewController) -> Void
     }
     
     struct DocumentState {
-        let configurations: [ConnectionConfiguration] = [
-            .init(connectionConfigurationType: .LS),
-            .init(connectionConfigurationType: .CD),
-            .init(connectionConfigurationType: .MJ),
-            .init(connectionConfigurationType: .Sales)
-        ]
-        let environmnets: [ConnectionConfiguration] = [
-            .init(connectionEnvironmentType: .QA),
-            .init(connectionEnvironmentType: .NA1)
-        ]
-        var defaultConfiguration = ConnectionConfiguration(connectionConfigurationType: .LS)
-        var customConfiguration = ConnectionConfiguration(connectionEnvironmentType: .NA1)
+        var configurations = [Configuration]()
         var isCustomConfigurationHidden = true
         
-        var currentConfiguration: ConnectionConfiguration {
+        var defaultConfiguration = Configuration(title: "", brandId: 0, channelId: "", environmentName: "", chatUrl: "", socketUrl: "")
+        var customConfiguration = Configuration(brandId: 0, channelId: "", environment: .NA1)
+        
+        var currentConfiguration: Configuration {
             isCustomConfigurationHidden ? defaultConfiguration : customConfiguration
         }
     }
@@ -41,7 +35,11 @@ class ConfigPresenter: BasePresenter<Void, ConfigPresenter.Navigation, Void, Con
     override func viewDidSubscribe() {
         super.viewDidSubscribe()
         
-        viewState.toLoaded(documentState: documentState)
+        Task { @MainActor in
+            await fetchConfigurations()
+            
+            viewState.toLoaded(documentState: documentState)
+        }
     }
 }
 
@@ -50,9 +48,30 @@ class ConfigPresenter: BasePresenter<Void, ConfigPresenter.Navigation, Void, Con
 
 extension ConfigPresenter {
     
+    @objc
+    func onDebugTapped() {
+        let shareLogs = UIAlertAction(title: "Share Logs", style: .default) { _ in
+            do {
+                self.navigation.showController(try Log.getLogShareDialog())
+            } catch {
+                error.logError()
+            }
+        }
+        let removeLogs = UIAlertAction(title: "Remove Logs", style: .destructive) { _ in
+            do {
+                try Log.removeLogs()
+            } catch {
+                error.logError()
+            }
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        UIAlertController.show(.actionSheet, title: "Options", message: nil, actions: [shareLogs, removeLogs, cancelAction])
+    }
+    
     @MainActor
     func onContinueButtonTapped() async {
-        guard isValid() else {
+        guard isConfigurationValid() else {
             viewState.toError(title: "All Fields Required", message: "Please provide a value for all fields.")
             return
         }
@@ -62,26 +81,26 @@ extension ConfigPresenter {
         do {
             let channelConfig: ChannelConfiguration
             
-            if documentState.currentConfiguration.isCustomEnvironment {
+            if documentState.isCustomConfigurationHidden {
                 channelConfig = try await CXoneChat.shared.connection.getChannelConfiguration(
-                    chatURL: documentState.currentConfiguration.chatUrl,
-                    brandId: documentState.currentConfiguration.brandId,
-                    channelId: documentState.currentConfiguration.channelId
+                    chatURL: documentState.defaultConfiguration.chatUrl,
+                    brandId: documentState.defaultConfiguration.brandId,
+                    channelId: documentState.defaultConfiguration.channelId
                 )
             } else {
-                guard let environment = documentState.currentConfiguration.environment else {
-                    Log.error(CommonError.unableToParse("environment"))
+                guard let environment = documentState.customConfiguration.environment else {
+                    viewState.toError(title: "Ops!", message: "Something went wrong! Try it again later.")
                     return
                 }
                 
                 channelConfig = try await CXoneChat.shared.connection.getChannelConfiguration(
                     environment: environment,
-                    brandId: documentState.currentConfiguration.brandId,
-                    channelId: documentState.currentConfiguration.channelId
+                    brandId: documentState.customConfiguration.brandId,
+                    channelId: documentState.customConfiguration.channelId
                 )
             }
             
-            navigation.navigateToLogin(documentState.currentConfiguration, channelConfig)
+            navigation.navigateToLogin(documentState.currentConfiguration, channelConfig.isAuthorizationEnabled)
             
             viewState.toLoaded(documentState: documentState)
         } catch {
@@ -94,21 +113,22 @@ extension ConfigPresenter {
         }
     }
     
-    func onConfigurationChanged(_ configuration: ConnectionConfiguration) {
-        documentState.isCustomConfigurationHidden = configuration.connectionConfigurationType != nil
+    func onConfigurationChanged(_ configuration: Configuration) {
+        documentState.defaultConfiguration = configuration
         
-        if documentState.isCustomConfigurationHidden {
-            documentState.defaultConfiguration = configuration
-        } else {
-            documentState.customConfiguration = configuration
-        }
-
         viewState.toLoaded(documentState: documentState)
+    }
+    
+    func onEnvironmentChanged(_ environment: CXoneChatSDK.Environment) {
+        documentState.customConfiguration.title = environment.rawValue
+        documentState.customConfiguration.environmentName = environment.rawValue
+        documentState.customConfiguration.socketUrl = environment.socketURL
+        documentState.customConfiguration.chatUrl = environment.chatURL
     }
     
     func onBrandIdChanged(_ brandId: String?) {
         if let brandId, let brandId = Int(brandId) {
-            documentState.customConfiguration.brandId = Int(brandId)
+            documentState.customConfiguration.brandId = brandId
         }
     }
     
@@ -129,13 +149,44 @@ extension ConfigPresenter {
 // MARK: - Private methods
 
 private extension ConfigPresenter {
-    
-    func isValid() -> Bool {
-        // Check if current configuration is on predefined
+
+    func isConfigurationValid() -> Bool {
         guard documentState.isCustomConfigurationHidden else {
             return true
         }
         
         return documentState.currentConfiguration.brandId != 0 && !documentState.currentConfiguration.channelId.isEmpty
+    }
+    
+    @MainActor
+    func fetchConfigurations() async {
+        guard let filePath = Bundle.main.path(forResource: "environment", ofType: "json") else {
+            Log.error(.failed("Could not get file with configurations."))
+            viewState.toLoaded(documentState: documentState)
+            return
+        }
+        
+        do {
+            guard let data = try String(contentsOfFile: filePath).data(using: .utf8) else {
+                Log.error(.failed("Could not get data from file."))
+                viewState.toLoaded(documentState: documentState)
+                return
+            }
+
+            guard let configurations = try JSONDecoder().decode(Configurations.self, from: data).configurations else {
+                viewState.toLoaded(documentState: documentState)
+                return
+            }
+
+            documentState.configurations = configurations
+
+            if let configuration = configurations.first {
+                documentState.defaultConfiguration = configuration
+            }
+        } catch {
+            Log.error(.error(error))
+            
+            viewState.toLoaded(documentState: documentState)
+        }
     }
 }

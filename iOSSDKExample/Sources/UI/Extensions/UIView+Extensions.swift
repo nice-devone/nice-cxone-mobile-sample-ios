@@ -13,7 +13,7 @@ extension UIView {
     
     // MARK: - Methods
     
-    func addSubviews(_ views: [UIView]) {
+    func addSubviews(_ views: UIView...) {
         views.forEach { view in
             guard !self.isDescendant(of: view) else {
                 return
