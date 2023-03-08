@@ -33,7 +33,7 @@ private extension ThreadDetailView {
 
     func setupSubviews() {
         progressRing.isHidden = true
-        progressRing.startColor = .systemCyan
+        progressRing.startColor = .cyan
         progressRing.grooveColor = .green
         progressRing.endColor = .blue
         

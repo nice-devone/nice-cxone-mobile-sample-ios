@@ -1,0 +1,26 @@
+targetTemplates:
+  Info:
+    info:
+      path: "generated/${target_name}_info.plist"
+      properties:
+        CFBundleDisplayName: "$(PRODUCT_NAME)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        ITSAppUsesNonExemptEncryption: false
+        LSRequiresIPhoneOS: true
+        NSCameraUsageDescription: "Allow access to camera to take pictures for sending as attachment."
+        UIApplicationSupportsIndirectInputEvents: true
+        UIBackgroundModes:
+          - remote-notification
+        UIRequiredDeviceCapabilities:
+          - armv7
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        WKAppBoundDomains: []

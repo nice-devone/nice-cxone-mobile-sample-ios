@@ -1,0 +1,56 @@
+# XCodegen YML file for iOS Sample Project
+
+include:
+  - path: xcodegen/defaults.yml
+    relativePaths: false
+  - path: xcodegen/entitlements.yml
+    relativePaths: false
+  - path: xcodegen/infoPlist.yml
+    relativePaths: false
+  - path: xcodegen/packages.yml
+    relativePaths: false
+  - path: xcodegen/amazon.yml
+    relativePaths: false
+  - local.yml
+
+options:
+  createIntermediateGroups: true
+  bundleIdPrefix: ${BUNDLE_PREFIX}
+  deploymentTarget:
+    iOS: "13"
+
+name: iOSSDKExample
+
+settings:
+  base:
+    PRODUCT_BUNDLE_IDENTIFIER: ${BUNDLE_PREFIX}.sample
+
+targetTemplates:
+  Common:
+    type: application
+    platform: iOS
+    deploymentTarget: "13.0"
+    settings:
+      base:
+        PRODUCT_NAME: "SDK Demo"
+    sources:
+      - path: iOSSDKExample/Sources
+      - path: iOSSDKExample/Supporting Files
+    dependencies:
+      - package: ActivityIndicator
+      - package: ALProgressView
+      - package: CXoneChatSDK
+      - package: IQKeyboardManagerSwift
+      - package: Kingfisher
+      - package: MessageKit
+      - package: SnapKit
+      - package: PKCE
+      - package: Swinject
+      - package: SwinjectAutoregistration
+      - package: Toast
+
+targets:
+  iOSSDKExample:
+    templates: [Common, Entitled, Info, Amazon]
+  iOSSDKExample_arm64:
+    templates: [Common, Entitled, Info]

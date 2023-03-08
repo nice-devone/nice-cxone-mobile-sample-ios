@@ -43,7 +43,7 @@ class WkWebViewController: UIViewController, WKNavigationDelegate {
 extension WkWebViewController {
     
     @objc
-    func close() {
+    func closeDidTap() {
         dismiss(animated: true)
     }
     
@@ -107,18 +107,15 @@ private extension WkWebViewController {
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = true
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Close", primaryAction: UIAction { [weak self] _ in
-            self?.close()
-        })
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Close", style: .done, target: self, action: #selector(closeDidTap))
         
         toolbar.backgroundColor = .systemBackground
-        
         toolbar.items = [
-            .init(image: .init(systemName: "chevron.left"), style: .plain, target: self, action: #selector(goesBack)),
-            .flexibleSpace(),
-            .init(image: .init(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(shareLink)),
-            .flexibleSpace(),
-            .init(image: .init(systemName: "safari"), style: .plain, target: self, action: #selector(openInBrowser))
+            UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(goesBack)),
+            UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
+            UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(shareLink)),
+            UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
+            UIBarButtonItem(image: UIImage(systemName: "safari"), style: .plain, target: self, action: #selector(openInBrowser))
         ]
         
         observerValue = webView.observe(\.title) { [weak navigationItem] webView, _ in

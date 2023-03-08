@@ -7,7 +7,8 @@ class CustomMessageSizeCalculator: MessageSizeCalculator {
     
     // MARK: - Properties
     
-    private static let buttonHeight: CGFloat = 50
+    static let buttonHeight: CGFloat = 44
+    
     private static let titleHeight: CGFloat = 40
     private static let textHeight: CGFloat = 50
     

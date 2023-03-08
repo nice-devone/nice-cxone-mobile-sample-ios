@@ -5,8 +5,10 @@ class PrimaryButton: BaseButton {
     
     // MARK: - Properties
     
+    var identifier: String?
+
     override var intrinsicContentSize: CGSize {
-        CGSize(width: super.intrinsicContentSize.width, height: 40)
+        CGSize(width: super.intrinsicContentSize.width, height: 44)
     }
     
     
@@ -26,7 +28,7 @@ class PrimaryButton: BaseButton {
 private extension PrimaryButton {
     
     func configure() {
-        configuration?.baseBackgroundColor = .systemBlue
+        backgroundColor  = .systemBlue
         setTitleColor(.white, for: .normal)
     }
 }

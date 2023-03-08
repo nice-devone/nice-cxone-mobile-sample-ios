@@ -8,17 +8,17 @@ class ConfigView: UIView {
     
     private let configurationSetupStack = UIStackView()
     
-    private let defaultConfigurationView = UIView()
+    private let customConfigurationView = UIView()
     private let configSelectLabel = UILabel()
     let configSelectButton = UIButton()
     
-    private let customConfigurationView = UIView()
+    private let defaultConfigurationView = UIView()
     private let environmentSelectLabel = UILabel()
     let environmentSelectButton = UIButton()
     let brandIdTextField = CustomTextfield(type: .text)
     let channelIdTextField = CustomTextfield(type: .text)
     
-    let configurationToggleButton = UIButton(configuration: .plain())
+    let configurationToggleButton = UIButton()
     
     let continueButton = PrimaryButton()
 
@@ -71,8 +71,8 @@ private extension ConfigView {
         
         configurationSetupStack.addArrangedSubviews(defaultConfigurationView, customConfigurationView)
         
-        defaultConfigurationView.addSubviews(configSelectLabel, configSelectButton)
-        customConfigurationView.addSubviews(environmentSelectLabel, environmentSelectButton, brandIdTextField, channelIdTextField)
+        customConfigurationView.addSubviews(configSelectLabel, configSelectButton)
+        defaultConfigurationView.addSubviews(environmentSelectLabel, environmentSelectButton, brandIdTextField, channelIdTextField)
     }
 
     func setupSubviews() {

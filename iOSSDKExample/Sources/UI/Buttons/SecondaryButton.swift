@@ -19,7 +19,7 @@ class SecondaryButton: BaseButton {
 private extension SecondaryButton {
     
     func configure() {
-        configuration?.baseBackgroundColor = .lightGray.withAlphaComponent(0.25)
+        backgroundColor = .lightGray.withAlphaComponent(0.25)
         setTitleColor(.darkGray, for: .normal)
     }
 }

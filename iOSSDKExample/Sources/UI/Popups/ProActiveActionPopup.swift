@@ -53,7 +53,7 @@ private extension ProActiveActionPopup {
     }
     
     @objc
-    func close(_ sender: UIButton) {
+    func closeDidTap(_ sender: UIButton) {
         isHidden = true
         
         if !timerFired {
@@ -63,6 +63,20 @@ private extension ProActiveActionPopup {
                 error.logError()
             }
         }
+    }
+    
+    @objc
+    func buttonTapped() {
+        guard let action = data["action"] as? [String: String], let urlString = action["url"], let url = URL(string: urlString) else {
+            return
+        }
+        
+        UIApplication.shared.currentController?.present(SFSafariViewController(url: url), animated: true)
+        
+        try? CXoneChat.shared.analytics.proactiveActionClick(data: self.actionDetails)
+        try? CXoneChat.shared.analytics.proactiveActionSuccess(true, data: self.actionDetails)
+        
+        self.timer?.invalidate()
     }
 }
 
@@ -96,7 +110,7 @@ private extension ProActiveActionPopup {
         
         let closeButton = UIButton(type: .close)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.addTarget(self, action: #selector(close), for: .touchUpInside)
+        closeButton.addTarget(self, action: #selector(closeDidTap), for: .touchUpInside)
         addSubview(closeButton)
         
         closeButton.snp.makeConstraints { make in
@@ -104,22 +118,10 @@ private extension ProActiveActionPopup {
         }
         
         let action = data["action"] as? [String: String]
-        let text = action?["text"]
         
-        let button = UIButton(configuration: .plain(), primaryAction: UIAction { [weak self] _ in
-            guard let self = self, let urlString = action?["url"], let url = URL(string: urlString) else {
-                return
-            }
-            
-            UIApplication.shared.currentController?.present(SFSafariViewController(url: url), animated: true)
-            
-            try? CXoneChat.shared.analytics.proactiveActionClick(data: self.actionDetails)
-            try? CXoneChat.shared.analytics.proactiveActionSuccess(true, data: self.actionDetails)
-            
-            self.timer?.invalidate()
-        })
-        
-        button.setTitle(text, for: .normal)
+        let button = PrimaryButton()
+        button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        button.setTitle(action?["text"], for: .normal)
         addSubview(button)
         
         button.snp.makeConstraints { make in

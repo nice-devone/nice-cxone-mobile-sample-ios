@@ -7,13 +7,7 @@ class BaseButton: UIButton {
     init() {
         super.init(frame: .zero)
         
-        var config: UIButton.Configuration = .filled()
-        config.titlePadding = 10
-        config.imagePadding = 10
-        config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 20, bottom: 14, trailing: 20)
-        config.cornerStyle = .fixed
-        
-        self.configuration = config
+        contentEdgeInsets = UIEdgeInsets(top: 14, left: 20, bottom: 14, right: 20)
         
         layer.cornerRadius = 8
     }

@@ -1,5 +1,6 @@
 import Foundation
 import InputBarAccessoryView
+import MobileCoreServices
 import UIKit
 
 
@@ -25,7 +26,10 @@ class AttachmentsInputBarAccessoryView: InputBarAccessoryView {
     
     // MARK: - Init
     
-    required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -61,8 +65,20 @@ extension AttachmentsInputBarAccessoryView: UIImagePickerControllerDelegate, UIN
     
     @objc
     func showAttachmentsPicker() {
+        inputTextView.resignFirstResponder()
+        
         let fileAction = UIAlertAction(title: "Choose from File Manager", style: .default) { [weak self] _ in
-            let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.image, .video, .audio, .pdf])
+            let documentPicker: UIDocumentPickerViewController
+            
+            if #available(iOS 14.0, *) {
+                documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.image, .video, .audio, .pdf])
+            } else {
+                documentPicker = UIDocumentPickerViewController(
+                    documentTypes: [kUTTypeImage, kUTTypeVideo, kUTTypeAudio, kUTTypePDF] as [String],
+                    in: .open
+                )
+            }
+            
             documentPicker.delegate = self
             documentPicker.allowsMultipleSelection = true
             documentPicker.modalPresentationStyle = .overFullScreen

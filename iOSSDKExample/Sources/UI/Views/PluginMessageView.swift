@@ -46,6 +46,37 @@ class PluginMessageView: UIView {
 }
 
 
+// MARK: - Actions
+
+private extension PluginMessageView {
+
+    @objc
+    func quickReplyButtonTapped(sender: UIButton) {
+        guard let title = sender.title(for: .normal) else {
+            Log.error(CommonError.unableToParse("title", from: sender))
+            return
+        }
+        self.isUserInteractionEnabled = false
+        
+        delegate?.pluginMessageView(self, quickReplySelected: title)
+    }
+    
+    @objc
+    func customVariableButtonDidTap(sender: PrimaryButton) {
+        guard let id = sender.identifier else {
+            Log.error(CommonError.unableToParse("id", from: sender))
+            return
+        }
+        guard let title = sender.title(for: .normal) else {
+            Log.error(CommonError.unableToParse("title", from: sender))
+            return
+        }
+        
+        delegate?.pluginMessageView(self, subElementDidTap: .button(PluginMessageButton(id: id, text: title, postback: nil, url: nil, displayInApp: false)))
+    }
+}
+
+
 // MARK: - Private methods
 
 private extension PluginMessageView {
@@ -115,19 +146,14 @@ private extension PluginMessageView {
                 return
             }
             
-            var config = UIButton.Configuration.bordered()
-            config.buttonSize = .medium
-            config.cornerStyle = .capsule
+            let button = PrimaryButton()
+            button.setTitle(entity.text, for: .normal)
+            button.addTarget(self, action: #selector(quickReplyButtonTapped), for: .touchUpInside)
+            button.layer.cornerRadius = CustomMessageSizeCalculator.buttonHeight / 2
             
-            let button = UIButton(configuration: config, primaryAction: UIAction(title: entity.text) { [weak self, weak delegate] _ in
-                guard let self else {
-                    return
-                }
-                
-                self.isUserInteractionEnabled = false
-                
-                delegate?.pluginMessageView(self, quickReplySelected: entity.text)
-            })
+            button.snp.makeConstraints { make in
+                make.height.equalTo(CustomMessageSizeCalculator.buttonHeight)
+            }
             
             stackView.addArrangedSubview(button)
         }
@@ -170,16 +196,25 @@ private extension PluginMessageView {
                 return
             }
             
-            var config = UIButton.Configuration.filled()
-            config.buttonSize = .get(for: size["ios"])
-            config.baseBackgroundColor = UIColor(hexString: color)
+            let button = PrimaryButton()
+            button.identifier = id
+            button.setTitle(title, for: .normal)
+            button.backgroundColor = UIColor(hexString: color)
+            button.addTarget(self, action: #selector(customVariableButtonDidTap), for: .touchUpInside)
             
-            let button = UIButton(configuration: config, primaryAction: UIAction(title: title) { [weak delegate] _ in
-                delegate?.pluginMessageView(self, subElementDidTap: .button(.init(id: id, text: title, postback: nil, url: nil, displayInApp: false)))
-            })
+            button.snp.makeConstraints { make in
+                make.height.equalTo(UIButton.getSize(for: size["ios"]))
+            }
             
             stackView.addArrangedSubview(button)
         }
+    }
+    
+    @objc
+    func subElementDidTap(_ sender: SubElementButton) {
+        self.isUserInteractionEnabled = false
+        
+        delegate?.pluginMessageView(self, subElementDidTap: sender.subElement)
     }
     
     func setupSubElement(_ subElement: PluginMessageSubElementType, into stackView: inout UIStackView) {
@@ -200,15 +235,9 @@ private extension PluginMessageView {
             
             stackView.addArrangedSubview(label)
         case .button(let entity):
-            let button = UIButton(configuration: .filled(), primaryAction: UIAction(title: entity.text) { [weak self, weak delegate] _ in
-                guard let self else {
-                    return
-                }
-                
-                self.isUserInteractionEnabled = false
-                
-                delegate?.pluginMessageView(self, subElementDidTap: subElement)
-            })
+            let button = SubElementButton(subElement: subElement)
+            button.setTitle(entity.text, for: .normal)
+            button.layer.cornerRadius = CustomMessageSizeCalculator.buttonHeight / 2
             
             stackView.addArrangedSubview(button)
         case .file(let entity):
@@ -243,18 +272,37 @@ private extension PluginMessageView {
 
 // MARK: - Helpers
 
-private extension UIButton.Configuration.Size {
+private extension UIButton {
 
-    static func get(for value: String?) -> UIButton.Configuration.Size {
+    static func getSize(for value: String?) -> CGFloat {
         switch value {
         case "big":
-            return .large
+            return CustomMessageSizeCalculator.buttonHeight * 1.2
         case "middle":
-            return .medium
+            return CustomMessageSizeCalculator.buttonHeight
         case "small":
-            return .small
+            return CustomMessageSizeCalculator.buttonHeight * 0.8
         default:
-            return .mini
+            return CustomMessageSizeCalculator.buttonHeight * 0.6
         }
+    }
+}
+
+private class SubElementButton: PrimaryButton {
+    
+    // MARK: - Properties
+    
+    let subElement: PluginMessageSubElementType
+    
+    
+    // MARK: - Init
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    init(subElement: PluginMessageSubElementType) {
+        self.subElement = subElement
+        super.init()
     }
 }

@@ -95,5 +95,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>WKAppBoundDomains</key>
+	<array/>
 </dict>
 </plist>

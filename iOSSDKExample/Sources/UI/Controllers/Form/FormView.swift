@@ -161,7 +161,7 @@ private extension FormView {
         
         let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didChoosePickerOption))
         doneButton.customView?.layer.name = ident
-        toolBar.setItems([.flexibleSpace(), doneButton], animated: true)
+        toolBar.setItems([UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil), doneButton], animated: true)
         
         return toolBar
     }
