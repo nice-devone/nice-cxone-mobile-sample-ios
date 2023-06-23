@@ -3,7 +3,7 @@ import SwinjectAutoregistration
 
 
 /// The application assembler which handles child assemblers with Swinject library.
-internal struct AppAssembly: Assembly {
+struct AppAssembly: Assembly {
     
     let dependencies: [Assembly] = [
         PresentationAssembly(),

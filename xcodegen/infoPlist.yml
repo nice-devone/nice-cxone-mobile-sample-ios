@@ -8,12 +8,13 @@ targetTemplates:
         ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
         NSCameraUsageDescription: "Allow access to camera to take pictures for sending as attachment."
+        NSMicrophoneUsageDescription: "Allow access to microphone to be able to record a voice message."
         UIApplicationSupportsIndirectInputEvents: true
         UIBackgroundModes:
           - remote-notification
         UIRequiredDeviceCapabilities:
           - armv7
-        UILaunchScreen: {}
+        UILaunchStoryboardName: LaunchScreen.storyboard
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft
@@ -24,3 +25,7 @@ targetTemplates:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         WKAppBoundDomains: []
+        CFBundleURLTypes:
+          - CFBundleURLName: "$(PRODUCT_BUNDLE_IDENTIFIER)"
+            CFBundleURLSchemes:
+              - "$(PRODUCT_BUNDLE_IDENTIFIER)"

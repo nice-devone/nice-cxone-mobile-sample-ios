@@ -7,19 +7,57 @@ class ThreadDetailPresenter: BasePresenter<ThreadDetailPresenter.Input, ThreadDe
     // MARK: - Structs
     
     struct Input {
+        let configuration: Configuration
         let thread: ChatThread
     }
     
     struct Navigation {
         let showToast: (_ title: String, _ message: String) -> Void
         let showController: (UIViewController) -> Void
+        let popToThreadList: () -> Void
     }
     
     struct DocumentState {
         var thread: ChatThread
+        var isConnected = false
     }
     
     lazy var documentState = DocumentState(thread: input.thread)
+    
+    var threadName: String {
+        documentState.thread.name?.mapNonEmpty { $0 }
+            ?? documentState.thread.assignedAgent?.fullName.mapNonEmpty { $0 }
+            ?? "No Agent"
+    }
+    
+    
+    // MARK: - Lifecycle
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    override func viewDidSubscribe() {
+        super.viewDidSubscribe()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        
+        
+        if input.thread.messages.count == 1 {
+            viewState.toLoading()
+        
+            do {
+                try CXoneChat.shared.threads.load(with: input.thread.id)
+            } catch {
+                error.logError()
+                viewState.toError(title: "Oops", message: error.localizedDescription)
+                
+                navigation.popToThreadList()
+            }
+        } else {
+            viewState.toLoaded()
+        }
+    }
 }
 
 
@@ -27,42 +65,81 @@ class ThreadDetailPresenter: BasePresenter<ThreadDetailPresenter.Input, ThreadDe
 
 extension ThreadDetailPresenter {
     
+    @objc
+    func willEnterForeground() {
+        guard !documentState.isConnected else {
+            return
+        }
+        
+        reconnect()
+    }
+    
+    @objc
+    func didEnterBackground() {
+        documentState.isConnected = false
+    }
+    
+    func onViewWillAppear() {
+        documentState.isConnected = true
+        
+        do {
+            try CXoneChat.shared.analytics.viewPage(title: "ChatView", uri: "chat-view")
+        } catch {
+            error.logError()
+        }
+    }
+    
+    func onUnexpectedDisconnect() {
+        Log.trace("Reconnecting the CXone services.")
+        
+        reconnect()
+    }
+    
+    func onConnect() {
+        documentState.isConnected = true
+        
+        do {
+            try CXoneChat.shared.threads.load(with: input.thread.id)
+        } catch {
+            error.logError()
+            navigation.popToThreadList()
+        }
+    }
+    
     func onShareCellContent(_ content: Any?) {
         let controller = UIActivityViewController(activityItems: [content as Any], applicationActivities: nil)
-        
+
         navigation.showController(controller)
     }
     
     func onCopyCellContent(_ content: Any?) {
         switch content {
-        case let text as String where content is String:
-            UIPasteboard.general.string = text
-        case let image as UIImage where content is UIImage:
-            UIPasteboard.general.image = image
+        case let content as UIImage:
+            UIPasteboard.general.image = content
+        case let content as URL:
+            UIPasteboard.general.url = content
         default:
-            Log.warning(.failed("Unsupported cell content."))
+            break
         }
+        
+        UIPasteboard.general.string = content as? String
     }
     
     @objc
     func onEditCustomField() {
-        let locations = ["West Coast", "Northeast", "Southeast", "Midwest"]
-        let locationCustomField = CXoneChat.shared.threads.customFields
-            .get(for: documentState.thread.id)
-            .first { $0.key == "location" } ?? (key: "location", value: "")
-        let departments = ["Sales", "Services"]
-        let departmentCustomField = CXoneChat.shared.threads.customFields
-            .get(for: documentState.thread.id)
-            .first { $0.key == "department" } ?? (key: "department", value: "")
-        let entities = [
-            FormTextFieldEntity(type: .list(locations), placeholder: "Locations", customField: locationCustomField),
-            FormTextFieldEntity(type: .list(departments), placeholder: "Departments", customField: departmentCustomField)
-        ]
-        let controller = FormViewController(entity: .init(title: "Edit Custom Fields", entities: entities)) { [weak self] customFields in
+        let contactCustomFields: [CustomFieldType] = CXoneChat.shared.threads.customFields.get(for: input.thread.id)
+        
+        guard !contactCustomFields.isEmpty else {
+            Log.error(.unableToParse("contactCustomFields"))
+            return
+        }
+        
+        let entity = FormVO(title: "Edit of Custom Fields", entities: contactCustomFields.map(FormCustomFieldType.init))
+        let controller = FormViewController(entity: entity) { [weak self] customFields in
             guard let self = self else {
                 return
             }
-            
+
             do {
                 try CXoneChat.shared.threads.customFields.set(customFields, for: self.documentState.thread.id)
             } catch {
@@ -70,7 +147,7 @@ extension ThreadDetailPresenter {
                 self.viewState.toError(title: "Oops!", message: error.localizedDescription)
             }
         }
-        
+
         navigation.showController(controller)
     }
     
@@ -113,12 +190,10 @@ extension ThreadDetailPresenter {
         }
     }
     
-    func onViewWillAppear() {
-        do {
-            try CXoneChat.shared.analytics.viewPage(title: "ChatView", uri: "chat-view")
-        } catch {
-            error.logError()
-        }
+    func onSendMessage(_ message: OutboundMessage) async throws {
+        let newMessage = try await CXoneChat.shared.threads.messages.send(message, for: documentState.thread)
+        
+        documentState.thread.messages.append(newMessage)
     }
     
     func updateThreadData() {
@@ -156,5 +231,24 @@ extension ThreadDetailPresenter {
         }
         
         return senderId == nextSenderId
+    }
+}
+
+
+// MARK: - Private methods
+
+private extension ThreadDetailPresenter {
+    
+    func reconnect() {
+        Task { @MainActor in
+            viewState.toLoading(title: "Reconnecting...")
+            
+            try await CXoneChat.shared.connection.connect(
+                chatURL: input.configuration.chatUrl,
+                socketURL: input.configuration.socketUrl,
+                brandId: input.configuration.brandId,
+                channelId: input.configuration.channelId
+            )
+        }
     }
 }

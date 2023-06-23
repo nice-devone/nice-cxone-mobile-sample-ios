@@ -5,11 +5,11 @@ import MessageKit
 
 extension ThreadDetailViewController: MessageCellDelegate {
     
-    public func didTapAvatar(in cell: MessageCollectionViewCell) {
+    func didTapAvatar(in cell: MessageCollectionViewCell) {
         Log.info("Avatar tapped")
     }
     
-    public func didTapMessage(in cell: MessageCollectionViewCell) {
+    func didTapMessage(in cell: MessageCollectionViewCell) {
         Log.info("Message tapped")
         
         guard let indexPath = messagesCollectionView.indexPath(for: cell) else {
@@ -22,15 +22,21 @@ extension ThreadDetailViewController: MessageCellDelegate {
         }
         
         if let attachment = message.attachments.first, let url = URL(string: attachment.url) {
-            present(WkWebViewController(url: url), animated: true)
-        } else if case .plugin = message.contentType {
+            present(WKWebViewController(url: url), animated: true)
+        }
+        
+        switch message.contentType {
+        case .plugin:
             UIAlertController.show(.alert, title: "Alert", message: "Plugin has been tapped")
-        } else {
+        case .richLink(let entity):
+            modalPresentationStyle = .fullScreen
+            present(WKWebViewController(url: entity.url), animated: true)
+        default:
             Log.warning(.failed("Did tap on unsupported message type."))
         }
     }
     
-    public func didTapImage(in cell: MessageCollectionViewCell) {
+    func didTapImage(in cell: MessageCollectionViewCell) {
         Log.info("image tapped")
         
         guard let mediaCell = cell as? MediaMessageCell else {
@@ -84,42 +90,51 @@ extension ThreadDetailViewController: MessageCellDelegate {
         }
     }
     
-    public func didTapCellTopLabel(in cell: MessageCollectionViewCell) {
+    func didTapCellTopLabel(in cell: MessageCollectionViewCell) {
         Log.info("Top cell label tapped")
     }
     
-    public func didTapCellBottomLabel(in cell: MessageCollectionViewCell) {
+    func didTapCellBottomLabel(in cell: MessageCollectionViewCell) {
         Log.info("Bottom cell label tapped")
     }
     
-    public func didTapMessageTopLabel(in cell: MessageCollectionViewCell) {
+    func didTapMessageTopLabel(in cell: MessageCollectionViewCell) {
         Log.info("Top message label tapped")
     }
     
-    public func didTapMessageBottomLabel(in cell: MessageCollectionViewCell) {
+    func didTapMessageBottomLabel(in cell: MessageCollectionViewCell) {
         Log.info("Bottom label tapped")
     }
     
-    public func didStartAudio(in cell: AudioMessageCell) {
-        Log.info("Did start playing audio sound")
-    }
-    
-    public func didPauseAudio(in cell: AudioMessageCell) {
-        Log.info("Did pause audio sound")
-    }
-    
-    public func didStopAudio(in cell: AudioMessageCell) {
-        Log.info("Did stop audio sound")
-    }
-    
-    public func didTapAccessoryView(in cell: MessageCollectionViewCell) {
+    func didTapAccessoryView(in cell: MessageCollectionViewCell) {
         Log.info("Accessory view tapped")
     }
     
-    /// Play audio from an `AudioMessageCell`
-    /// - Parameter cell: The current `AudioMessageCell`
-    public func didTapPlayButton(in cell: AudioMessageCell) {
-        Log.info("Play button tapped")
+    func didTapPlayButton(in cell: AudioMessageCell) {
+        guard let indexPath = messagesCollectionView.indexPath(for: cell),
+              let message = messagesCollectionView.messagesDataSource?.messageForItem(at: indexPath, in: messagesCollectionView)
+        else {
+            Log.error(.failed("Failed to identify message when audio cell receive tap gesture"))
+            return
+        }
+        guard audioPlayer.state != .stopped else {
+            audioPlayer.playSound(for: message, in: cell)
+            return
+        }
+        if audioPlayer.playingMessage?.messageId == message.messageId {
+            if audioPlayer.state == .playing {
+                audioPlayer.pauseSound(for: message, in: cell)
+            } else {
+                audioPlayer.resumeSound()
+            }
+        } else {
+            audioPlayer.stopAnyOngoingPlaying()
+            audioPlayer.playSound(for: message, in: cell)
+        }
+    }
+    
+    func didTapBackground(in cell: MessageCollectionViewCell) {
+        messageInputBar.inputTextView.resignFirstResponder()
     }
 }
 

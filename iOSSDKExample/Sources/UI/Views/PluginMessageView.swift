@@ -4,7 +4,7 @@ import UIKit
 
 
 protocol PluginMessageDelegate: AnyObject {
-    func pluginMessageView(_ view: PluginMessageView, quickReplySelected text: String)
+    func pluginMessageView(_ view: PluginMessageView, quickReplySelected option: String, withPostback postback: String?)
     func pluginMessageView(_ view: PluginMessageView, subElementDidTap subElement: PluginMessageSubElementType)
 }
 
@@ -19,12 +19,21 @@ class PluginMessageView: UIView {
     
     weak var delegate: PluginMessageDelegate?
     
-    static let fileImageHeight: CGFloat = 100
+    var isOptionSelectionEnabled = true {
+        didSet {
+            stackView.arrangedSubviews.forEach { subview in
+                (subview as? PrimaryButton)?.isEnabled = isOptionSelectionEnabled
+            }
+        }
+    }
     
     
     // MARK: - Init
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init() {
         super.init(frame: .zero)
         
@@ -51,14 +60,15 @@ class PluginMessageView: UIView {
 private extension PluginMessageView {
 
     @objc
-    func quickReplyButtonTapped(sender: UIButton) {
+    func quickReplyButtonTapped(sender: PrimaryButton) {
         guard let title = sender.title(for: .normal) else {
             Log.error(CommonError.unableToParse("title", from: sender))
             return
         }
-        self.isUserInteractionEnabled = false
         
-        delegate?.pluginMessageView(self, quickReplySelected: title)
+        isOptionSelectionEnabled = false
+        
+        delegate?.pluginMessageView(self, quickReplySelected: title, withPostback: sender.postback)
     }
     
     @objc
@@ -147,6 +157,8 @@ private extension PluginMessageView {
             }
             
             let button = PrimaryButton()
+            button.postback = entity.postback
+            button.isEnabled = isOptionSelectionEnabled
             button.setTitle(entity.text, for: .normal)
             button.addTarget(self, action: #selector(quickReplyButtonTapped), for: .touchUpInside)
             button.layer.cornerRadius = CustomMessageSizeCalculator.buttonHeight / 2
@@ -236,8 +248,14 @@ private extension PluginMessageView {
             stackView.addArrangedSubview(label)
         case .button(let entity):
             let button = SubElementButton(subElement: subElement)
+            button.postback = entity.postback
+            button.addTarget(self, action: #selector(subElementDidTap), for: .touchUpInside)
             button.setTitle(entity.text, for: .normal)
             button.layer.cornerRadius = CustomMessageSizeCalculator.buttonHeight / 2
+            
+            button.snp.makeConstraints { make in
+                make.height.equalTo(CustomMessageSizeCalculator.buttonHeight)
+            }
             
             stackView.addArrangedSubview(button)
         case .file(let entity):
@@ -247,7 +265,7 @@ private extension PluginMessageView {
             imageView.layer.cornerRadius = 5
 
             imageView.snp.makeConstraints { make in
-                make.height.equalTo(Self.fileImageHeight)
+                make.height.equalTo(CustomMessageSizeCalculator.imageHeight)
             }
             
             stackView.addArrangedSubview(imageView)
@@ -293,7 +311,7 @@ private class SubElementButton: PrimaryButton {
     // MARK: - Properties
     
     let subElement: PluginMessageSubElementType
-    
+
     
     // MARK: - Init
     

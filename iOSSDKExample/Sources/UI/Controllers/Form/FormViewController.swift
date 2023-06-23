@@ -18,7 +18,10 @@ class FormViewController: BaseViewController {
     
     // MARK: - Init
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init(entity: FormVO, onFinished: @escaping ([String: String]) -> Void) {
         self.viewObject = entity
         self.onFinished = onFinished
@@ -55,28 +58,20 @@ private extension FormViewController {
     func onButtonTapped(_ sender: UIButton) {
         view.endEditing(true)
         
-        guard isValid() else {
-            Log.error(CommonError.failed("Form values are not valid."))
-            return
-        }
-        
-        dismiss(animated: true) {
-            switch sender {
-            case self.myView.cancelButton:
-                break
-            case self.myView.confirmButton:
-                self.onFinished(self.myView.customFields)
-            default:
-                Log.error(CommonError.failed("Unknown sender did tap."))
+        switch sender {
+        case myView.cancelButton:
+            dismiss(animated: true)
+        case myView.confirmButton:
+            guard myView.areFieldsValid() else {
+                Log.error(CommonError.failed("Form values are not valid."))
+                return
             }
+            
+            dismiss(animated: true) {
+                self.onFinished(self.myView.customFields)
+            }
+        default:
+            Log.error(CommonError.failed("Unknown sender did tap."))
         }
-    }
-}
-
-
-private extension FormViewController {
-    
-    func isValid() -> Bool {
-        true
     }
 }

@@ -15,38 +15,78 @@ extension Message: MessageType {
 
     /// The kind of message and its underlying kind.
     public var kind: MessageKind {
-        let message: String
-        
-        switch contentType {
-        case .text(let text):
-            message = text.mapNonEmpty { $0 } ?? ""
-        case .plugin(let plugin):
-            message = plugin.text?.mapNonEmpty { $0 } ?? ""
-        case .unknown:
-            message = ""
-        }
+        let message = contentType.message
         
         if let attachment = attachments.first {
-            let messageMedia = MessageMediaItem(messageAttachment: attachment)
-            
-            switch attachment.mimeType {
-            case _ where attachment.mimeType.contains("image"):
-                return .photo(messageMedia)
-            case _ where attachment.mimeType.contains("video"):
-                return .video(messageMedia)
-            case _ where attachment.mimeType.contains("application/pdf") || attachment.mimeType.contains("text"):
-                guard let item = MessageLinkItem(attachment: attachment) else {
-                    return .text(message)
-                }
-                
-                return .linkPreview(item)
-            default:
-                return .photo(messageMedia)
-            }
-        } else if case .plugin(let entity) = contentType {
-            return .custom(entity)
+            return handle(message: message, with: attachment)
         }
         
-        return .text(message)
+        return handleRichMessage(message)
+    }
+}
+
+
+// MARK: - Helpers
+
+private extension Message {
+    
+    func handle(message: String, with attachment: Attachment) -> MessageKind {
+        switch attachment.mimeType {
+        case _ where attachment.mimeType.contains("image"):
+            return .photo(MessageMediaItem(from: attachment))
+        case _ where attachment.mimeType.contains("video"):
+            return .video(MessageMediaItem(from: attachment))
+        case _ where attachment.mimeType.contains("audio"):
+            do {
+                return .audio(try MessageAudioItem(from: attachment))
+            } catch {
+                error.logError()
+            }
+        case _ where attachment.mimeType.contains("application/pdf") || attachment.mimeType.contains("text"):
+            guard let item = MessageLinkItem(attachment: attachment) else {
+                return .text(message)
+            }
+            
+            return .linkPreview(item)
+        default:
+            break
+        }
+        
+        return .photo(MessageMediaItem(from: attachment))
+    }
+    
+    func handleRichMessage(_ message: String) -> MessageKind {
+        switch contentType {
+        case .plugin(let entity):
+            return .custom(entity)
+        case .richLink(let entity):
+            return .custom(entity)
+        case .quickReplies(let entity):
+            return .custom(entity)
+        case .listPicker(let entity):
+            return .custom(entity)
+        default:
+            return .text(message)
+        }
+    }
+}
+
+private extension MessageContentType {
+
+    var message: String {
+        switch self {
+        case .text(let entity):
+            return entity.text.mapNonEmpty { $0 } ?? ""
+        case .plugin(let entity):
+            return entity.text?.mapNonEmpty { $0 } ?? ""
+        case .richLink(let entity):
+            return entity.title
+        case .quickReplies(let entity):
+            return entity.title
+        case .listPicker(let entity):
+            return entity.title
+        case .unknown:
+            return ""
+        }
     }
 }

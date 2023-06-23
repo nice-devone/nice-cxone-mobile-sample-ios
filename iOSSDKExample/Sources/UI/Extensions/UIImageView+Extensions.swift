@@ -4,17 +4,17 @@ import UIKit
 extension UIImageView {
     
     func load(url: URL) {
-        do {
-            let data = try Data(contentsOf: url)
-            
-            guard let image = UIImage(data: data) else {
-                Log.error("could not init UIImage from Data.")
-                return
+        URLSession.shared
+            .dataTask(with: url) { (data, _, error) in
+                guard let imageData = data else {
+                    error?.logError()
+                    return
+                }
+              
+              DispatchQueue.main.async {
+                self.image = UIImage(data: imageData)
+              }
             }
-            
-            self.image = image
-        } catch {
-            error.logError()
-        }
+            .resume()
     }
 }

@@ -32,4 +32,4 @@ packages:
     from: 5.0.0
   CXoneChatSDK:
     url: https://github.com/nice-devone/nice-cxone-mobile-sdk-ios
-    from: 1.0.0
+    from: 1.1.0

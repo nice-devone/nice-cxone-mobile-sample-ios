@@ -45,6 +45,10 @@ extension String {
         Int(self)
     }
     
+    func height(withConstrainedWidth width: CGFloat, font: UIFont.TextStyle) -> CGFloat {
+        self.height(withConstrainedWidth: width, font: .preferredFont(forTextStyle: font))
+    }
+    
     func height(withConstrainedWidth width: CGFloat, font: UIFont) -> CGFloat {
         let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
         let boundingBox = self.boundingRect(

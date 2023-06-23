@@ -7,14 +7,17 @@ class ThreadListCell: UITableViewCell {
     
     // MARK: - Views
     
-    let avatarView = AvatarView(frame: .init(x: 0, y: 0, width: 70, height: 70))
+    let avatarView = AvatarView(frame: CGRect(x: 0, y: 0, width: 70, height: 70))
 	let nameLabel = UILabel()
 	let lastMessageLabel = UILabel()
 	
     
     // MARK: - Init
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 	override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
 		super.init(style: style, reuseIdentifier: reuseIdentifier)
 		
@@ -58,14 +61,24 @@ extension ThreadListCell {
                 lastMessageLabel.text = "Image"
             case .linkPreview(let item):
                 lastMessageLabel.text = item.teaser
+            case .audio:
+                lastMessageLabel.text = "Audio message"
             case .video:
                 lastMessageLabel.text = "Video"
             case .custom:
                 switch thread.messages.last?.contentType {
                 case .text(let text):
-                    lastMessageLabel.text = text
+                    lastMessageLabel.text = text.text
                 case .plugin(let plugin):
-                    lastMessageLabel.text = plugin.postback?.mapNonEmpty { $0 } ?? "Rich content message"
+                    lastMessageLabel.text = plugin.text.mapNonEmpty { $0 }
+                        ?? plugin.postback?.mapNonEmpty { $0 }
+                        ?? "Rich content message"
+                case .richLink(let richLink):
+                    lastMessageLabel.text = richLink.title
+                case .quickReplies(let quickReplies):
+                    lastMessageLabel.text = quickReplies.title
+                case .listPicker(let listPicker):
+                    lastMessageLabel.text = listPicker.text
                 default:
                     lastMessageLabel.text = "Unsupported content type"
                 }
@@ -86,7 +99,7 @@ private extension ThreadListCell {
     }
     
     func setupSubviews() {
-        nameLabel.font = .preferredFont(forTextStyle: .title3, compatibleWith: .init(legibilityWeight: .bold))
+        nameLabel.font = .preferredFont(forTextStyle: .title3, compatibleWith: UITraitCollection(legibilityWeight: .bold))
         
         lastMessageLabel.numberOfLines = 2
         lastMessageLabel.font = .preferredFont(forTextStyle: .body)

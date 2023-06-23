@@ -3,10 +3,10 @@ import Foundation
 
 enum LoginViewState: HasInitial {
     case loading
-    case loaded(isOAuthHidden: Bool)
+    case loaded(LoginPresenter.DocumentState)
     case error(title: String, message: String)
     
-    static var initial: LoginViewState = .loaded(isOAuthHidden: true)
+    static var initial: LoginViewState = .loading
 }
 
 
@@ -31,8 +31,8 @@ extension LoginViewState {
         self = .loading
     }
     
-    mutating func toLoaded(isOAuthHidden: Bool) {
-        self = .loaded(isOAuthHidden: isOAuthHidden)
+    mutating func toLoaded(documentState: LoginPresenter.DocumentState) {
+        self = .loaded(documentState)
     }
     
     mutating func toError(title: String, message: String? = nil) {

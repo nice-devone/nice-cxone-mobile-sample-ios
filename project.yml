@@ -48,9 +48,32 @@ targetTemplates:
       - package: Swinject
       - package: SwinjectAutoregistration
       - package: Toast
+    postCompileScripts:
+      - script: |
+          if [[ "$(uname -m)" == arm64 ]]; then
+            export PATH="/opt/homebrew/bin:$PATH"
+          fi
+
+          if which swiftlint > /dev/null; then
+            swiftlint
+          else
+            echo "warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint"
+          fi
+        name: Swiftlint
+        basedOnDependencyAnalysis: false
 
 targets:
   iOSSDKExample:
     templates: [Common, Entitled, Info, Amazon]
   iOSSDKExample_arm64:
     templates: [Common, Entitled, Info]
+
+schemes:
+  iOSSDKExample_arm64:
+    build:
+      targets:
+        iOSSDKExample_arm64: all
+  iOSSDKExample:
+    build:
+      targets:
+        iOSSDKExample: all

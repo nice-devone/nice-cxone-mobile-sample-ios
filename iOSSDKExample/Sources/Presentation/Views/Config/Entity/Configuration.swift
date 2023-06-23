@@ -1,12 +1,8 @@
 import CXoneChatSDK
+import Foundation
 
 
-/// Entity with configuration defined in the sub repository with brand configurations.
-struct Configurations: Decodable {
-    let configurations: [Configuration]?
-}
-
-struct Configuration: Decodable {
+struct Configuration {
     
     // MARK: - Properties
     
@@ -17,6 +13,25 @@ struct Configuration: Decodable {
     var environmentName: String
     var chatUrl: String
     var socketUrl: String
+    
+    var environment: CXoneChatSDK.Environment? {
+        switch self.chatUrl {
+        case CXoneChatSDK.Environment.NA1.chatURL:
+            return .NA1
+        case CXoneChatSDK.Environment.EU1.chatURL:
+            return .EU1
+        case CXoneChatSDK.Environment.AU1.chatURL:
+            return .AU1
+        case CXoneChatSDK.Environment.CA1.chatURL:
+            return .CA1
+        case CXoneChatSDK.Environment.UK1.chatURL:
+            return .UK1
+        case CXoneChatSDK.Environment.JP1.chatURL:
+            return .JP1
+        default:
+            return nil
+        }
+    }
     
     
     // MARK: - Init
@@ -38,9 +53,12 @@ struct Configuration: Decodable {
         self.chatUrl = chatUrl
         self.socketUrl = socketUrl
     }
-    
-    
-    // MARK: - Coding
+}
+
+
+// MARK: - Codable
+
+extension Configuration: Codable {
     
     enum CodingKeys: CodingKey {
         case brandId
@@ -68,28 +86,16 @@ struct Configuration: Decodable {
         let chatUrl = try environmentContainer.decode(String.self, forKey: .chatUrl)
         self.chatUrl = chatUrl.last == "/" ? chatUrl.dropLast().description : chatUrl
     }
-}
-
-// MARK: - Helpers
-
-extension Configuration {
     
-    var environment: CXoneChatSDK.Environment? {
-        switch self.chatUrl {
-        case CXoneChatSDK.Environment.NA1.chatURL:
-            return .NA1
-        case CXoneChatSDK.Environment.EU1.chatURL:
-            return .EU1
-        case CXoneChatSDK.Environment.AU1.chatURL:
-            return .AU1
-        case CXoneChatSDK.Environment.CA1.chatURL:
-            return .CA1
-        case CXoneChatSDK.Environment.UK1.chatURL:
-            return .UK1
-        case CXoneChatSDK.Environment.JP1.chatURL:
-            return .JP1
-        default:
-            return nil
-        }
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        var environmentContainer = container.nestedContainer(keyedBy: EnvironmentKeys.self, forKey: .environment)
+        
+        try container.encode(brandId, forKey: .brandId)
+        try container.encode(channelId, forKey: .channelId)
+        try container.encode(title, forKey: .name)
+        try environmentContainer.encode(environmentName, forKey: .name)
+        try environmentContainer.encode(socketUrl, forKey: .socketUrl)
+        try environmentContainer.encode(chatUrl, forKey: .chatUrl)
     }
 }

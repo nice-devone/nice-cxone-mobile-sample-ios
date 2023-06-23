@@ -6,15 +6,22 @@ class PrimaryButton: BaseButton {
     // MARK: - Properties
     
     var identifier: String?
-
-    override var intrinsicContentSize: CGSize {
-        CGSize(width: super.intrinsicContentSize.width, height: 44)
+    
+    var postback: String?
+    
+    override var isEnabled: Bool {
+        didSet {
+            backgroundColor = isEnabled ? .systemBlue : .lightGray
+        }
     }
     
     
     // MARK: - Init
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override init() {
         super.init()
         

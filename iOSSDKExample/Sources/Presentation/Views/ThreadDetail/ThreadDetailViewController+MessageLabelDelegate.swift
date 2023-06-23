@@ -19,7 +19,7 @@ extension ThreadDetailViewController: MessageLabelDelegate {
     func didSelectURL(_ url: URL) {
         Log.info("URL Selected: \(url)")
         
-        present(WkWebViewController(url: url), animated: true)
+        present(WKWebViewController(url: url), animated: true)
 	}
 	
     func didSelectTransitInformation(_ transitInformation: [String: String]) {

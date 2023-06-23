@@ -3,12 +3,15 @@ import Foundation
 import UIKit
 
 
-class ConfigPresenter: BasePresenter<Void, ConfigPresenter.Navigation, Void, ConfigViewState> {
+class ConfigPresenter: BasePresenter<ConfigPresenter.Input, ConfigPresenter.Navigation, Void, ConfigViewState> {
 
     // MARK: - Structs
 
+    struct Input {
+        let option: DeeplinkOption?
+    }
     struct Navigation {
-        var navigateToLogin: (Configuration, _ isAuthorizationEnabled: Bool) -> Void
+        var navigateToLogin: (Configuration, DeeplinkOption?) -> Void
         var showController: (UIViewController) -> Void
     }
     
@@ -35,11 +38,9 @@ class ConfigPresenter: BasePresenter<Void, ConfigPresenter.Navigation, Void, Con
     override func viewDidSubscribe() {
         super.viewDidSubscribe()
         
-        Task { @MainActor in
-            await fetchConfigurations()
-            
-            viewState.toLoaded(documentState: documentState)
-        }
+        fetchConfigurations()
+        
+        viewState.toLoaded(documentState: documentState)
     }
 }
 
@@ -76,41 +77,11 @@ extension ConfigPresenter {
             return
         }
         
-        viewState.toLoading(title: "Getting channel configuration...")
+        LocalStorageManager.configuration = documentState.currentConfiguration
         
-        do {
-            let channelConfig: ChannelConfiguration
-            
-            if documentState.isCustomConfigurationHidden {
-                guard let environment = documentState.defaultConfiguration.environment else {
-                    viewState.toError(title: "Ops!", message: "Something went wrong! Try it again later.")
-                    return
-                }
-                
-                channelConfig = try await CXoneChat.shared.connection.getChannelConfiguration(
-                    environment: environment,
-                    brandId: documentState.defaultConfiguration.brandId,
-                    channelId: documentState.defaultConfiguration.channelId
-                )
-            } else {
-                channelConfig = try await CXoneChat.shared.connection.getChannelConfiguration(
-                    chatURL: documentState.customConfiguration.chatUrl,
-                    brandId: documentState.customConfiguration.brandId,
-                    channelId: documentState.customConfiguration.channelId
-                )
-            }
-            
-            navigation.navigateToLogin(documentState.currentConfiguration, channelConfig.isAuthorizationEnabled)
-            
-            viewState.toLoaded(documentState: documentState)
-        } catch {
-            error.logError()
-            
-            viewState.toError(
-                title: "Channel Configuration Error",
-                message: "Something went wrong - We couldn't get the configuration for channel. Please check your selection and try again."
-            )
-        }
+        navigation.navigateToLogin(documentState.currentConfiguration, input.option)
+        
+        viewState.toLoaded(documentState: documentState)
     }
     
     func onConfigurationChanged(_ configuration: Configuration) {
@@ -160,8 +131,7 @@ private extension ConfigPresenter {
         return documentState.defaultConfiguration.brandId != 0 && !documentState.defaultConfiguration.channelId.isEmpty
     }
     
-    @MainActor
-    func fetchConfigurations() async {
+    func fetchConfigurations() {
         guard let filePath = Bundle.main.path(forResource: "environment", ofType: "json") else {
             Log.error(.failed("Could not get file with configurations."))
             return
@@ -172,15 +142,21 @@ private extension ConfigPresenter {
                 Log.error(.failed("Could not get data from file."))
                 return
             }
-
-            guard let configurations = try JSONDecoder().decode(Configurations.self, from: data).configurations else {
-                Log.error(.failed("Could not get configuration from data."))
-                return
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: AnyObject],
+                  let array = json["configurations"] as? NSArray
+            else {
+                throw CommonError.unableToParse("configurations", from: String(data: data, encoding: .utf8))
+            }
+            
+            documentState.configurations = try array.compactMap { element in
+                guard let element = element as? NSDictionary else {
+                    return nil
+                }
+                
+                return try JSONDecoder().decode(Configuration.self, from: JSONSerialization.data(withJSONObject: element as NSDictionary))
             }
 
-            documentState.configurations = configurations
-
-            if let configuration = configurations.first {
+            if let configuration = documentState.configurations.first {
                 documentState.customConfiguration = configuration
             }
         } catch {

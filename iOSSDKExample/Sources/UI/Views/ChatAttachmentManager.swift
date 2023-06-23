@@ -14,7 +14,6 @@ protocol ChatAttachmentDelegate: AnyObject {
     ///   - shouldBecomeVisible: If the ChatAttachmentDelegate should be presented or dismissed
     func attachmentManager(_ manager: ChatAttachmentManager, shouldBecomeVisible: Bool)
     
-    
     /// Notifys when an attachment has been inserted into the ChatAttachmentDelegate
     ///
     /// - Parameters:
@@ -48,13 +47,13 @@ protocol ChatAttachmentDelegate: AnyObject {
 
 extension ChatAttachmentDelegate {
     
-    func attachmentManager(_ manager: ChatAttachmentManager, didInsert attachment: ChatAttachmentManager.Attachment, at index: Int) {}
+    func attachmentManager(_ manager: ChatAttachmentManager, didInsert attachment: ChatAttachmentManager.Attachment, at index: Int) { }
     
-    func attachmentManager(_ manager: ChatAttachmentManager, didRemove attachment: ChatAttachmentManager.Attachment, at index: Int) {}
+    func attachmentManager(_ manager: ChatAttachmentManager, didRemove attachment: ChatAttachmentManager.Attachment, at index: Int) { }
     
-    func attachmentManager(_ manager: ChatAttachmentManager, didReloadTo attachments: [ChatAttachmentManager.Attachment]) {}
+    func attachmentManager(_ manager: ChatAttachmentManager, didReloadTo attachments: [ChatAttachmentManager.Attachment]) { }
     
-    func attachmentManager(_ manager: ChatAttachmentManager, didSelectAddAttachmentAt index: Int) {}
+    func attachmentManager(_ manager: ChatAttachmentManager, didSelectAddAttachmentAt index: Int) { }
 }
 
 
@@ -94,7 +93,7 @@ extension ChatAttachmentDataSource {
 // MARK: - ChatAttachmentManager
 
 class ChatAttachmentManager: NSObject, InputPlugin {
-  
+
     enum Attachment {
         case image(UIImage)
         case url(URL)
@@ -122,13 +121,25 @@ class ChatAttachmentManager: NSObject, InputPlugin {
     }()
     
     /// The attachments that the managers holds
-    private(set) var attachments = [Attachment]() { didSet { reloadData() } }
+    private(set) var attachments = [Attachment]() {
+        didSet {
+            reloadData()
+        }
+    }
     
     /// A flag you can use to determine if you want the manager to be always visible
-    var isPersistent = false { didSet { attachmentView.reloadData() } }
+    var isPersistent = false {
+        didSet {
+            attachmentView.reloadData()
+        }
+    }
     
     /// A flag to determine if the AddAttachmentCell is visible
-    var showAddAttachmentCell = true { didSet { attachmentView.reloadData() } }
+    var showAddAttachmentCell = true {
+        didSet {
+            attachmentView.reloadData()
+        }
+    }
     
     
     // MARK: - InputManager
@@ -201,9 +212,9 @@ class ChatAttachmentManager: NSObject, InputPlugin {
 }
 
 
-// MARK: - UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
+// MARK: - UICollectionViewDataSource
 
-extension ChatAttachmentManager: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension ChatAttachmentManager: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard indexPath.row == attachments.count else {
@@ -237,23 +248,23 @@ extension ChatAttachmentManager: UICollectionViewDataSource, UICollectionViewDel
             case .image(let image):
                 cell = collectionView.dequeue(for: indexPath) as ChatImageAttachmentCell
                 (cell as? ChatImageAttachmentCell)?.imageView.image = image
-            case .data:
+            case .data, .url:
                 cell = collectionView.dequeue(for: indexPath) as ChatDataAttachmentCell
-            default:
-                cell = collectionView.dequeue(for: indexPath) as ChatAttachmentCell
             }
             
             cell.attachment = attachment
             cell.indexPath = indexPath
             cell.manager = self
             
-            
             return cell
         }
     }
+}
     
-    
-    // MARK: - UICollectionViewDelegateFlowLayout
+
+// MARK: - UICollectionViewDelegateFlowLayout
+ 
+extension ChatAttachmentManager: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         var height = attachmentView.intrinsicContentHeight
@@ -268,6 +279,7 @@ extension ChatAttachmentManager: UICollectionViewDataSource, UICollectionViewDel
     private func addAttachmentCell(in collectionView: UICollectionView, at indexPath: IndexPath) -> ChatAttachmentCell {
         let cell = collectionView.dequeue(for: indexPath) as ChatAttachmentCell
         cell.deleteButton.isHidden = true
+        
         // Draw a plus
         let frame = CGRect(
             origin: CGPoint(x: cell.bounds.origin.x, y: cell.bounds.origin.y),
@@ -276,11 +288,13 @@ extension ChatAttachmentManager: UICollectionViewDataSource, UICollectionViewDel
         let strokeWidth: CGFloat = 3
         let length: CGFloat = frame.width / 2
         let vLayer = CAShapeLayer()
+        
         vLayer.path = UIBezierPath(
             roundedRect: CGRect(x: frame.midX - (strokeWidth / 2), y: frame.midY - (length / 2), width: strokeWidth, height: length),
             cornerRadius: 5
         ).cgPath
         vLayer.fillColor = UIColor.lightGray.cgColor
+        
         let hLayer = CAShapeLayer()
         hLayer.path = UIBezierPath(
             roundedRect: CGRect(x: frame.midX - (length / 2), y: frame.midY - (strokeWidth / 2), width: length, height: strokeWidth),

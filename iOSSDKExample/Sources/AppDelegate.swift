@@ -14,6 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     private var appModule = AppModule()
     private var mainCoordinator: MainCoordinator?
+    private var option: DeeplinkOption?
     
     
     // MARK: - Methods
@@ -43,8 +44,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.shared.enable = true
         IQKeyboardManager.shared.disabledDistanceHandlingClasses.append(ThreadDetailViewController.self)
         
+        // Reset Badge Number
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        
         // Setup User Notification Center for real device
         #if !targetEnvironment(simulator)
+        UNUserNotificationCenter.current().delegate = self
+        
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (success, error) in
             error?.logError()
             guard success else {
@@ -68,18 +74,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             navigationController: navigationController,
             assembler: appModule.assembler
         )
-        mainCoordinator?.start()
+        
+        mainCoordinator?.start(with: option)
         
         return true
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        guard let authenticator = OAuthenticators.authenticator else {
-            Log.error(.failed("Could not get OAuth authenticator."))
+        if ThreadsDeeplinkHandler.canOpenUrl(url) {
+            CXoneChat.shared.connection.disconnect()
+            
+            self.option = ThreadsDeeplinkHandler.handleUrl(url)
+            mainCoordinator?.start(with: option)
+            
+            return true
+        } else if let authenticator = OAuthenticators.authenticator {
+            return authenticator.handleOpen(url: url, sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String)
+        } else {
             return false
         }
-
-        return authenticator.handleOpen(url: url, sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String)
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
@@ -90,8 +103,44 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         error.logError()
     }
     
-    func application(_ application: UIApplication, shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier) -> Bool {
+    func application(
+        _ application: UIApplication,
+        shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier
+    ) -> Bool {
         extensionPointIdentifier != .keyboard
+    }
+}
+
+
+// MARK: - UNUserNotificationCenterDelegate
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+        UIApplication.shared.applicationIconBadgeNumber += 1
+        
+        return [.alert, .badge, .sound]
+    }
+    
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async -> UIBackgroundFetchResult {
+        guard let aps = userInfo["aps"] as? NSDictionary,
+              let alert = aps["alert"] as? NSDictionary,
+              let deeplink = alert["deeplink"] as? String,
+              let url = URL(string: deeplink)
+        else {
+            return .noData
+        }
+        
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        
+        if ThreadsDeeplinkHandler.canOpenUrl(url) {
+            CXoneChat.shared.connection.disconnect()
+            
+            self.option = ThreadsDeeplinkHandler.handleUrl(url)
+            mainCoordinator?.start(with: option)
+        }
+        
+        return .noData
     }
 }
 
