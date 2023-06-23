@@ -15,7 +15,10 @@ class ThreadListViewController: BaseViewController, ViewRenderable {
     
     // MARK: - Init
     
-    internal required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init(presenter: ThreadListPresenter) {
         self.presenter = presenter
         super.init(nibName: nil, bundle: nil)
@@ -46,8 +49,17 @@ class ThreadListViewController: BaseViewController, ViewRenderable {
         myView.tableView.delegate = self
         myView.tableView.dataSource = self
         
-        navigationItem.leftBarButtonItem = .init(title: "Sign Out", style: .plain, target: presenter, action: #selector(presenter.signOut))
         myView.segmentedControl.addTarget(self, action: #selector(onSegmentControlChanged), for: .primaryActionTriggered)
+        
+        let disconnectButton = UIBarButtonItem(
+            image: UIImage(systemName: "bolt.slash.fill"),
+            style: .plain,
+            target: presenter,
+            action: #selector(presenter.onDisconnectTapped)
+        )
+        disconnectButton.tintColor = .primaryColor
+        
+        navigationItem.leftBarButtonItem = disconnectButton
     }
     
     func render(state: ThreadListViewState) {
@@ -56,14 +68,14 @@ class ThreadListViewController: BaseViewController, ViewRenderable {
         }
         
         switch state {
-        case .loading:
-            showLoading()
+        case .loading(let title):
+            showLoading(title: title)
         case .loaded(let entity):
             myView.emptyView.isHidden = !entity.threads.isEmpty
             myView.tableView.isHidden = entity.threads.isEmpty
             threads = entity.threads
             isMultiThread = entity.isMultiThread
-            adjustNavigationBarIfNeeded()
+            adjustNavigationBar()
             myView.tableView.reloadData()
         case .error(let title, let message):
             showAlert(title: title, message: message)
@@ -118,10 +130,7 @@ extension ThreadListViewController: UITableViewDelegate, UITableViewDataSource {
         cell.configure(thread: thread, isMultiThread: isMultiThread)
     }
     
-    func tableView(
-        _ tableView: UITableView,
-        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
-    ) -> UISwipeActionsConfiguration? {
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         guard isMultiThread, myView.segmentedControl.selectedSegmentIndex == 0 else {
             return UISwipeActionsConfiguration(actions: [])
         }
@@ -158,11 +167,11 @@ private extension ThreadListViewController {
 
 private extension ThreadListViewController {
 
-    func adjustNavigationBarIfNeeded() {
-        let isEnabled = threads.isEmpty || isMultiThread
+    func adjustNavigationBar() {
+        let isEnabled = isMultiThread || threads.filter(\.canAddMoreMessages).isEmpty
         
         if navigationItem.rightBarButtonItem == nil {
-            navigationItem.rightBarButtonItem = .init(
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
                 barButtonSystemItem: .add,
                 target: presenter,
                 action: #selector(presenter.onAddThreadTapped)

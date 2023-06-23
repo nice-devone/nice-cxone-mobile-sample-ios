@@ -13,29 +13,95 @@ extension UIViewController {
     }
     
     func showLoading(title: String? = nil) {
-        let loadingViewController = LoadingViewController()
-        loadingViewController.modalPresentationStyle = .overCurrentContext
-        loadingViewController.modalTransitionStyle = .crossDissolve
-        
-        if let title {
-            loadingViewController.titleLabel.isHidden = false
-            loadingViewController.titleLabel.text = title
-        } else {
-            loadingViewController.titleLabel.isHidden = true
-        }
-        
-        DispatchQueue.main.async {
-            self.present(loadingViewController, animated: true)
-        }
+        LoadingView.shared.startAnimating(with: title)
     }
     
     func hideLoading() {
+        LoadingView.shared.stopAnimatimating()
+    }
+}
+
+
+// MARK: - Loading View
+
+private class LoadingView {
+
+    // MARK: - Variables
+    
+    private let containerView = UIView()
+    private let blurView = UIView()
+    private let activityIndicator = UIActivityIndicatorView()
+    private let titleLabel = UILabel()
+
+    static var shared = LoadingView()
+
+    
+    // MARK: - Private Init
+    
+    private init() { }
+
+    
+    // MARK: - Functions
+    
+    func startAnimating(with title: String? = nil) {
+        guard !activityIndicator.isAnimating else {
+            return
+        }
+        guard let view = UIApplication.shared.mainWindow?.rootViewController?.view else {
+            Log.error(.unableToParse("mainWindow"))
+            return
+        }
+        
+        view.addSubview(containerView)
+        containerView.addSubviews(blurView, activityIndicator, titleLabel)
+        
+        containerView.alpha = 0
+        
+        containerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        activityIndicator.style = .large
+        activityIndicator.color = .white
+        activityIndicator.startAnimating()
+        
+        activityIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        
+        titleLabel.text = title
+        titleLabel.textColor = .white
+        titleLabel.textAlignment = .center
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(activityIndicator.snp.bottom).offset(10)
+            make.leading.trailing.equalToSuperview().inset(24)
+        }
+        
+        let blurEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .systemThickMaterialDark))
+        blurEffectView.frame = view.bounds
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        blurView.addSubview(blurEffectView)
+        
         DispatchQueue.main.async {
-            guard let controller = self.presentedViewController, controller is LoadingViewController else {
-                return
+            UIView.animate(withDuration: 0.2) {
+                self.containerView.alpha = 1
             }
-            
-            controller.dismiss(animated: true, completion: nil)
+        }
+    }
+
+    func stopAnimatimating() {
+        DispatchQueue.main.async {
+            UIView.animate(
+                withDuration: 0.2,
+                animations: { [weak self] in
+                    self?.containerView.alpha = 0
+                },
+                completion: { [weak self] _ in
+                    self?.activityIndicator.stopAnimating()
+                    self?.containerView.removeFromSuperview()
+                }
+            )
         }
     }
 }

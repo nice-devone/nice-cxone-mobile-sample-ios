@@ -1,13 +1,5 @@
 import Foundation
 
-/// details of a successful OAuth request
-struct OAResult {
-
-    // MARK: - Properties
-
-    /// challenge result code
-    let challengeResult: String
-}
 
 /// an object capable of performing OAuth authentication
 protocol OAuthenticator {
@@ -56,21 +48,4 @@ protocol OAuthenticator {
     ///     - url: url being opened
     ///     - sourceApplication: name of application originating request
     func handleOpen(url: URL, sourceApplication: String?) -> Bool
-}
-
-enum OAuthenticators {
-
-    // MARK: - Properties
-
-    static private(set) var authenticators = [OAuthenticator]()
-
-    static var authenticator: OAuthenticator? {
-        authenticators.first
-    }
-
-    // MARK: - Methods
-
-    static func register(authenticator: OAuthenticator) {
-        authenticators.append(authenticator)
-    }
 }

@@ -17,7 +17,10 @@ class ConfigViewController: BaseViewController, ViewRenderable {
     
     // MARK: - Init
     
-    internal required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init(presenter: ConfigPresenter) {
         self.presenter = presenter
         super.init(nibName: nil, bundle: nil)
@@ -52,7 +55,12 @@ class ConfigViewController: BaseViewController, ViewRenderable {
                 return
             }
             
-            navigationItem.rightBarButtonItem = .init(image: Assets.debug, style: .plain, target: presenter, action: #selector(presenter.onDebugTapped))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                image: Assets.debug,
+                style: .plain,
+                target: presenter,
+                action: #selector(presenter.onDebugTapped)
+            )
         } else {
             navigationItem.rightBarButtonItem = nil
         }
@@ -78,16 +86,20 @@ class ConfigViewController: BaseViewController, ViewRenderable {
 
 // MARK: - UITextFieldDelegate
 
-extension ConfigViewController: UITextFieldDelegate {
+extension ConfigViewController: FormTextFieldDelegate {
     
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        textField.resignFirstResponder()
+    func formTextFieldShouldReturn(_ formTextField: FormTextField) -> Bool {
+        formTextField.resignFirstResponder()
+    }
+    
+    func formTextFieldDidEndEditing(_ formTextField: FormTextField) {
+        formTextField.resignFirstResponder()
         
-        switch textField {
+        switch formTextField {
         case myView.brandIdTextField:
-            presenter.onBrandIdChanged(textField.text)
+            presenter.onBrandIdChanged(formTextField.text)
         case myView.channelIdTextField:
-            presenter.onChannelIdChanged(textField.text)
+            presenter.onChannelIdChanged(formTextField.text)
         default:
             Log.error(CommonError.failed("Unknown text field did end editing."))
         }
@@ -107,6 +119,10 @@ private extension ConfigViewController {
         case myView.configurationToggleButton:
             presenter.onToggleCustomConfiguration(isHidden: !myView.isCustomConfigurationHidden)
         case myView.continueButton:
+            guard myView.isValid() else {
+                return
+            }
+            
             Task { @MainActor in
                 await presenter.onContinueButtonTapped()
             }

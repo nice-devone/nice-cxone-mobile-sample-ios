@@ -3,9 +3,7 @@ import UIKit
 
 class BaseViewController: UIViewController {
     
-    // MARK: - Methods
-    
-    public override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
         super.motionEnded(motion, with: event)
         
         guard motion == .motionShake else {

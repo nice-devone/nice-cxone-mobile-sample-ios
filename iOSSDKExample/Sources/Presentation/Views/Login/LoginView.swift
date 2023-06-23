@@ -14,7 +14,10 @@ class LoginView: UIView {
     
     // MARK: - Initialization
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init() {
         super.init(frame: .zero)
 
@@ -37,15 +40,23 @@ private extension LoginView {
     func setupSubviews() {
         backgroundColor = .systemBackground
         
+        stackView.axis = .vertical
+        stackView.spacing = 10
+        
         guestButton.setTitle("Continue as guest", for: .normal)
         
         oAuthButton.setImage(Assets.btnLWA_gold_209x48, for: .normal)
         oAuthButton.setImage(Assets.btnLWA_gold_209x48pressed, for: .selected)
+        oAuthButton.isHidden = true
     }
     
     func setupConstraints() {
         stackView.snp.makeConstraints { make in
             make.center.equalToSuperview()
+        }
+        
+        oAuthButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
         }
     }
 }

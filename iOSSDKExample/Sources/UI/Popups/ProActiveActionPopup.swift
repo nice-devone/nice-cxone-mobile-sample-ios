@@ -17,7 +17,10 @@ class ProActiveActionPopup: UIView {
     
     // MARK: - Init
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init(data: [String: Any], actionId: UUID) {
         self.data = data
         self.actionId = actionId
@@ -90,7 +93,7 @@ private extension ProActiveActionPopup {
         
         let label = UILabel(frame: .zero)
         label.text = data["headingText"] as? String
-        label.font = .preferredFont(forTextStyle: .title3, compatibleWith: .init(legibilityWeight: .bold))
+        label.font = .preferredFont(forTextStyle: .title3, compatibleWith: UITraitCollection(legibilityWeight: .bold))
         addSubview(label)
         
         label.snp.makeConstraints { make in

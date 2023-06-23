@@ -3,8 +3,17 @@ import UIKit
 
 extension UIApplication {
     
+    // MARK: - Static Properties
+    
     static var isDarkModeActive: Bool {
         UITraitCollection.current.userInterfaceStyle == .dark
+    }
+    
+    
+    // MARK: - Properties
+    
+    var mainWindow: UIWindow? {
+        UIApplication.shared.windows.filter(\.isKeyWindow).first
     }
     
     var rootViewController: UIViewController? {

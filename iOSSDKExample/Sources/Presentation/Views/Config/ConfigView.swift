@@ -15,8 +15,8 @@ class ConfigView: UIView {
     private let defaultConfigurationView = UIView()
     private let environmentSelectLabel = UILabel()
     let environmentSelectButton = UIButton()
-    let brandIdTextField = CustomTextfield(type: .text)
-    let channelIdTextField = CustomTextfield(type: .text)
+    let brandIdTextField = FormTextField(type: .text, isRequired: true)
+    let channelIdTextField = FormTextField(type: .text, isRequired: true)
     
     let configurationToggleButton = UIButton()
     
@@ -27,13 +27,38 @@ class ConfigView: UIView {
 
     // MARK: - Initialization
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init() {
         super.init(frame: .zero)
 
         addAllSubviews()
         setupSubviews()
         setupConstraints()
+    }
+    
+    
+    // MARK: - Internal methods
+    
+    func isValid() -> Bool {
+        guard isCustomConfigurationHidden else {
+            return true
+        }
+        
+        var isValid = true
+        
+        if !channelIdTextField.isValid() {
+            Log.error(.failed("channelId is not valid."))
+            isValid = false
+        }
+        if !brandIdTextField.isValid() {
+            Log.error(.failed("brandId is not valid."))
+            isValid = false
+        }
+        
+        return isValid
     }
 }
 
@@ -121,7 +146,7 @@ private extension ConfigView {
         configSelectButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview()
             make.centerY.equalTo(configSelectLabel)
-            make.height.equalTo(50)
+            make.height.equalTo(44)
         }
         environmentSelectLabel.snp.makeConstraints { make in
             make.top.leading.equalToSuperview()
@@ -129,17 +154,15 @@ private extension ConfigView {
         environmentSelectButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview()
             make.centerY.equalTo(environmentSelectLabel)
-            make.height.equalTo(50)
+            make.height.equalTo(44)
         }
         brandIdTextField.snp.makeConstraints { make in
             make.top.equalTo(environmentSelectLabel.snp.bottom).offset(24)
             make.leading.trailing.equalToSuperview()
-            make.height.equalTo(44)
         }
         channelIdTextField.snp.makeConstraints { make in
             make.top.equalTo(brandIdTextField.snp.bottom).offset(24)
             make.leading.trailing.bottom.equalToSuperview()
-            make.height.equalTo(44)
         }
         configurationToggleButton.snp.makeConstraints { make in
             make.bottom.equalTo(continueButton.snp.top).offset(-36)

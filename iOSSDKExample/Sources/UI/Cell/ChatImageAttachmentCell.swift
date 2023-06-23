@@ -34,6 +34,9 @@ class ChatImageAttachmentCell: ChatAttachmentCell {
         }
     }
     
+    
+    // MARK: - Lifecycle
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         imageView.image = nil

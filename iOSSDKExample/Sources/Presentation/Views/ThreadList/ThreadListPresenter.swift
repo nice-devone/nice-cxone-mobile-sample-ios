@@ -3,17 +3,13 @@ import Foundation
 import UIKit
 
 
-class ThreadListPresenter: BasePresenter<
-    ThreadListPresenter.Input,
-    ThreadListPresenter.Navigation,
-    Void,
-    ThreadListViewState
-> {
+class ThreadListPresenter: BasePresenter<ThreadListPresenter.Input, ThreadListPresenter.Navigation, Void, ThreadListViewState> {
 
     // MARK: - Structs
     
     struct Input {
         let configuration: Configuration
+        let option: DeeplinkOption?
     }
 
     struct Navigation {
@@ -28,8 +24,6 @@ class ThreadListPresenter: BasePresenter<
         var isConnected = false
         var threads = [ChatThread]()
         var isCurrentThreadsSegmentSelected = true
-        let locations = ["West Coast", "Northeast", "Southeast", "Midwest"]
-        let departments = ["Sales", "Services"]
         
         var isMultiThread: Bool { CXoneChat.shared.connection.channelConfiguration.hasMultipleThreadsPerEndUser }
     }
@@ -40,23 +34,17 @@ class ThreadListPresenter: BasePresenter<
     lazy var documentState = DocumentState()
     
     
-    // MARK: - Init
+    // MARK: - Lifecycle
     
     override func viewDidSubscribe() {
         super.viewDidSubscribe()
         
-        CXoneChat.shared.delegate = self
-        
-        Task { @MainActor in
-            viewState.toLoading()
-            
-            do {
-                try await connect()
-            } catch {
-                error.logError()
-                viewState.toError(title: "Ops!", message: error.localizedDescription)
-            }
-        }
+        NotificationCenter.default.addObserver(self, selector: #selector(onViewDidAppear), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -66,25 +54,30 @@ class ThreadListPresenter: BasePresenter<
 extension ThreadListPresenter {
     
     @objc
-    func signOut() {
-        CXoneChat.signOut()
-        
-        navigation.navigateToConfiguration()
+    func didEnterBackground() {
+        documentState.isConnected = false
     }
     
+    @objc
     func onViewDidAppear() {
-        guard documentState.isConnected else {
-            return
-        }
+        CXoneChat.shared.delegate = self
         
-        fetchThreads()
+        if documentState.isConnected {
+            documentState.threads = getThreads()
+            
+            viewState.toLoaded(documentState: documentState)
+        } else {
+            Task { @MainActor in
+                await connect()
+            }
+        }
     }
     
     @objc
     func onAddThreadTapped() {
         guard documentState.isMultiThread || documentState.threads.isEmpty else {
             Log.error(CommonError.failed("Cannot create new thread - Current brand is not multi thread."))
-            viewState.toError(title: "Unable to create new thread", message: "Your brand supports only single conversation.")
+            viewState.toError(title: "Unable to create new thread", message: "Your brand supports only a single conversation.")
             return
         }
         
@@ -92,10 +85,31 @@ extension ThreadListPresenter {
     }
     
     @objc
+    func onDisconnectTapped() {
+        let controller = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        controller.addAction(UIAlertAction(title: "Disconnect", style: .default) { [weak self] _ in
+            CXoneChat.shared.connection.disconnect()
+            
+            self?.navigation.navigateToLogin()
+        })
+        controller.addAction(UIAlertAction(title: "Sign Out", style: .destructive) { [weak self] _ in
+            LocalStorageManager.configuration = nil
+            CXoneChat.signOut()
+            
+            self?.navigation.navigateToConfiguration()
+        })
+        controller.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        navigation.presentController(controller)
+    }
+    
+    @objc
     func onSegmentControlChanged(isCurrentThreadsSegmentSelected: Bool) {
         documentState.isCurrentThreadsSegmentSelected = isCurrentThreadsSegmentSelected
         
-        fetchThreads()
+        documentState.threads = getThreads()
+        
+        viewState.toLoaded(documentState: documentState)
     }
     
     func onThreadSwipeToDelete(_ thread: ChatThread) {
@@ -103,8 +117,6 @@ extension ThreadListPresenter {
         
         do {
             try CXoneChat.shared.threads.archive(thread)
-            
-            fetchThreads()
         } catch {
             error.logError()
             viewState.toError(title: "Ops!", message: error.localizedDescription)
@@ -113,14 +125,7 @@ extension ThreadListPresenter {
     
     @MainActor
     func onThreadTapped(thread: ChatThread) async {
-        do {
-            try CXoneChat.shared.threads.load(with: thread.id)
-            
-            navigation.navigateToThread(thread)
-        } catch {
-            error.logError()
-            viewState.toError(title: "Ops", message: error.localizedDescription)
-        }
+        navigation.navigateToThread(thread)
     }
 }
 
@@ -136,11 +141,6 @@ extension ThreadListPresenter: CXoneChatDelegate {
             
             try CXoneChat.shared.analytics.chatWindowOpen()
             try CXoneChat.shared.analytics.viewPage(title: "ThreadList", uri: "thread-view")
-            
-            // To manually execute a trigger, use the following line instead of reportPageView
-            // if let triggerId = UUID(uuidString: "1c3bf289-5885-43c9-91be-b92516a55dbe") {
-            //    try CXoneChat.shared.connection.executeTrigger(triggerId)
-            // }
         } catch {
             error.logError()
             viewState.toError(title: "Ops!", message: error.localizedDescription)
@@ -150,11 +150,63 @@ extension ThreadListPresenter: CXoneChatDelegate {
     func onUnexpectedDisconnect() {
         documentState.isConnected = false
         
-        viewState.toError(title: "Connection Dropped", message: "Please sign in again.")
+        Task { @MainActor in
+            viewState.toLoading(title: "Reconnecting...")
+            
+            await connect()
+        }
     }
     
+    func onTokenRefreshFailed() {
+        CXoneChat.shared.customer.set(nil)
+        
+        navigation.navigateToLogin()
+    }
+    
+    
     func onThreadLoad(_ thread: ChatThread) {
-        fetchThreads()
+        documentState.threads = getThreads()
+        
+        if case .thread(let threadId) = input.option, thread.id == threadId {
+            navigation.navigateToThread(thread)
+        } else {
+            viewState.toLoaded(documentState: documentState)
+        }
+    }
+    
+    func onThreadsLoad(_ threads: [ChatThread]) {
+        documentState.threads = threads.filter { documentState.isCurrentThreadsSegmentSelected ? $0.canAddMoreMessages : !$0.canAddMoreMessages }
+        
+        if !documentState.threads.isEmpty {
+            documentState.threads.forEach { thread in
+                do {
+                    try CXoneChat.shared.threads.loadInfo(for: thread)
+                } catch {
+                    error.logError()
+                }
+            }
+        } else {
+            viewState.toLoaded(documentState: documentState)
+        }
+    }
+    
+    func onThreadInfoLoad(_ thread: ChatThread) {
+        documentState.threads = getThreads()
+        
+        if case .thread(let threadId) = input.option, thread.id == threadId {
+            Task { @MainActor in
+                navigation.navigateToThread(thread)
+            }
+        }
+        if documentState.threads.filter({ $0.messages.isEmpty }).isEmpty {
+            viewState.toLoaded(documentState: documentState)
+        }
+    }
+    
+    func onThreadArchive() {
+        documentState.threads = getThreads()
+        
+        viewState.toLoaded(documentState: documentState)
     }
     
     func onNewMessage(_ message: Message) {
@@ -168,7 +220,7 @@ extension ThreadListPresenter: CXoneChatDelegate {
         
         if thread.messages.isEmpty {
             do {
-                try updateThreadsMetadata()
+                try CXoneChat.shared.threads.loadInfo(for: thread)
             } catch {
                 error.logError()
                 viewState.toError(title: "Ops!", message: error.localizedDescription)
@@ -178,14 +230,6 @@ extension ThreadListPresenter: CXoneChatDelegate {
         }
     }
     
-    func onThreadInfoLoad(_ thread: ChatThread) {
-        fetchThreads()
-    }
-    
-    func onThreadArchive() {
-        fetchThreads()
-    }
-    
     func onCustomPluginMessage(_ messageData: [Any]) {
         Log.info("Plugin message received")
         
@@ -193,21 +237,15 @@ extension ThreadListPresenter: CXoneChatDelegate {
     }
     
     func onAgentChange(_ agent: Agent, for threadId: UUID) {
-        fetchThreads()
-    }
-    
-    func onThreadsLoad(_ threads: [ChatThread]) {
-        fetchThreads()
-    }
-    
-    func onTokenRefreshFailed() {
-        CXoneChat.shared.customer.set(nil)
+        documentState.threads = getThreads()
         
-        navigation.navigateToLogin()
+        viewState.toLoaded(documentState: documentState)
     }
     
     func onThreadUpdate() {
-        fetchThreads()
+        documentState.threads = getThreads()
+        
+        viewState.toLoaded(documentState: documentState)
     }
     
     func onProactivePopupAction(data: [String: Any], actionId: UUID) {
@@ -231,10 +269,28 @@ extension ThreadListPresenter: CXoneChatDelegate {
 
 private extension ThreadListPresenter {
     
-    func updateThreadsMetadata() throws {
-        try CXoneChat.shared.threads.get().forEach { thread in
-            try CXoneChat.shared.threads.loadInfo(for: thread)
+    @MainActor
+    func connect() async {
+        viewState.toLoading()
+        
+        do {
+            if let env = input.configuration.environment {
+                try await CXoneChat.shared.connection.connect(environment: env, brandId: input.configuration.brandId, channelId: input.configuration.channelId)
+            } else {
+                try await CXoneChat.shared.connection.connect(
+                    chatURL: input.configuration.chatUrl,
+                    socketURL: input.configuration.socketUrl,
+                    brandId: input.configuration.brandId,
+                    channelId: input.configuration.channelId
+                )
+            }
+        } catch {
+            error.logError()
+            viewState.toError(title: "Ops!", message: error.localizedDescription)
+            
+            navigation.navigateToLogin()
         }
+        
     }
     
     func loadThreads() throws {
@@ -245,32 +301,16 @@ private extension ThreadListPresenter {
         }
     }
     
-    @MainActor
-    func connect() async throws {
-        if let env = input.configuration.environment {
-            try await CXoneChat.shared.connection.connect(environment: env, brandId: input.configuration.brandId, channelId: input.configuration.channelId)
-        } else {
-            try await CXoneChat.shared.connection.connect(
-                chatURL: input.configuration.chatUrl,
-                socketURL: input.configuration.socketUrl,
-                brandId: input.configuration.brandId,
-                channelId: input.configuration.channelId
-            )
-        }
-    }
-    
-    func fetchThreads() {
-        documentState.threads = CXoneChat.shared.threads
+    func getThreads() -> [ChatThread] {
+        CXoneChat.shared.threads
             .get()
             .filter { documentState.isCurrentThreadsSegmentSelected ? $0.canAddMoreMessages : !$0.canAddMoreMessages }
-        
-        viewState.toLoaded(documentState: documentState)
     }
     
     func promptUserCredentials() {
-        let entities = [
-            FormTextFieldEntity(type: .text, placeholder: "First Name", customField: (key: "firstName", value: "")),
-            FormTextFieldEntity(type: .text, placeholder: "Last Name", customField: (key: "lastName", value: ""))
+        let entities: [FormCustomFieldType] = [
+            .textField(FormTextFieldEntity(label: "First Name", ident: "firstName", isRequired: false, isEmail: false)),
+            .textField(FormTextFieldEntity(label: "Last Name", ident: "lastName", isRequired: false, isEmail: false))
         ]
         let controller = FormViewController(entity: FormVO(title: "User Credentials", entities: entities)) { [weak self] customFields in
             CXoneChat.shared.customer.setName(
@@ -278,38 +318,48 @@ private extension ThreadListPresenter {
                 lastName: customFields.first { $0.key == "lastName" }.map(\.value) ?? ""
             )
             
-            self?.promptContactCustomFields()
+            if let preChatSurvey = CXoneChat.shared.threads.preChatSurvey {
+                self?.promptContactCustomFields(with: preChatSurvey)
+            } else {
+                self?.createNewThread()
+            }
         }
 
         navigation.presentController(controller)
     }
     
-    func promptContactCustomFields() {
-        let entities: [FormTextFieldEntity] = [
-            .init(type: .list(documentState.locations), placeholder: "Location", customField: (key: "location", value: "")),
-            .init(type: .list(documentState.departments), placeholder: "Department", customField: (key: "department", value: ""))
-        ]
-        let controller = FormViewController(entity: .init(title: "Contact Custom Fields", entities: entities)) { [weak self] customFields in
-            do {
-                let threadId = try CXoneChat.shared.threads.create()
-                
-                guard let thread = CXoneChat.shared.threads.get().thread(by: threadId) else {
-                    Log.error(CommonError.unableToParse("thread", from: self?.documentState.threads))
-                    self?.viewState.toError(title: "Ops!", message: "Something went wrong. Please, try it again later.")
-                    return
-                }
-                
-                try CXoneChat.shared.threads.customFields.set(customFields, for: threadId)
-                
-                self?.fetchThreads()
-                
-                self?.navigation.navigateToThread(thread)
-            } catch {
-                error.logError()
-                self?.viewState.toError(title: "Ops!", message: error.localizedDescription)
-            }
+    func promptContactCustomFields(with preChatSurvey: PreChatSurvey) {
+        let controller = FormViewController(
+            entity: FormVO(title: preChatSurvey.name, entities: preChatSurvey.customFields.map { FormCustomFieldType(from: $0) })
+        ) { [weak self] customFields in
+            self?.createNewThread(with: customFields)
         }
         
         navigation.presentController(controller)
+    }
+    
+    func createNewThread(with customFields: [String: String]? = nil) {
+        do {
+            let threadId: UUID
+            
+            if let customFields {
+                threadId = try CXoneChat.shared.threads.create(with: customFields)
+            } else {
+                threadId = try CXoneChat.shared.threads.create()
+            }
+            
+            guard let thread = CXoneChat.shared.threads.get().thread(by: threadId) else {
+                Log.error(CommonError.unableToParse("thread", from: documentState.threads))
+                viewState.toError(title: "Ops!", message: "Something went wrong. Please, try it again later.")
+                return
+            }
+            
+            documentState.threads = getThreads()
+            
+            navigation.navigateToThread(thread)
+        } catch {
+            error.logError()
+            viewState.toError(title: "Ops!", message: error.localizedDescription)
+        }
     }
 }

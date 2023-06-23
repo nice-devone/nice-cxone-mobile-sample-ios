@@ -14,6 +14,8 @@ class ThreadDetailPluginCell: MessageContentCell {
         set { pluginMessageView.delegate = newValue }
     }
     
+    var isOptionSelectionEnabled = true
+    
     
     // MARK: - Views
     
@@ -43,10 +45,11 @@ class ThreadDetailPluginCell: MessageContentCell {
         
         self.message = message
         
-        guard case .custom(let entity) = message.kind, let payload = entity as? MessagePayload else {
+        guard case .custom(let entity) = message.kind, let payload = entity as? MessagePlugin else {
             fatalError("ThreadDetailPluginCell received unhandled MessageDataType: \(message.kind)")
         }
         
+        pluginMessageView.isOptionSelectionEnabled = isOptionSelectionEnabled
         pluginMessageView.configure(with: payload.element)
         
         super.configure(with: message, at: indexPath, and: messagesCollectionView)

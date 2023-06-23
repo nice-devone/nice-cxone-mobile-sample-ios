@@ -8,18 +8,17 @@ class CustomMessageSizeCalculator: MessageSizeCalculator {
     // MARK: - Properties
     
     static let buttonHeight: CGFloat = 44
-    
-    private static let titleHeight: CGFloat = 40
-    private static let textHeight: CGFloat = 50
+    static let imageHeight: CGFloat = 150
     
     
     // MARK: - Init
     
-    public override init(layout: MessagesCollectionViewFlowLayout? = nil) {
+    override init(layout: MessagesCollectionViewFlowLayout? = nil) {
         super.init()
         
         self.layout = layout
     }
+    
     
     // MARK: - Methods
     
@@ -29,16 +28,36 @@ class CustomMessageSizeCalculator: MessageSizeCalculator {
         }
         
         let maxWidth = messageContainerMaxWidth(for: message, at: indexPath)
-        
         let contentInset = layout.collectionView?.contentInset ?? .zero
-        
         let inset = layout.sectionInset.left + layout.sectionInset.right + contentInset.left + contentInset.right
         
-        guard case .custom(let entity) = message.kind, let plugin = entity as? MessagePayload else {
+        guard case .custom(let entity) = message.kind else {
             return CGSize(width: ((maxWidth) - inset), height: ((maxWidth / 2) - inset))
         }
         
-        return CGSize(width: ((maxWidth) - inset), height: calculateHeight(from: plugin.element, maxWidth: maxWidth, inset: inset))
+        switch entity {
+        case let entity as MessagePlugin:
+            return CGSize(width: ((maxWidth) - inset), height: calculateHeight(from: entity.element, maxWidth: maxWidth, inset: inset))
+        case let entity as MessageRichLink:
+            return CGSize(
+                width: ((maxWidth) - inset),
+                height: Self.imageHeight + entity.title.height(withConstrainedWidth: maxWidth, font: .subheadline) + inset
+            )
+        case let entity as MessageQuickReplies:
+            let labelHeight = entity.title.height(withConstrainedWidth: maxWidth, font: .headline) + inset
+            
+            return CGSize(
+                width: ((maxWidth) - inset),
+                height: labelHeight + calculateSubElementsHeight(entity.buttons.map(MessageSubElementType.replyButton)) + inset
+            )
+        case let entity as MessageListPicker:
+            let titleHeight = entity.title.height(withConstrainedWidth: maxWidth, font: .headline) + inset
+            let textHeight = entity.text.height(withConstrainedWidth: maxWidth, font: .body)
+            
+            return CGSize(width: ((maxWidth) - inset), height: titleHeight + textHeight + calculateSubElementsHeight(entity.elements) + inset)
+        default:
+            return CGSize(width: ((maxWidth) - inset), height: ((maxWidth / 2) - inset))
+        }
     }
 }
 
@@ -50,15 +69,15 @@ private extension CustomMessageSizeCalculator {
     func calculateHeight(from entity: PluginMessageType, maxWidth: CGFloat, inset: CGFloat) -> CGFloat {
         switch entity {
         case .quickReplies(let entity):
-            return calculateSubElementsHeight(entity.elements) + inset
+            return calculateSubElementsHeight(entity.elements, viewWidth: maxWidth) + inset
         case .textAndButtons(let entity):
-            return calculateSubElementsHeight(entity.elements) + inset
+            return calculateSubElementsHeight(entity.elements, viewWidth: maxWidth) + inset
         case .satisfactionSurvey(let entity):
-            return calculateSubElementsHeight(entity.elements) + inset
+            return calculateSubElementsHeight(entity.elements, viewWidth: maxWidth) + (2 * inset)
         case .menu(let entity):
-            return calculateSubElementsHeight(entity.elements) + inset
+            return calculateSubElementsHeight(entity.elements, viewWidth: maxWidth) + inset
         case .subElements(let entities):
-            return calculateSubElementsHeight(entities) + inset
+            return calculateSubElementsHeight(entities, viewWidth: maxWidth) + inset
         case .gallery(let entities):
             var elementsHeight: CGFloat = 0
             
@@ -76,18 +95,31 @@ private extension CustomMessageSizeCalculator {
         }
     }
     
-    func calculateSubElementsHeight(_ elements: [PluginMessageSubElementType]) -> CGFloat {
+    func calculateSubElementsHeight(_ elements: [PluginMessageSubElementType], viewWidth: CGFloat) -> CGFloat {
         var elementsHeight: CGFloat = 0
         
         elements.forEach { element in
             switch element {
-            case .text:
-                elementsHeight += Self.textHeight
+            case .text(let entity):
+                elementsHeight += entity.text.height(withConstrainedWidth: viewWidth, font: .body)
             case .file:
-                elementsHeight += PluginMessageView.fileImageHeight
-            case .title:
-                elementsHeight += Self.titleHeight
+                elementsHeight += Self.imageHeight
+            case .title(let entity):
+                elementsHeight += entity.text.height(withConstrainedWidth: viewWidth, font: .title2)
             case .button:
+                elementsHeight += Self.buttonHeight
+            }
+        }
+        
+        return elementsHeight
+    }
+    
+    func calculateSubElementsHeight(_ elements: [MessageSubElementType]) -> CGFloat {
+        var elementsHeight: CGFloat = 0
+        
+        elements.forEach { element in
+            switch element {
+            case .replyButton:
                 elementsHeight += Self.buttonHeight
             }
         }

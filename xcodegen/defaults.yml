@@ -3,4 +3,4 @@ settings:
   base:
     BUNDLE_PREFIX: com.incontact.mobileSDK
     DEVELOPMENT_TEAM: A9KL983VAD
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.1.0"

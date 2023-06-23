@@ -33,7 +33,7 @@ class ChatAttachmentCell: UICollectionViewCell {
         button.layer.cornerRadius = 10
         button.clipsToBounds = true
         button.backgroundColor = .systemBlue
-        button.addTarget(self, action: #selector(deleteAttachment), for: .touchUpInside)
+        button.addTarget(self, action: #selector(self?.deleteAttachment), for: .touchUpInside)
         return button
     }()
     
@@ -49,16 +49,19 @@ class ChatAttachmentCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        setupSubviews()
+        contentView.addSubviews(containerView, deleteButton)
         setupConstraints()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
-        setupSubviews()
+        contentView.addSubviews(containerView, deleteButton)
         setupConstraints()
     }
+    
+    
+    // MARK: - Lifecycle
     
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -89,11 +92,6 @@ extension ChatAttachmentCell {
 // MARK: - Private methods
 
 extension ChatAttachmentCell {
-    
-    func setupSubviews() {
-        contentView.addSubview(containerView)
-        contentView.addSubview(deleteButton)
-    }
 
     func setupConstraints() {
         containerView.snp.makeConstraints { make in

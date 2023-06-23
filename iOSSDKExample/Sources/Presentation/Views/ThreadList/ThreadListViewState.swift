@@ -2,11 +2,11 @@ import Foundation
 
 
 enum ThreadListViewState: HasInitial {
-    case loading
+    case loading(title: String?)
     case loaded(ThreadListVO)
     case error(title: String, message: String)
     
-    static var initial: ThreadListViewState = .loading
+    static var initial: ThreadListViewState = .loading(title: nil)
 }
 
 
@@ -27,12 +27,12 @@ extension ThreadListViewState {
 
 extension ThreadListViewState {
     
-    mutating func toLoading() {
-        self = .loading
+    mutating func toLoading(title: String? = nil) {
+        self = .loading(title: title)
     }
     
     mutating func toLoaded(documentState: ThreadListPresenter.DocumentState) {
-        self = .loaded(.init(threads: documentState.threads, isMultiThread: documentState.isMultiThread))
+        self = .loaded(ThreadListVO(threads: documentState.threads, isMultiThread: documentState.isMultiThread))
     }
     
     mutating func toError(title: String, message: String? = nil) {

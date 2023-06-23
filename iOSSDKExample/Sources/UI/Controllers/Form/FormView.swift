@@ -7,6 +7,10 @@ class FormView: UIView {
     // MARK: - Views
     
     let titleLabel = UILabel()
+    
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+    
     private let contentStackView = UIStackView()
     private let buttonStackView = UIStackView()
     
@@ -15,14 +19,19 @@ class FormView: UIView {
     
     
     // MARK: - Properties
-
+    
     var customFields = [String: String]()
-    var pickerOptions = [(key: String, options: [String])]()
+    
+    private var viewObject: FormVO?
+    private var listOptions = [FormListFieldEntity]()
     
     
     // MARK: - Init
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init() {
         super.init(frame: .zero)
         
@@ -32,21 +41,27 @@ class FormView: UIView {
     }
     
     func setupView(with viewObject: FormVO) {
-        self.pickerOptions = viewObject.entities.compactMap { entity -> (key: String, options: [String])? in
-            guard case .list(let options) = entity.type else {
-                return nil
-            }
-            
-            return (entity.customField.key, options)
-        }
+        self.viewObject = viewObject
         
-        viewObject.entities.forEach { entity in
-            customFields[entity.customField.key] = entity.customField.value
-            
-            let textField = getTextField(with: entity)
-            textField.placeholder = entity.placeholder
-            
-            contentStackView.addArrangedSubview(textField)
+        viewObject.entities.forEach { type in
+            switch type {
+            case .textField(let entity):
+                handleTextField(entity)
+            case .list(let entity):
+                handleList(entity)
+            case .tree(let entity):
+                handleTree(entity)
+            }
+        }
+    }
+    
+    
+    // MARK: - Internal methods
+    
+    func areFieldsValid() -> Bool {
+        // swiftlint:disable:next reduce_boolean
+        contentStackView.arrangedSubviews.reduce(true) { valid, subview in
+            (subview as? FormViewElement)?.isValid() != false && valid
         }
     }
 }
@@ -63,24 +78,28 @@ private extension FormView {
 }
 
 
-// MARK: - UITextFieldDelegate
+// MARK: - TextFieldDelegate
 
-extension FormView: UITextFieldDelegate {
-
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
+extension FormView: FormTextFieldDelegate {
+    
+    func formTextFieldShouldReturn(_ formTextField: FormTextField) -> Bool {
+        formTextFieldDidEndEditing(formTextField)
+        
+        return formTextField.resignFirstResponder()
     }
     
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        textField.resignFirstResponder()
+    func formTextFieldDidEndEditing(_ formTextField: FormTextField) {
+        formTextField.resignFirstResponder()
         
-        
-        guard let entity = customFields.first(where: { $0.key == textField.layer.name }) else {
-            Log.error(CommonError.unableToParse("index"))
+        guard formTextField.type != .list else {
+            return
+        }
+        guard let customField = customFields.first(where: { $0.key == formTextField.identification }) else {
+            Log.error(CommonError.unableToParse("customField"))
             return
         }
         
-        customFields.updateValue(textField.text ?? "", forKey: entity.key)
+        customFields.updateValue(formTextField.text ?? "", forKey: customField.key)
     }
 }
 
@@ -94,7 +113,7 @@ extension FormView: UIPickerViewDataSource, UIPickerViewDelegate {
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        guard let options = pickerOptions.first(where: { $0.key == pickerView.layer.name })?.options else {
+        guard let options = listOptions.first(where: { $0.ident == pickerView.layer.name })?.options else {
             return 0
         }
         
@@ -102,22 +121,34 @@ extension FormView: UIPickerViewDataSource, UIPickerViewDelegate {
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        guard let options = pickerOptions.first(where: { $0.key == pickerView.layer.name })?.options else {
+        guard let options = listOptions.first(where: { $0.ident == pickerView.layer.name })?.options else {
             return nil
         }
-        
-        return options[safe: row]
+        return Array(options.values)[row]
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        guard let entity = pickerOptions.first(where: { $0.key == pickerView.layer.name }) else {
-            Log.error(CommonError.unableToParse("entity", from: pickerOptions))
+        guard let entity = listOptions.first(where: { $0.ident == pickerView.layer.name }) else {
+            Log.error(CommonError.unableToParse("entity", from: listOptions))
             return
         }
         
-        let option = entity.options[row]
-        customFields[entity.key] = option
-        (contentStackView.arrangedSubviews.first { $0.layer.name == entity.key } as? CustomTextfield)?.text = option
+        
+        let optionValue = Array(entity.options.values)[row]
+        customFields[entity.ident] = entity.options.first { $0.value == optionValue }?.key
+        (contentStackView.arrangedSubviews
+            .first { ($0 as? FormTextField)?.identification == entity.ident } as? FormTextField)?
+            .text = optionValue
+    }
+}
+
+
+// MARK: - ExpandableListDelegate
+
+extension FormView: ExpandableListDelegate {
+
+    func expandableListView(_ view: ExpandableListView, didChooseValueIdentifier value: String, with customFieldsIdent: String) {
+        customFields[customFieldsIdent] = value
     }
 }
 
@@ -126,32 +157,70 @@ extension FormView: UIPickerViewDataSource, UIPickerViewDelegate {
 
 private extension FormView {
     
-    func getTextField(with entity: FormTextFieldEntity) -> CustomTextfield {
-        let textField = CustomTextfield(type: entity.type)
-        textField.layer.name = entity.customField.key
-        textField.delegate = self
-        textField.autocapitalizationType = .none
-        textField.autocorrectionType = .no
+    func handleTextField(_ entity: FormTextFieldEntity) {
+        guard customFields[entity.ident] == nil else {
+            return
+        }
         
-        switch entity.type {
-        case .text:
-            textField.text = entity.customField.value.isEmpty ? nil : entity.customField.value
-        case .list(let options):
-            textField.text = options.first
-            
+        customFields[entity.ident] = entity.value ?? ""
+        
+        let textFieldView = getTextField(type: entity.isEmail ? .email : .text, isRequired: entity.isRequired, ident: entity.ident, value: entity.value)
+        textFieldView.placeholder = entity.label
+        
+        contentStackView.addArrangedSubview(textFieldView)
+    }
+    
+    func handleList(_ entity: FormListFieldEntity) {
+        guard customFields[entity.ident] == nil else {
+            return
+        }
+        
+        customFields[entity.ident] = entity.value ?? entity.options.keys.first
+        listOptions.append(entity)
+        
+        let textFieldView = getTextField(
+            type: .list,
+            isRequired: entity.isRequired,
+            ident: entity.ident,
+            value: entity.options.first { $0.value == entity.label }?.value ?? entity.options.values.first
+        )
+        textFieldView.placeholder = entity.label
+        
+        contentStackView.addArrangedSubview(textFieldView)
+    }
+    
+    func handleTree(_ entity: FormTreeFieldEntity) {
+        guard customFields[entity.ident] == nil else {
+            return
+        }
+        
+        customFields[entity.ident] = entity.value ?? ""
+        
+        let expandableView = ExpandableListView()
+        expandableView.delegate = self
+        expandableView.setup(entity: entity)
+        
+        contentStackView.addArrangedSubview(expandableView)
+    }
+    
+    func getTextField(type: FormFieldType, isRequired: Bool, ident: String, value: String?) -> FormTextField {
+        let textFieldView = FormTextField(type: type, isRequired: isRequired)
+        textFieldView.text = value.isNilOrEmpty ? nil : value
+        textFieldView.identification = ident
+        textFieldView.delegate = self
+        textFieldView.autocapitalizationType = .none
+        textFieldView.autocorrectionType = .no
+        
+        if type == .list {
             let picker = UIPickerView()
-            picker.layer.name = entity.customField.key
+            picker.layer.name = ident
             picker.delegate = self
             picker.dataSource = self
-            textField.inputView = picker
-            textField.inputAccessoryView = getToolbar(ident: entity.customField.key)
+            textFieldView.pickerInputView = picker
+            textFieldView.pickerInputAccessoryView = getToolbar(ident: ident)
         }
         
-        textField.snp.makeConstraints { make in
-            make.height.equalTo(44)
-        }
-        
-        return textField
+        return textFieldView
     }
     
     func getToolbar(ident: String) -> UIToolbar {
@@ -167,17 +236,25 @@ private extension FormView {
     }
     
     func addAllSubviews() {
-        addSubviews(titleLabel, contentStackView, buttonStackView)
+        addSubviews(titleLabel, scrollView, buttonStackView)
+        scrollView.addSubview(contentView)
+        
+        contentView.addSubview(contentStackView)
         buttonStackView.addArrangedSubviews(cancelButton, confirmButton)
     }
     
     func setupSubviews() {
         backgroundColor = .systemBackground
         
+        contentView.isUserInteractionEnabled = true
+        
+        scrollView.isUserInteractionEnabled  = true
+        
         titleLabel.textAlignment = .center
         titleLabel.font = .preferredFont(forTextStyle: .title3)
         titleLabel.textColor = .lightGray
         
+        contentStackView.isUserInteractionEnabled = true
         contentStackView.axis = .vertical
         contentStackView.spacing = 24
         contentStackView.distribution = .equalSpacing
@@ -192,17 +269,24 @@ private extension FormView {
     
     func setupConstraints() {
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(safeAreaLayoutGuide.snp.top).inset(20)
+            make.top.equalTo(safeAreaLayoutGuide).inset(20)
             make.leading.trailing.equalToSuperview().inset(24)
+        }
+        scrollView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(10)
+            make.leading.trailing.equalToSuperview()
+        }
+        contentView.snp.makeConstraints { make in
+            make.top.bottom.equalTo(scrollView)
+            make.leading.trailing.equalTo(self).inset(24)
         }
         contentStackView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(24)
-            make.leading.trailing.equalToSuperview().inset(24)
+            make.edges.equalToSuperview()
         }
         buttonStackView.snp.makeConstraints { make in
-            make.top.greaterThanOrEqualTo(contentStackView.snp.bottom).offset(40)
-            make.leading.trailing.equalTo(contentStackView)
-            make.bottom.equalTo(safeAreaLayoutGuide.snp.bottom).inset(20)
+            make.top.equalTo(scrollView.snp.bottom).offset(20)
+            make.leading.trailing.equalTo(titleLabel)
+            make.bottom.equalToSuperview().inset(20)
         }
     }
 }

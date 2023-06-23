@@ -26,7 +26,10 @@ class CustomFieldView: UIView {
     
     // MARK: - Init
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init(description: String, value: String) {
         self.valueDescription = description
         self.value = value

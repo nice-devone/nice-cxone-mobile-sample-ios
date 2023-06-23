@@ -1,7 +1,7 @@
 import Foundation
 
 
-extension Optional where Wrapped == String {
+extension String? {
     
     // MARK: - Properties
     

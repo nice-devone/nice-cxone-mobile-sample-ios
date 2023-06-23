@@ -2,11 +2,11 @@ import Foundation
 
 
 enum ThreadDetailViewState: HasInitial {
-    case loading
+    case loading(title: String?)
     case loaded
     case error(title: String, message: String)
     
-    static var initial: ThreadDetailViewState = .loaded
+    static var initial: ThreadDetailViewState = .loading(title: nil)
 }
 
 // MARK: - Queries
@@ -26,8 +26,8 @@ extension ThreadDetailViewState {
 
 extension ThreadDetailViewState {
     
-    mutating func toLoading() {
-        self = .loading
+    mutating func toLoading(title: String? = nil) {
+        self = .loading(title: title)
     }
     
     mutating func toLoaded() {

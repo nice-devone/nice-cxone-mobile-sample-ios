@@ -1,10 +1,3 @@
-//
-//  CommonError.swift
-//  iOSSDKExample
-//
-//  Created by Lukas Sanda on 21.09.2022.
-//
-
 import Foundation
 
 

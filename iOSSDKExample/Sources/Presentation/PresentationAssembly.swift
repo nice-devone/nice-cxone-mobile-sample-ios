@@ -3,14 +3,14 @@ import SwinjectAutoregistration
 
 
 /// The assembler for all related stuff to the Presentation layer.
-public struct PresentationAssembly: Assembly {
+struct PresentationAssembly: Assembly {
     
     // MARK: - Init
     
-    public init() { }
+    init() { }
     
     
     // MARK: - Methods
     
-    public func assemble(container: Container) { }
+    func assemble(container: Container) { }
 }

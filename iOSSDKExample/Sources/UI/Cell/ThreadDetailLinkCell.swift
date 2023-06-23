@@ -10,7 +10,6 @@ class ThreadDetailLinkCell: MessageContentCell {
     
     private var linkURL: URL?
     
-    /// The `MessageCellDelegate` for the cell.
     override weak var delegate: MessageCellDelegate? {
         didSet {
             messageLabel.delegate = delegate
@@ -141,7 +140,7 @@ private class ThreadDetailLinkView: UIView {
     // MARK: - Views
     
     lazy var imageView: UIImageView = {
-        let imageView: UIImageView = .init()
+        let imageView = UIImageView()
         imageView.clipsToBounds = true
         imageView.contentMode = .scaleAspectFit
         imageView.image = Assets.icLink
@@ -150,7 +149,7 @@ private class ThreadDetailLinkView: UIView {
         return imageView
     }()
     lazy var titleLabel: UILabel = {
-        let label: UILabel = .init()
+        let label = UILabel()
         label.numberOfLines = 0
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -161,7 +160,10 @@ private class ThreadDetailLinkView: UIView {
     
     // MARK: - Init
     
-    required public init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init() {
         super.init(frame: .zero)
 

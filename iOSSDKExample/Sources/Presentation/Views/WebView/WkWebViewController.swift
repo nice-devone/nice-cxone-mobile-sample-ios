@@ -2,7 +2,7 @@ import UIKit
 import WebKit
 
 
-class WkWebViewController: UIViewController, WKNavigationDelegate {
+class WKWebViewController: UIViewController, WKNavigationDelegate {
     
     // MARK: - Views
     
@@ -19,7 +19,10 @@ class WkWebViewController: UIViewController, WKNavigationDelegate {
     
     // MARK: - Init
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     init(url: URL) {
         self.url = url
         super.init(nibName: nil, bundle: nil)
@@ -40,7 +43,7 @@ class WkWebViewController: UIViewController, WKNavigationDelegate {
 
 // MARK: - Actions
 
-extension WkWebViewController {
+extension WKWebViewController {
     
     @objc
     func closeDidTap() {
@@ -94,7 +97,7 @@ extension WkWebViewController {
 
 // MARK: - Private methods
 
-private extension WkWebViewController {
+private extension WKWebViewController {
     
     func addAllSubviews() {
         view.addSubviews(webView, toolbar)
