@@ -1,0 +1,162 @@
+// Common
+"common.cancel" = "Cancel";
+"common.close" = "Close";
+"common.continue" = "Continue";
+"common.confirm" = "Confirm";
+"common.required_field" = "Required Field";
+"common.invalid_email" = "Invalid e-mail";
+"common.ok" = "OK";
+"common.oops" = "Oops!";
+"common.generic_error" = "Something went wrong. Try it again later or contact the CXone Mobile team.";
+"common.notification_unknown_thread_error" = "Received remote notification from unknown thread.";
+"common.attention" = "Attention";
+"common.disconnect" = "Disconnect";
+"common.sign_out" = "Sign Out";
+"common.reconnecting" = "Reconnecting...";
+"common.search" = "Search";
+"common.invalid_number" = "Invalid Number";
+"common.invalid_email" = "Invalid E-mail";
+
+// Configuration
+"configuration.title" = "Configuration";
+"configuration.environment_selection_title" = "Environments";
+"configuration.configuration_selection_title" = "Configurations";
+"configuration.custom.configuration_label" = "Configuration";
+"configuration.custom.button_title" = "Use a custom configuration";
+"configuration.default.environment_label" = "Environment";
+"configuration.default.brand_id_placeholder" = "Brand ID";
+"configuration.default.channel_id_placeholder" = "Channel ID";
+"configuration.default.button_title" = "Use a default configuration";
+"configuration.default.missing_fields.title" = "All Fields Required";
+"configuration.default.missing_fields.message" = "Please provide a value for all fields.";
+"configuration.loading_title" = "Fetching configurations...";
+
+// Settings
+"settings.title" = "Settings";
+"settings.sdk.title" = "SDK";
+"settings.sdk.restore_customer_name.label" = "Restore Customer Name";
+"settings.sdk.restore_customer_name.button_title" = "Reset";
+"settings.sdk.restore_customer_name.current_name" = "Current name:";
+"settings.sdk.footer_restore_customer_name" = "Restoring the customer's name allows the form with the first and last name fields to be displayed";
+"settings.sdk.version" = "Version";
+"settings.logs.title" = "Logs";
+"settings.logs.share.label" = "Open Share Dialog";
+"settings.logs.share.button" = "Share";
+"settings.logs.remove.label" = "Remove logs";
+"settings.logs.remove.button" = "Remove";
+"settings.logs.remove.message.success" = "Logs Removed Successfully";
+"settings.logs.remove.message.failure" = "Unable to Parse Logs";
+"settings.brand_logo.title" = "Brand Logo";
+"settings.brand_logo.label" = "You can specify an image as a brand logo which is going to be visible in the top of the chat thread. Press to upload it.";
+"settings.brand_logo.title" = "Brand Logo";
+"settings.theme.title" = "Theme";
+"settings.theme.info" = "This section allows you to customize the appearance of the chat thread. If a text field is left blank, the default value for that color will be used.";
+"settings.theme.no_color.placeholder" = "Enter Color";
+"settings.theme.no_color.error" = "Invalid color";
+"settings.theme.no_color.alertMessage" = "Color cannot be left blank. The UI will set the default color for the respective element(s).";
+"settings.theme.chat_navigationBar_color_field.placeholder" = "Navigation Bar Color";
+"settings.theme.chat_navigation_elements_color_field.placeholder" = "Navigation Bar Elements Color";
+"settings.theme.chat_background_color_field.placeholder" = "Chat Background Color";
+"settings.theme.chat_agent_cell_color_field.placeholder" = "Chat Agent Cell Color";
+"settings.theme.chat_customer_cell_color_field.placeholder" = "Chat Customer Cell Color";
+"settings.theme.chat_agent_font_color_field.placeholder" = "Chat Agent Font Color";
+"settings.theme.chat_customer_font_color_field.placeholder" = "Chat Customer Font Color";
+"settings.theme.chat_form_text_color.placeholder" = "Chat Form Text Color";
+"settings.theme.chat_form_error_color.placeholder" = "Chat Form Error Color";
+"settings.theme.chat_button_text_color.placeholder" = "Chat Button Text Color";
+"settings.theme.chat_button_background_color.placeholder" = "Chat Button Background Color";
+
+// Login
+"login.title" = "Login";
+"login.oauth.available_providers_title" = "Available OAuth providers";
+"login.guest.divider_title" = "or";
+"login.guest.button_title" = "Continue as guest";
+"login.unavailable_oauth.message" = "There are no authenticators available. Try it again later or contact the CXone Mobile team.";
+"login.repeat.button_title" = "Repeat";
+
+// Thread list
+"thread_list.title" = "Threads";
+"thread_list.disconnect_options.message" = "Do you want to disconnect and go back to the store or sign out from your selected brand and channel?";
+"thread_list.segment_control.available_threads" = "Current";
+"thread_list.segment_control.archived_threads" = "Archived";
+"thread_list.archive_thread" = "Archive";
+"thread_list.empty_title" = "No Threads";
+"thread_list.new_thread.unable_to_create.title" = "Unable to create new thread";
+"thread_list.new_thread.unable_to_create.message" = "Your brand supports only a single conversation.";
+"thread_list.new_thread.user_details.title" = "User Details";
+"thread_list.new_thread.user_details.first_name" = "First Name";
+"thread_list.new_thread.user_details.last_name" = "Last Name";
+"thread_list.new_thread.prechat_survey.title" = "Precontact Survey Form";
+"thread_list.no_agent" = "No Agent";
+"thread_list.cell.custom_message.image" = "Image";
+"thread_list.cell.custom_message.audio" = "Audio";
+"thread_list.cell.custom_message.video" = "Video";
+"thread_list.cell.custom_message.unsupported" = "Unsupported Content Type";
+"thread_list.cell.custom_message.rich_content" = "Rich content message";
+
+// Thread Detail
+"thread_detail.na" = "NA";
+"thread_detail.no_agent" = "No Agent";
+"thread_detail.assigned_agent.no_name" = "No Name";
+"thread_detail.cell_context_menu.share_content" = "Share";
+"thread_detail.cell_context_menu.copy_content" = "Copy";
+"thread_detail.cell_message.status_sent" = "Sent";
+"thread_detail.cell_message.status_delivered" = "Delivered";
+"thread_detail.cell_message.status_read" = "Read";
+"thread_detail.messaging.sending_placeholder" = "Sending...";
+"thread_detail.edit_custom_fields.title" = "Edit of Custom Fields";
+"thread_detail.update_thread_name.title" = "Update Thread Name";
+"thread_detail.update_thread_name.message" = "Enter a name for this thread";
+"thread_detail.update_thread_name.placeholder" = "Thread Name";
+"thread_detail.message_from_different_thread.text" = "New message from %@";
+
+// Audio
+"audio_preview.recording" = "Recording...";
+"audio_preview.review_recorded_message" = "Review your recorder message";
+
+// Debug
+"debug.logs.share" = "Share Logs";
+"debug.logs.remove" = "Remove Logs";
+"debug.logs.title" = "Options";
+
+// Form
+"form.required_field" = "%@ is required";
+
+// File Loader
+"file_loader.title" = "Choose your Image";
+"file_loader.file_manager" = "Choose from File Manager";
+"file_loader.remove" = "Remove";
+"file_loader.image_from_library" = "Image from Library";
+"file_loader.camera" = "Take from Camera";
+
+// Store
+"store.title" = "NICE Store";
+"store.signout.message" = "You are about to sign out from selected channel. Do you want to proceed?";
+
+// Product Detail
+"product_detail.description" = "Description";
+"product_detail.add_to_cart.title" = "Add to Cart";
+
+// Cart
+"cart.title" = "Shopping Cart";
+"cart.summary.title" = "Order Summary";
+"cart.summary.total_title" = "Total";
+"cart.summary.vat.title" = "VAT";
+"cart.summary.vat.included" = "Included";
+"cart.summary.shipping.title" = "Shipping";
+"cart.summary.shipping.free" = "Free";
+"cart.summary.checkout.title" = "Checkout";
+"cart.empty.title" = "Your cart is empty.";
+
+// Payment
+"payment.title" = "Payment";
+"payment.card_number_title" = "Card Number";
+"payment.valid_until_title" = "Valid Until";
+"payment.ccv_title" = "CCV";
+"payment.card_holder_name_title" = "Card Holder Name";
+"payment.total_amount_title" = "Total";
+"payment.confirmation_button_title" = "Pay Now";
+
+// Purchase Done
+"purchase_done.message" = "Your order has been paid.";
+"purchase_done.back_to_store" = "Back to Store";

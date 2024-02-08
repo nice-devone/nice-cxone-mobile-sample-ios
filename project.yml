@@ -1,4 +1,17 @@
-# XCodegen YML file for iOS Sample Project
+#
+# Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+#
+# Licensed under the NICE License;
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://github.com/BrandEmbassy/cxone-mobile-sdk-IOS/blob/master/LICENSE
+#
+# TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE CXONE MOBILE SDK IS PROVIDED ON
+# AN “AS IS” BASIS. NICE HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS
+# OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
+#
 
 include:
   - path: xcodegen/defaults.yml
@@ -16,8 +29,6 @@ include:
 options:
   createIntermediateGroups: true
   bundleIdPrefix: ${BUNDLE_PREFIX}
-  deploymentTarget:
-    iOS: "13"
 
 name: iOSSDKExample
 
@@ -29,25 +40,23 @@ targetTemplates:
   Common:
     type: application
     platform: iOS
-    deploymentTarget: "13.0"
+    deploymentTarget: "14.0"
     settings:
       base:
-        PRODUCT_NAME: "SDK Demo"
+        PRODUCT_NAME: iOSSDKExample
+        DISPLAY_NAME: "SDK Demo"
     sources:
       - path: iOSSDKExample/Sources
       - path: iOSSDKExample/Supporting Files
     dependencies:
-      - package: ActivityIndicator
-      - package: ALProgressView
       - package: CXoneChatSDK
-      - package: IQKeyboardManagerSwift
+      - package: CXoneChatUI
       - package: Kingfisher
-      - package: MessageKit
-      - package: SnapKit
       - package: PKCE
       - package: Swinject
       - package: SwinjectAutoregistration
-      - package: Toast
+      - package: Firebase
+        product: FirebaseCrashlytics
     postCompileScripts:
       - script: |
           if [[ "$(uname -m)" == arm64 ]]; then
@@ -55,24 +64,55 @@ targetTemplates:
           fi
 
           if which swiftlint > /dev/null; then
-            swiftlint
+            swiftlint --config .swiftlint.yml
           else
-            echo "warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint"
+            echo "warning: SwiftLint not installed, run brew install swiftlint"
           fi
         name: Swiftlint
+        basedOnDependencyAnalysis: false
+
+      - script: |
+          if [[ "$(uname -m)" == arm64 ]]; then
+            export PATH="/opt/homebrew/bin:$PATH"
+          fi
+
+          if which swiftgen > /dev/null; then
+            swiftgen config -c .swiftgen.yml
+          else
+            echo "warning: SwiftGen not installed, run brew install swiftgen"
+          fi
+        name: SwiftGen
+        runOnlyWhenInstalling: true
+        basedOnDependencyAnalysis: true
+    postBuildScripts:
+      - script: |
+          buildNumber=$(date +'%y%m%d.%H%M')
+
+          echo "Updating build number to $buildNumber"
+
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+
+          if [ -f "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist" ]; then
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist"
+          fi
+        name: Generate Build Number
+        basedOnDependencyAnalysis: false
+      - script: |
+          ${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run
+        inputFiles:
+          - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
+          - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}
+          - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist
+          - $(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist
+          - $(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)
+        name: Crashlytics - Upload dSYM Files
         basedOnDependencyAnalysis: false
 
 targets:
   iOSSDKExample:
     templates: [Common, Entitled, Info, Amazon]
-  iOSSDKExample_arm64:
-    templates: [Common, Entitled, Info]
 
 schemes:
-  iOSSDKExample_arm64:
-    build:
-      targets:
-        iOSSDKExample_arm64: all
   iOSSDKExample:
     build:
       targets:
