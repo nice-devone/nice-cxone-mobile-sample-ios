@@ -2,19 +2,38 @@
 
 # CXone Mobile SDK Sample App
 
-CXone Mobile SDK lets you integrate CXone into your enterprise iOS mobile phone application with operation system iOS 13 and later.
+CXone Mobile SDK lets you integrate CXone into your enterprise iOS mobile phone application with operation system iOS 14 and later.
 
-The following are sample codes to help configure and customize application Digital First Omnichannel chat integration experience. The sample codes come from a sample app that you can get from the [Sample app](https://github.com/nice-devone/nice-cxone-mobile-sample-ios).
+The following sample code will help configure and customize application Digital First Omnichannel chat integration experience.
 
+
+## How to Run the Application
+
+- Clone the SDK repository
+- *Prerequisites:* Install Xcodegen and Swiftgen
+    - [Xcodegen](https://github.com/yonaskolb/XcodeGen#installing) - a command line tool written in Swift that generates Xcode project using folder structure and a project spec.
+    - [Swiftgen](https://github.com/SwiftGen/SwiftGen#installation) - a tool to automatically generate Swift code for resources of projects (like images, localised strings, etc), to make them type-safe to use.
+- Run the `setup.sh` script from the root directory
+    ```bash
+    sh scripts/setup.sh
+    ```
+- Open project via `iOSSDKExample.xcodeproj`
+- Build & run application
 
 ## Chat Provider
-Whole SDK is available with shared instance via `CXoneChat.shared` which provides [`ChatProvider`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatprovider.htm) with available delegates, feature providers and more.
+The SDK is available with shared instance via `CXoneChat.shared` which provides `ChatProvider` with available delegates, feature providers and more.
 
 ### SDK Version
-CXoneChat provides an interface to be able to check version of the SDK runtime. For this case, it is accessible with [`CXoneChat.version`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatprovider.htm) property. 
+CXoneChat provides an interface to be able to check version of the SDK runtime. For this case, it is accessible with `CXoneChat.version` property. 
+
+### SDK Chat State
+The state defines whether it is necessary to set up the SDK, connect to the CXone services or start communication with an agent.
+
+### SDK Chat Mode
+Chat mode based on the channel configuration
 
 ### SDK Logging
-CXoneChat SDK provides its own logging to be able to track its flow or detect errors occured during events. Internal **LogManager** forwards errors to the host application via [`onError(_:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/cxonechatdelegate.htm) delegate method. You can it to your Log manager or just print messages.
+CXoneChat SDK provides its own logging to be able to track its flow or detect errors occured during events. Internal **LogManager** forwards errors to the host application via `CXoneChatDelegate.onError(_:)` delegate method. You can it to your Log manager or just print messages.
 
 ```swift
 extension Manager: LogDelegate {
@@ -43,7 +62,7 @@ Host application triggers events for various situations - load threads, send mes
 Host application doesn't necessarily have to register all those methods - the SDK handles this with a default implements. Chat delegate manager can register only those are related to current scene context.
 
 ### Logger Configuration
-To be able to use internal logger, it is necessary to setup it with a [`configureLogger(level:verbosity:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatprovider.htm) method. The method parameters specify log level and verbosity. The [level](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/classes/logmanager.htm) determines which messages are going to be forwarded to the host application - `error`, `warning`, `info`, `trace`. The `error` level should be the one, if you want to receive just necessary and serious messages from the SDK. On the other hand, `trace` is the lowest level for tracking SDK so it provides detailed information about what is happening in the SDK. [Verbosity](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/classes/logmanager.htm) specify how detailed are messages from the internal Log manager - simple, medium, full. The minimum level is a **simple** one which logs occurrence date time and its message. The **full**, apart of that, logs file, line number and function name.
+To be able to use internal logger, it is necessary to setup it with a `CXoneChat.configureLogger(level:verbosity:)` method. The method parameters specify log level and verbosity. The `LogManager.Level` determines which messages are going to be forwarded to the host application - `error`, `warning`, `info`, `trace`. The `error` level should be the one, if you want to receive just necessary and serious messages from the SDK. On the other hand, `trace` is the lowest level for tracking SDK so it provides detailed information about what is happening in the SDK. `LogManager.Verbosity` specify how detailed are messages from the internal Log manager - simple, medium, full. The minimum level is a **simple** one which logs occurrence date time and its message. The **full**, apart of that, logs file, line number and function name.
 
 Configure the logger before first interaction with the SDK and register the log delegate.
 ```swift
@@ -57,8 +76,7 @@ Whenever user are about to log out or end the chat, the SDK provides method to s
 > Important: This action also remove all stored data - customer, visitor ID, keychain etc, and creates new instance of the SDK!
 
 ```swift
-@objc
-func signOut() {
+func onSignOutTapped() {
     CXoneChat.signOut()
     ...
 }
@@ -68,10 +86,10 @@ func signOut() {
 ## Connection
 Section with connection related methods and properties. These methods allows to get channel configuration, connect to the to the CXone service or send a ping to ensure connection connection is established.
 
-Following features are provided via [`CXoneChat.shared.connection`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/connectionprovider.htm) provider.
+Following features are provided via `CXoneChat.shared.connection` provider.
 
 ### Get Channel Configuration
-The SDK provides two ways for channel configuration. In case host application is already connected to the CXone service, it is possible to use [`channelConfiguration`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/connectionprovider.htm) which returns current configuration. If you call this property without established connection, it returns default configuration which is might not be related to required channel configuration.
+The SDK provides two ways for channel configuration. In case host application is already connected to the CXone service, it is possible to use `ConnectionProvider.channelConfiguration` which returns current configuration. If you call this property without established connection, it returns default configuration which is might not be related to required channel configuration.
 
 ```swift
 let configuration = CXoneChat.shared.connection.channelConfiguration
@@ -83,49 +101,49 @@ if configuration.hasMultipleThreadsPerEndUser {
     ...
 }
 ```
-In case you need configuration before establishing connection or even preparing for the establishing, there is a [`getChannelConfiguration(environment:brandId:channelId:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/connectionprovider.htm) method which uses prepared [`Environemnt`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/enumerations/environment.htm). This method uses new Swift [concurrency](https://developer.apple.com/documentation/swift/updating_an_app_to_use_swift_concurrency).
+In case you need configuration before establishing connection or even preparing for the establishing, there is a `ConnectionProvider.getChannelConfiguration(environment:brandId:channelId:)` method which uses prepared `CXoneChat.Environemnt`.
 
 For example: Get the configuration for brand **1234**, channel **"chat_abcd_1234_efgh"** and located in the **Europe**.
 
 ```swift
 let configuration = try await CXoneChat.shared.connection.getChannelConfiguration(
-    environment: .EU1, 
-    brandId: 1234, 
+    environment: .EU1,
+    brandId: 1234,
     channelId: "chat_abcd_1234_efgh"
 )
 ```
 
 The method throws `channelConfigFailure` or `DecodingError.dataCorrupted(_:)` error when it is not possible to initialize connection URL or decode URL response.
 
-### Establish the Connection
-Same as getting channel configuration method, establishing a connection with method [connect(environment:brandId:channelId:)](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/connectionprovider.htm) uses prepared [Environment](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/enumerations/environment.htm). It uses new Swift [concurrency](https://developer.apple.com/documentation/swift/updating_an_app_to_use_swift_concurrency).
+### Prepare the SDK for Usage
+Before the SDK can be used for any functionality (analytics or chat communication features) it is necessary to prepare it for usage. This is achieved with `prepare(environment:brandId:channelId:)` method. It requires pre-defined `CXoneChat.Environment`,brand ID and channel ID.
 
-For example: Connect to the brand **1234**, channel **"chat_abcd_1234_efgh"** and located in the **Europe**.
+For example: Prepareusage of to the brand **1234**, channel **"chat_abcd_1234_efgh"** and located in the **Europe**.
 
 ```swift
-try await CXoneChat.shared.connection.connect(
+try await CXoneChat.shared.connection.prepare(
     environment: .EU1, 
     brandId: 1234, 
     channelId: "chat_abcd_1234_efgh"
 )
 ```
 
+### Establish the Connection
+The SDK uses state-based architecture, so it is necessary to have the SDK in the correct state. For establishing web socket connection, it is necessary to firstly call `ConnectionProvider.prepare(environment:brandId:channelId:)` which set the SDK to the `.prepared` state. With everything set, the web socket connection can be easily established with `ConnectionProvider.connect` method.
+
+```swift
+try await CXoneChat.shared.connection.connect()
+```
+
 ### Disconnect from CXone Service
-Whenever host application should keep customer logged in and sign out from CXone service, use [`disconnect()`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/connectionprovider.htm). It keep connection context and just invalides the web socket.
+Whenever host application should keep customer logged in and sign out from CXone service, use `ConnectionProvider.disconnect()`. It keep connection context and just invalides the web socket.
 
 ```swift
 CXoneChatSDK.shared.connection.disconnect()
 ```
 
-### Ping the Chat Server
-The SDK provides [`ping()`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/connectionprovider.htm) method to check if SDK is connected to the server. In case of any error, the SDK logs the error via internal Log Manager.
-
-```swift
-CXoneChatSDK.shared.connection.ping()
-```
-
 ### Execute Trigger Manually
-CXone platform can contain various triggers related to specific events. Host application can trigger it manually via [`executeTrigger(_:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/connectionprovider.htm) method based on its unique identifier. This method throws a `missingParameter` error in case of not established connection and missing customer.
+CXone platform can contain various triggers related to specific events. Host application can trigger it manually via `ConnectionProvider.executeTrigger(_:)` method based on its unique identifier.
 
 ```swift
 if let triggerId = UUID(uuidString: "1a2bc345-6789-12a3-4Bbc-d67890e12fhg") {
@@ -141,17 +159,17 @@ if let triggerId = UUID(uuidString: "1a2bc345-6789-12a3-4Bbc-d67890e12fhg") {
 ## Customer
 Section with customer related methods and properties. These methods allows to retrieve or set current customer, set OAuth stuff or just update customer credentials.
 
-Following features are provided via [`CXoneChat.shared.customer`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm) provider.
+Following features are provided via `CXoneChat.shared.customer` provider.
 
 ### Get Current Customer
-The [`get()`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm) returns a customer who is currently using host application. When establishing a connection, the SDK initialize new customer with empty credentials, so this method returns a customer with nil first and last name.
+The `CustomerProvider.get()` returns a customer who is currently using host application. When establishing a connection, the SDK initialize new customer with empty credentials, so this method returns a customer with nil first and last name.
 
 ```swift
 let customer = CXoneChat.shared.customer.get()
 ```
 
 ### Set Current Customer
-[set(_:)](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm) a customer can be used to update empty credentials, creating new one or removing the current.
+`CustomerProvider.set(_:)` a customer can be used to update empty credentials, creating new one or removing the current.
 
 > Important: Some features are available only when any customer is set. Setting `nil` customer might impact usability of the SDK.
 
@@ -171,7 +189,7 @@ CXoneChat.shared.customer.set(nil)
 ```
 
 ### Set Device Token
-It is necessary to register device to be able to use push notifications. For this case, the SDK provides two methods - [first](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm) uses a *String* representation of the token, [second](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm) uses `Data` data type.
+It is necessary to register the device to be able to use push notifications. For this case the SDK provides two methods `CustomerProvider.setDeviceToken(_:)` - the first one uses a *String* representation of the token, the second one uses the `Data` datatype.
 ```swift
 func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
     CXoneChat.shared.customer.setDeviceToken(deviceToken)
@@ -179,7 +197,7 @@ func application(_ application: UIApplication, didRegisterForRemoteNotifications
 ```
 
 ### Set Authorization Code
-The SDK supports OAuth user authorization. For this feature, application has to provide the code with [`setAuthorizationCode(_:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm) to be able to obtain an access token. It has to be obtained before establishing a connection via `connect()` methods. 
+The SDK supports OAuth user authorization. For this feature, application has to provide the code with `CustomerProvider.setAuthorizationCode(_:)` to be able to obtain an access token. It has to be obtained before establishing a connection via `connect()` methods. 
 
 Example from he sample application uses Amazon OAuth:
 
@@ -192,7 +210,7 @@ AMZNAuthorizationManager.shared().authorize(request) { [weak self] result, _, er
 ```
 
 ### Set Code Verifier
-The SDK supports OAuth 2.0 which uses proof key for code exchange - [PKCE](https://oauth.net/2/pkce/). Above setting the authorization code, it is necessary to provide a code verifier with [`setCodeVerifier(_:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm), which is forwarded in the request to the OAuth authorization manager. Code verifier has to be passed so CXone can retrieve an authorization token. 
+The SDK supports OAuth 2.0 which uses proof key for code exchange - [PKCE](https://oauth.net/2/pkce/). Above setting the authorization code, it is necessary to provide a code verifier with `CustomerProvider.setCodeVerifier(_:)`, which is forwarded in the request to the OAuth authorization manager. Code verifier has to be passed so CXone can retrieve an authorization token. 
 
 The sample application uses third party framework [Swift-PKCE](https://github.com/hendrickson-tyler/swift-pkce) to be able to generate code verifier.
 
@@ -215,12 +233,12 @@ AMZNAuthorizationManager.shared().authorize(request) { [weak self] result, _, er
 ```
 
 ### Set Customer Name
-Method [`setName(firstName:lastName:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm) updates a customer name, even with empty values or initialize new one when the customer has been set to `nil` with [`set(_:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customerprovider.htm) method.
+Method `CustomerProvider.setName(firstName:lastName:)` updates a customer name, even with empty values or initialize new one when the customer has been set to `nil` with `CustomerProvider.set(_:)` method.
 
 In the sample application, user credentials are provided with pre-chat survey and parsed from the custom fields.
 
 ```swift
-let controller = FormViewController(entity: enity) { [weak self] customFields in
+let controller = FormViewController(entity: entity) { [weak self] customFields in
     CXoneChat.shared.customer.setName(
         firstName: customFields.first { $0.key == "firstName" }.map(\.value) ?? "",
         lastName: customFields.first { $0.key == "lastName" }.map(\.value) ?? ""
@@ -234,10 +252,10 @@ let controller = FormViewController(entity: enity) { [weak self] customFields in
 ## Customer Custom Fields
 Section with custom fields related methods. These methods allows to contact, specific thread, or customer, persists across all threads, custom fields.
 
-Following features are provided via [`CXoneChat.shared.customFields`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customercustomfieldsprovider.htm) provider.
+Following features are provided via `CXoneChat.shared.customFields` provider.
 
 ### Get Customer Custom Fields
-Method [`get()`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customercustomfieldsprovider.htm) returns array of `CustomFieldType`, that can be a textfield, selector or hierarchical type, if any customer custom fields exists; otherwise, it returns empty array.
+Method `CustomerCustomFieldsProvider.get()` returns array of `CustomFieldType`, that can be a textfield, selector or hierarchical type, if any customer custom fields exists; otherwise, it returns empty array.
 
 ```swift
 let customerCustomFields: [CustomFieldType] = CXoneChat.shared.customerCustomFields.get()
@@ -250,19 +268,15 @@ let ageCustomField = customerCustomFields.first { type in
 }
 ```
 
-### Get Key-Value Customer Custom Fields (deprecated)
-The [`get()`] method (https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customercustomfieldsprovider.htm) returns key-value pairs if custom fields exist. Otherwise it returns an empty array. However, this method has been replaced by `get() -> [CustomFieldType]` in version 1.1.0 and you should avoid using it as it will be obsolete in version 1.2.0.
-
-```swift
-let customerCustomFields: [String: String] = CXoneChat.shared.customerCustomFields.get()
-let ageCustomField = customerCustomFields.filter { $0.key == "age" }
-```
-
 ### Set Customer Custom Fields
-Customer custom fields are related to the customer and across all chat cases (threads). The [`set(_:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/customercustomfieldsprovider.htm) method has to be called only with established connection to the CXone service; otherwise, it throws and error.
+Customer custom fields are related to the customer and across all chat cases (threads). The `CustomerCustomFieldsProvider.set(_:)` method has to be called only with established connection to the CXone service; otherwise, it throws an error.
 
 ```swift
-CXoneChat.shared.customeFields.set(["age": "29"])
+do {
+    try CXoneChat.shared.customeFields.set(["age": "29"])
+} catch {
+    ...
+}
 ```
 
 
@@ -271,7 +285,7 @@ You can make your app single- or multi-threaded. If your app is single-threaded,
 
 Threads provider allows to get current or load thread/s, create new one, archive or even mark thread a read.
  
-Following features are provided via [`CXoneChat.shared.threads`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) provider.
+Following features are provided via `CXoneChat.shared.threads` provider.
 
 > Important: Threads provider also contain providers for message and contact custom fields according to its context.
 
@@ -287,60 +301,50 @@ if let preChatSurvey = CXoneChat.shared.threads.preChatSurvey {
 ```
 
 ### Get Current Threads
-Retrieving an array of current threads is provided with the [`get()`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) method. It returns threads if any exist; otherwise, it returns empty array.
+Retrieving an array of current threads is provided with the `ChatThreadsProvider.get()` method. It returns threads if any exist; otherwise, it returns empty array.
 
 ```swift
-documentState.threads = CXoneChat.shared.threads
+chatThreads = CXoneChat.shared.threads
     .get()
-    .filter(\.canAddMoreMessages)
+    .filter { $0.state != .closed }
 ```
 
 ### Create New Thread
-For creating a new array, the SDK provides [`create()`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) method. Mandatory is to have established connection to the CXone service. Also, if your channel does not support multi-channel configuration, you should not call this method, if you already have a thread. On the other hand, the SDK throws  `unsupportedChannelConfig` error. This method also returns unique identifier of newly created thread.
+For creating a new thread, the SDK provides `ChatThreadsProvider.create()` method. You must establish connection to the CXone service via `connect()` before calling this method. If your channel does not support multi-channel configuration, you should not call this method if you already have a thread. If you call this method without first calling `connect()` or if multichannel configurations are not supported, the SDK throws  `unsupportedChannelConfig` error. This method returns the unique identifier of the newly created thread.
 
 ```swift
 let threadId = try CXoneChat.shared.threads.create()
 
-guard  let thread = CXoneChat.shared.threads.get().thread(by: threadId) else {
+guard let thread = CXoneChat.shared.threads.get().thread(by: threadId) else {
     ...
 }
 ...
 ```
 
-### Load Thread/s
-The SDK provides two load methods. [First](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) one loads all of the threads for the current customer which should be called only for multi-thread channel configuration or if you are convinced you don't have any existing threads. Also, it has to be called when connection is established. [Second](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) method uses a thread ID to load specific or when you pass `nil`, it will try to load active thread. If there is no active thread, this returns an error which is forwarded to the [`onThredLoadFail(_:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/cxonechatdelegate.htm) delegate method.
+### Load Thread(s)
+The SDK automatically loads thread(s) when establishing connection to the CXone services and it is not necessary to handle it manually. However, it is necessary to manually load thread for multi-threaded channel configuration because thread list does not contain all previously sent/received messages. When any thread from thread list is selected, host application should use `ChatThreadsProvider.load(with:)` method to recover thread data. The SDK will then notify the application with `onThreadUpdated(_:)` delegate method about recovered thread with all possible data and thread is ready for usage.
 
-> Important: Load error should be marked as a soft error because it means there are just no available thread/s.
-
-```swift
-func loadThreads() throws {
-    if documentState.isMultiThread {
-        try CXoneChat.shared.threads.load()
-    } else {
-        try CXoneChat.shared.threads.load(with: nil)
-    }
-}
-```
-
-### Load Thread Information
-[`loadInfo(for:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) loads metadata of the thread. It also provides the move reset message for the thread so can use this to show a preview of the last message. It is necessary to have established connection. On the other hand, it throws and error. 
+> Important: `load()` and `load(with:)` should no longer be used for loading thread after connection.
 
 ```swift
-func onThreadsLoad(_ threads: [ChatThread]) {
-    ... 
-    documentState.threads.forEach { thread in
-        do {
-            try CXoneChat.shared.threads.loadInfo(for: thread)
-        } catch {
-            ...
-        }
-    }
+func onAppear() {
     ...
+
+    do {
+        ...
+        guard CXoneChat.shared.mode == .multithread else {
+            return
+        }
+
+        try CXoneChat.shared.threads.load(with: thread.id)
+    } catch {
+        ...
+    }
 }
 ```
 
 ### Update Thread Name
-Updating thread name with [`updateName(_:for:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) method is available only for multi-thread channel configuration. Also it has to be called only when connection is established and for existing thread. If one of this condition is not satisifed, it throws and error.
+Updating thread name with `ChatThreadsProvider.updateName(_:for:)` method is available only for multi-thread channel configuration. Also it has to be called only when connection is established and for existing thread. If one of this condition is not satisifed, it throws an error.
 
 ```swift
 do {
@@ -351,44 +355,47 @@ do {
 ```
 
 ### Archive Thread
-[archive(_:)](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) method change thread property `canAddMoreMessages` so user can not communicate with an agent in selected thread. Method is available only for multi-thread channel configuration and with established connection. Any other way it throws an error.
+`ChatThreadsProvider.archive(_:)` method change thread property `canAddMoreMessages` so user can not communicate with an agent in selected thread. Method is available only for multi-thread channel configuration and with established connection. Any other way it throws an error.
 
 ```swift
-func onThreadSwipeToDelete(_ thread: ChatThread) {
+func onSwipeToDelete(offsets: IndexSet) {
     ...
-
     do {
-        try CXoneChat.shared.threads.archive(thread)
+        try CXoneChat.shared.threads.archive(deletedThread)
         ...
     } catch {
-    ...
+        ...
     }
 }
 ```
 
 ### Mark Thread as Read
-The SDK provides [`markRead(_:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) method which reports that the most recept message, of the specific thread, was ready by the customer.
+The SDK provides `ChatThreadsProvider.markRead(_:)` method which reports that the most recept message, of the specific thread, was ready by the customer.
 
 ```swift
-do {
-    try CXoneChat.shared.threads.markRead(thread)
-} catch {
-    ...
+func onAppear() {
+    ...    
+    do {
+        ...
+        try CXoneChat.shared.threads.markRead(thread)
+        ...
+    } catch {
+        ...
+    }
 }
 ```
 
 ### Report Typing Start/End
-[`reportTypingStart(_: in:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/chatthreadsprovider.htm) reports the customer has started or finished typing in the specified chat thread. It is necessary to have established connection; otherwise, it throws and error.
+`ChatThreadsProvider.reportTypingStart(_: in:)` reports the customer has started or finished typing in the specified chat thread. It is necessary to have established connection; otherwise, it throws an error.
 
 ```swift
-func inputBar(_ inputBar: InputBarAccessoryView, textViewTextDidChangeTo text: String) {
+func onUserTyping() {
     ...
-    try CXoneChat.shared.threads.reportTypingStart(true, in: presenter.documentState.thread)
     
-    ...
-    self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer  in
+    do {
+        try CXoneChat.shared.threads.reportTypingStart(isUserTyping, in: thread)
+    } catch {
         ...
-        try CXoneChat.shared.threads.reportTypingStart(false, in: self.presenter.documentState.thread)
     }
 }
 ```
@@ -397,76 +404,60 @@ func inputBar(_ inputBar: InputBarAccessoryView, textViewTextDidChangeTo text: S
 ## Thread Messages
 Section with thread messages related methods. These methods allows to load additional messages and send a message.
 
-Following features are provided via [`CXoneChat.shared.threads.messages`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/messagesprovider.htm) provider.
+Following features are provided via `CXoneChat.shared.threads.messages` provider.
 
 ### Load More Messages
- [loadMore(for:)](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/messagesprovider.htm) loads another page of messages for the thread. By default, when a user loads an old thread, they see a page of 20 messages. This function loads 20 more messages if the user scrolls up and swipe down to load more.
+ `MessagesProvider.loadMore(for:)` loads another page of messages for the thread. By default, when a user loads an old thread, they see a page of 20 messages. This function loads 20 more messages if the user scrolls up and swipe down to load more.
+
+> Important: Should be triggered only in case thread has more messages to load!
 
 ```swift
-@objc
-func didPullToRefresh() {
-    if presenter.documentState.thread.hasMoreMessagesToLoad {
-        do {
-            try CXoneChat.shared.threads.messages.loadMore(for: presenter.documentState.thread)
-        } catch {
-            ...
-        }
-    } else {
+func onPullToRefresh(refreshControl: UIRefreshControl) {
+    guard thread.hasMoreMessagesToLoad else {
         ...
+        return
+    }
+
+    ...
+        
+    do {
+        try CXoneChat.shared.threads.messages.loadMore(for: thread)
+    } catch {
+       ...
     }
 }
 ```
 
 ### Send a Message
-Sends the contact's message string, via [`send(_:for:`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/messagesprovider.htm) method, through the WebSocket to the thread it belongs to. It uses new Swift [concurrency](https://developer.apple.com/documentation/swift/updating_an_app_to_use_swift_concurrency). It is necessary to have established connection; otherwise, it throws and error.
+Sends the contact's message string, via `MessagesProvider.send(_:for:)` method, through the WebSocket to the thread it belongs to. It is necessary to have established connection; otherwise, it throws an error.
 
 Also, this method returns a `Message` object to be able to append it to the chat history before the BE emits the relevant event and the SDK informs about it with the `onNewMessage(_:)` delegate method.
 
 ```swift
-func onSendMessage(_ message: OutboundMessage) async throws {
-    let newMessage = try await CXoneChat.shared.threads.messages.send(message, for: documentState.thread)
-
-    documentState.thread.messages.append(newMessage)
-}
-```
-Where `message` stands for `OutboundMessage(text: text, postback: postback)`.
-
-### Send a Text Message (deprecated)
-Sends the contact's message string, via [`send(_:for:`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/messagesprovider.htm) method, through the WebSocket to the thread it belongs to. It uses new Swift [concurrency](https://developer.apple.com/documentation/swift/updating_an_app_to_use_swift_concurrency). It is necessary to have established connection; otherwise, it throws and error. However, this method has been replaced by `func send(_:for:) async throws -> Message` in version 1.1.0 and you should avoid using it as it will be obsolete in version 1.2.0.
-
-```swift
-Task { @MainActor in
-    do {
-        try await CXoneChat.shared.threads.messages.send(text, for: presenter.documentState.thread)
-    } catch {
-        ...
+@MainActor
+func onSendMessage(_ messageType: ChatMessageType, attachments: [AttachmentItem], postback: String? = nil) {
+    ...
+        
+    Task { @MainActor in
+        do {
+            let newMessage = try await CXoneChat.shared.threads.messages.send(message, for: thread)
+            ...
+        } catch {
+            ...
+        }
     }
 }
 ```
-
-### Send a Text Message with an Attachment (deprecated)
-Sends images and other attachments, via [`send(_:with:for:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/messagesprovider.htm) from the contact to the agent. Contacts can upload more than one at a time. It uses new Swift [concurrency](https://developer.apple.com/documentation/swift/updating_an_app_to_use_swift_concurrency). It is necessary to have established connection; otherwise, it throws and error. It also throws and error when attachment sending process failed.  However, this method has been replaced by `func send(_:for:) async throws -> Message` in version 1.1.0 and you should avoid using it as it will be obsolete in version 1.2.0.
-
-```swift
-Task { @MainActor in
-    do {
-        try await CXoneChat.shared.threads.messages.send(
-            message, 
-            with: attachments, 
-            for: presenter.documentState.thread
-        )
-    }
-}
-```
+Where `message` stands for `OutboundMessage(text:attachments:postback:)`.
 
 
 ## Thread Custom Fields
 Section with contact custom fields related methods. These methods allows to get and set contact, specific thread, custom fields.
 
-Following features are provided via [`CXoneChat.shared.threads.customFields`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/contactcustomfieldsprovider.htm) provider.
+Following features are provided via `CXoneChat.shared.threads.customFields` provider.
 
 ### Get Customer Custom Fields
-Method [`get(for:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/contactcustomfieldsprovider.htm) returns array of `CustomFieldType`, that can be a textfield, selector or hierarchical type, if any customer custom fields exists; otherwise, it returns empty array.
+Method `ContactCustomFieldsProvider.get(for:)` returns array of `CustomFieldType`, that can be a textfield, selector or hierarchical type, if any customer custom fields exists; otherwise, it returns empty array.
 
 ```swift
 let contactCustomFields: [CustomFieldType] = CXoneChat.shared.threads.customFields.get()
@@ -479,23 +470,15 @@ let locationCustomField = contactCustomFields.first { type in
 }
 ```
 
-### Get Key-Value Contact Custom Fields (deprecated)
-Retrieving contact custom fields with method [`get(for:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/contactcustomfieldsprovider.htm) is based on the unique thread identifier. If custom fields exists, it returns key-value pairs; otherwise, it returns empty array. However, this method has been replaced by `get(for:) -> [CustomFieldType]` in version 1.1.0 and you should avoid using it as it will be obsolete in version 1.2.0.
-
-```swift
-let locationCustomField: [String: String] = CXoneChat.shared.threads.customFields
-    .get(for: documentState.thread.id)
-    .first { $0.key == "location" }
-```
-
 ### Set Contact Custom Fields
-Contact custom fields are related to the customer and specific chat case (thread). [`set(_:for:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/contactcustomfieldsprovider.htm) stores custom fields based on thread unique identifier. This method has to be called only with established connection to the CXone service; otherwise, it throws and error.
+Contact custom fields are related to the customer and specific chat case (thread). `ContactCustomFieldsProvider.set(_:for:)` stores custom fields based on thread unique identifier. This method has to be called only with established connection to the CXone service; otherwise, it throws an error.
 
 ```swift
-let controller = FormViewController(entity: entity) { [weak  self] customFields in
+...
+defaultChatCoordinator.presentForm(title: "Custom Fields", customFields: entities) { [weak self] customFields in
     ...
     do {
-        try CXoneChat.shared.threads.customFields.set(customFields, for: self.documentState.thread.id)
+        try CXoneChat.shared.threads.customFields.set(customFields, for: thread.id)
     } catch {
         ...
     }
@@ -504,57 +487,65 @@ let controller = FormViewController(entity: entity) { [weak  self] customFields 
 
 
 ## Analytics
-The SDK allows to report several events from the client side. You can report open the application, page view, proactive actions or even when customer did start typing.
+The SDK can report several events from the client side. You can report opening the application, page view, proactive actions or even when customer did start typing.
 
-Following features are provided via [`CXoneChat.shared.analytics`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) provider.
+Following features are provided via `CXoneChat.shared.analytics` provider.
+
+> Important: For Analytics usage, it is necessary to have chat atleast in `.prepared` state!
 
 ### Get VisitorID
-Whenever you need customer visitor identifier, this provider allows it. It is necessary to be connected to the CXone service because this identifier generates with establishing a connection; otherwise, it returns nil.
+Whenever you need customer visitor identifier, this provider allows it. In order to create it, it is necessary to previously establish connection or call one of the available analytics methods. Otherwise, it returns nil.
 
 ```swift
 let visitorId = CXoneChat.shared.analytics.visitorId
 ```
 
 ### View Page
-The SDK provides [viewPage(title:uri:)](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) method which reports to CXone service some page in the application has been viewed by the visitor. It reports its title and uri. It is necessary to have established connection; otherwise, it throws and error.
+The SDK provides `AnalyticsProvider.viewPage(title:uri:)` method which reports to CXone service some page in the application has been viewed by the visitor. It reports its title and uri.
 
 ```swift
-func onViewWillAppear() {
-    ...
-    do {
-        try CXoneChat.shared.analytics.viewPage(title: "ChatView", uri: "chat-view")
-    } catch {
-        ...
+func onAppear() {
+    Task {
+        do {
+            try await CXoneChat.shared.analytics.viewPage(title: "products?smartphones", uri: "/products/smartphones")
+        } catch {
+            ...
+        }
     }
+    
+    ...
+}
+```
+
+### View Page Ended
+The SDK provides `AnalyticsProvider.viewPageEnded(title:uri:)` method which reports to CXone service some page in the application is being closed. It reports its title, uri and internally also current timestamp.
+
+```swift
+func willDisappear() {
+    Task {
+        do {
+            try await CXoneChat.shared.analytics.viewPageEnded(title: "products?smartphones", uri: "/products/smartphones")
+        } catch {
+            ...
+        }
+    }
+    
+    ...
 }
 ```
 
 ### Chat Window Open
-[`chatWindowOpen()`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) reports to CXone the chat window has been opened by the visitor. It is necessary to have established connection; otherwise, it throws and error.
+`AnalyticsProvider.chatWindowOpen()` reports to CXone the chat window has been opened by the visitor. It is necessary to have established connection; otherwise, it throws an error.
 
 ```swift
-func onConnect() {
+func onAppear() {
     ...
     do {
-        ...
-        CXoneChat.shared.analytics.chatWindowOpen()
-        ...
-    } catch {
-        ...
-    }
-}
-```
-
-### Application Visit
-Method [`visit()`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) reports to CXone service visitor has visited the application. It is necessary to have established connection; otherwise, it throws and error.
-
-```swift
-func onConnect() {
-    ...
-    do {
-        ...
-        try CXoneChat.shared.analytics.visit()
-        ...
+        Task {
+            // Report chat window opened
+            try await CXoneChat.shared.analytics.chatWindowOpen()
+        }
+    ...    
     } catch {
         ...
     }
@@ -562,226 +553,136 @@ func onConnect() {
 ```
 
 ### Conversion
-[`conversion(type:value:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) is an event which notifes the backend that a conversion has been made. Conversions are understood as a completed activities that are important to your business. It is necessary to have established connection; otherwise, it throws and error.
+`AnalyticsProvider.conversion(type:value:)` is an event which notifes the backend that a conversion has been made. Conversions are understood as a completed activities that are important to your business. It is necessary to have established connection; otherwise, it throws an error.
 
 ```swift
-try CXoneChat.shared.analytics.conversion(type: conversionType, value: conversionValue)
+@MainActor
+func checkout() async {
+    ...
+    
+    Task {
+        do {
+            try await CXoneChat.shared.analytics.conversion(type: "purchase", value: totalAmount)
+        } catch {
+            ...
+        }
+    }
+        
+    ...
+}
 ```
 
 ### Custom Visitor Event
-[customVisitorEvent(data:)](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) can report to CXone service some event, which is not covered by other existing methods, occurred with the visitor. It is necessary to have established connection; otherwise, it throws and error.
+`AnalyticsProvidercustomVisitorEvent(data:)` can report to CXone service some event, which is not covered by other existing methods, occurred with the visitor. It is necessary to have established connection; otherwise, it throws an error.
 
 ```swift
 try CXoneChat.analytics.customVisitorEvent(data: .custom(eventData))
 ```
 
 ### Proactive Action Display
-[`proactiveActionDisplay(data:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) reports proactive action was displayed to the visitor in the application. It is necessary to have established connection; otherwise, it throws and error.
+`AnalyticsProvider.proactiveActionDisplay(data:)` reports proactive action was displayed to the visitor in the application. It is necessary to have established connection; otherwise, it throws an error.
 
 ```swift
 func setup() {
     ...
-    try? CXoneChat.shared.analytics.proactiveActionDisplay(data: actionDetails)
+    Task {
+        do {
+            try await CXoneChat.shared.analytics.proactiveActionDisplay(data: actionDetails)
+        } catch {
+            ...
+        }
+    }
+        
+    ...
 }
 ```
 
 ### Proactive Action Click
-[`proactiveActionClick(data:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) reports proactive action was clicked or acted upon by the visitor. It is necessary to have established connection; otherwise, it throws and error.
+`AnalyticsProvider.proactiveActionClick(data:)` reports proactive action was clicked or acted upon by the visitor. It is necessary to have established connection; otherwise, it throws an error.
 
 ```swift
-func setup() {
+func onProactiveActionClicked() {
     ...
-    try? CXoneChat.shared.analytics.proactiveActionClick(data: actionDetails)
+    
+    Task {
+        do {
+            try await CXoneChat.shared.analytics.proactiveActionClick(data: self.actionDetails)
+        } catch {
+            ...
+        }
+    }
+    
+    ...
 }
 ```
 
 ### Proactive Action Success/Failure
-[`proactiveActionSuccess(_: data:)`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/analyticsprovider.htm) reports proactive action was successful or fails and lead to a conversion based on `Bool` given in the parameter. It is necessary to have established connection; otherwise, it throws and error.
+`AnalyticsProvider.proactiveActionSuccess(_: data:)` reports proactive action was successful or fails and lead to a conversion based on `Bool` given in the parameter. It is necessary to have established connection; otherwise, it throws an error.
 
 ```swift
-@objc
-func fireTimer() {
+func reportProactiveAction(successful: Bool) {
     ...
-    do {
-        try CXoneChat.shared.analytics.proactiveActionSuccess(false, data: actionDetails)
-    } catch {
-        ...
+
+    Task {
+        do {
+            try await CXoneChat.shared.analytics.proactiveActionSuccess(successful, data: self.actionDetails)
+        } catch {
+            ...
+        }
     }
+
+    ...
 }
 ```
 
 
 ## Event Delegates
-The following are examples, from the sample application, of actions that can occur during a chat that you might want to have trigger an action. These [`CXoneChatDelegate`](https://help.nice-incontact.com/content/acd/digital/mobilesdk/ios/sdklibrary/protocols/cxonechatdelegate.htm) events might cause a notification to appear, a new page to open, or some other action to occur.
+The following are examples, from the sample application, of actions that can occur during a chat that you might want to have trigger an action. These `CXoneChatDelegate` events might cause a notification to appear, a new page to open, or some other action to occur.
 
-### On Connect
-Callback to be called when the connection has successfully been established.
+### On Chat Updated
+Callback to be called when the chat state has been updated. it can handle loading while preparing or connecting to the CXone services or trigger new chat thread creation.
 
 ```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onConnect() {
-        documentState.isConnected = true
-        
-        do {
-            try loadThreads()
-            
-            try CXoneChat.shared.analytics.chatWindowOpen()
-            try CXoneChat.shared.analytics.viewPage(title: "ThreadList", uri: "thread-view")
-        } catch {
-            error.logError()
-            viewState.toError(title: "Ops!", message: error.localizedDescription)
-        }
-    }
+func onChatUpdated(_ chatState: ChatState, mode: ChatMode) {
+    ...
 }
 ```
+
 
 ### On Unexpected Disconnect
 Callback to be called when the connection unexpectedly drops. If possible, you can immediately reconnect to the CXone services.
 
 ```swift
-extension ThreadListPresenter: CXoneChatDelegate {
+func onUnexpectedDisconnect() {
+    ...
 
-    func onUnexpectedDisconnect() {
-        documentState.isConnected = false
-        
-        Task { @MainActor in
-            viewState.toLoading(title: "Reconnecting...")
-            
-            await connect()
+    Task { @MainActor in
+        do {
+            try await connect()
+        } catch {
+            ...
         }
     }
 }
 ```
 
-### On Thread Load
-Callback to be called when a thread has been loaded/recovered.
+### On Thread Updated
+Callback to be called when a thread has been recovered with all data. This event is fired whenever a chat thread is modified, e.g. thread name updated, agent changed, more messages loaded or received/sent message.
+
+It is necessary to handle everything that was previously handled via `onAgentChanged(_:for:)`, `onThreadUpdate()`, `onAgentReadMessage(threadId:)`, etc. within this delegate method.
 
 ```swift
-extension ThreadDetailViewController: CXoneChatDelegate {
-
-    func onThreadLoad(_ thread: ChatThread) {
-        DispatchQueue.main.async {
-            self.hideLoading()
-            
-            self.updateThreadData()
-            
-            self.scrollToBottomIfNeeded()
-        }
-    }
+func onThreadUpdated(_ chatThread: ChatThread) {
+    ...
 }
 ```
 
-### On Thread Archive
-Callback to be called when a thread has been archived.
+### On Threads Updated
+Callback to be called when a threads have been loaded with metadata and ready to use. This event is fired whenever a chat threads are modified, e.g. thread archived.
 
 ```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onThreadArchive() {
-        documentState.threads = getThreads()
-        
-        viewState.toLoaded(documentState: documentState)
-    }
-}
-```
-
-### On Threads Load
-Callback to be called when all of the threads for the customer have loaded.
-
-```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onThreadsLoad(_ threads: [ChatThread]) {
-        documentState.threads = threads.filter { documentState.isCurrentThreadsSegmentSelected ? $0.canAddMoreMessages : !$0.canAddMoreMessages }
-        
-        if !documentState.threads.isEmpty {
-            documentState.threads.forEach { thread in
-                do {
-                    try CXoneChat.shared.threads.loadInfo(for: thread)
-                } catch {
-                    error.logError()
-                }
-            }
-        } else {
-            viewState.toLoaded(documentState: documentState)
-        }
-    }
-}
-```
-
-### On Thread Info Load
-Callback to be called when thread info has loaded.
-
-```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onThreadInfoLoad(_ thread: ChatThread) {
-        documentState.threads = getThreads()
-        
-        if case .thread(let threadId) = input.option, thread.id == threadId {
-            Task { @MainActor in
-                navigation.navigateToThread(thread)
-            }
-        }
-        if documentState.threads.filter({ $0.messages.isEmpty }).isEmpty {
-            viewState.toLoaded(documentState: documentState)
-        }
-    }
-}
-```
-
-### On Thread Update
-Callback to be called when the thread has been updates (thread name changed).
-
-```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onThreadUpdate() {
-        documentState.threads = getThreads()
-        
-        viewState.toLoaded(documentState: documentState)
-    }
-}
-```
-
-### On Load More Messages
-Callback to be called when a new page of message has been loaded.
-
-```swift
-extension ThreadDetailViewController: CXoneChatDelegate {
-
-    func onLoadMoreMessages(_ messages: [Message]) {
-        DispatchQueue.main.async {
-            self.myView.refreshControl.endRefreshing()
-        }
-        
-        updateThreadData()
-    }
-}
-```
-
-### On New Message
-Callback to be called when a new message arrives.
-
-```swift
-extension ThreadDetailViewController: CXoneChatDelegate {
-
-    func onNewMessage(_ message: Message) {
-        self.hideLoading()
-        
-        if message.threadId == presenter.documentState.thread.id {
-            DispatchQueue.main.async {
-                self.updateThreadData()
-                (self.inputAccessoryView as? InputBarAccessoryView)?.sendButton.stopAnimating()
-                (self.inputAccessoryView as? InputBarAccessoryView)?.inputTextView.placeholder = "Aa"
-                
-                self.scrollToBottomIfNeeded()
-            }
-        } else {
-            presenter.onMessageReceivedFromOtherThread(message)
-        }
-    }
+func onThreadsUpdated(_ chatThreads: [ChatThread]) {
+    ...
 }
 ```
 
@@ -789,71 +690,17 @@ extension ThreadDetailViewController: CXoneChatDelegate {
 Callback to be called when a custom plugin message is received. However, known custom plugin message should be handled directly with rest of the message types (text message, satisfaction survey, quick replies etc.)
 
 ```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onCustomPluginMessage(_ messageData: [Any]) {
-        Log.info("Plugin message received")
-
-        viewState.toLoaded(documentState: documentState)
-}
-```
-
-### On Agent Change
-Callback to be called when the agent for the contact has changed.
-
-```swift
-extension ThreadDetailViewController: CXoneChatDelegate {
-    
-    func onAgentChange(_ agent: Agent, for threadId: UUID) {
-        presenter.documentState.thread.assignedAgent = agent
-        
-        guard self.presenter.documentState.thread.name.isNilOrEmpty else {
-            return
-        }
-        
-        DispatchQueue.main.async {
-            self.navigationItem.title = agent.fullName.mapNonEmpty { $0 } ?? "No Name"
-        }
-    }
-}
-```
-
-### On Agent Read Message
-Callback to be called when the agent has read a message.
-
-```swift
-extension ThreadDetailViewController: CXoneChatDelegate {
-
-    func onAgentReadMessage(threadId: UUID) {
-        updateThreadData()
-    }
+func onCustomPluginMessage(_ messageData: [Any]) {
+    ...
 }
 ```
 
 ### On Agent Typing Started/Ended
-Callback to be called when the agent has stopped typing.
+Callback to be called when the agent has stared/stopped typing.
 
 ```swift
-extension ThreadDetailViewController: CXoneChatDelegate {
-
-    func onAgentTyping(_ isTyping: Bool, threadId: UUID) {
-        guard threadId == presenter.documentState.thread.id else {
-            Log.error("Did start typing in unknown thread.")
-            return
-        }
-        guard timer == nil else {
-            Log.error("Could not handle typing indicator because timer is not nil.")
-            return
-        }
-        
-        if isTyping {
-            setTypingIndicatorViewHidden(false) {
-                self.scrollToBottomIfNeeded()
-            }
-        } else {
-            setTypingIndicatorViewHidden(true, performUpdates: nil)
-        }
-    }
+func onAgentTyping(_ isTyping: Bool, threadId: UUID) {
+    ...
 }
 ```
 
@@ -862,7 +709,6 @@ Callback to be called when the custom fields are set for a contact.
 
 ```swift
 func onContactCustomFieldsSet() {
-    Log.message("Contact custom fields did set.")
     ...
 }
 ```
@@ -872,7 +718,6 @@ Callback to be called when the custom fields are set for a customer.
 
 ```swift
 func onCustomerCustomFieldsSet() {
-    Log.message("Customer custom fields did set.")
     ...
 }
 ```
@@ -881,18 +726,8 @@ func onCustomerCustomFieldsSet() {
 Callback to be called when an error occurs.
 
 ```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onError(_ error: Error) {
-        // "recoveringThreadFailed" is a soft error.
-        if let error = error as? CXoneChatError, error == CXoneChatError.recoveringThreadFailed {
-            Log.info(error.localizedDescription)
-        } else {
-            error.logError()
-        }
-        
-        viewState.toLoaded(documentState: documentState)
-    }
+func onError(_ error: Error) {
+    ...
 }
 ```
 
@@ -900,13 +735,8 @@ extension ThreadListPresenter: CXoneChatDelegate {
 Callback to be called when refreshing the token has failed.
 
 ```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onTokenRefreshFailed() {
-        CXoneChat.shared.customer.set(nil)
-        
-        navigation.navigateToLogin()
-    }
+func onTokenRefreshFailed() {
+    ...
 }
 ```
 
@@ -915,7 +745,6 @@ Callback to be called when a welcome message proactive action has been received.
 
 ```swift
 func onWelcomeMessageReceived() {
-    Log.message("Welcome message did receive.")
     ...
 }
 ```
@@ -924,10 +753,7 @@ func onWelcomeMessageReceived() {
 Callback to be called when a custom popup proactive action is received.
 
 ```swift
-extension ThreadListPresenter: CXoneChatDelegate {
-
-    func onProactivePopupAction(data: [String: Any], actionId: UUID) {
-        navigation.showProactiveActionPopup(data, actionId)
-    }
+func onProactivePopupAction(data: [String: Any], actionId: UUID) {
+    ...
 }
 ```
