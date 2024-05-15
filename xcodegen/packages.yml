@@ -31,7 +31,7 @@ packages:
     from: 10.0.0
   CXoneChatSDK:
     url: https://github.com/nice-devone/nice-cxone-mobile-sdk-ios.git
-    from: 1.3.2
+    from: 1.3.3
   CXoneChatUI:
     url: https://github.com/nice-devone/nice-cxone-mobile-ui-ios.git
-    from: 1.3.2
+    from: 1.3.3
