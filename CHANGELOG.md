@@ -3,7 +3,6 @@
 
 ### Features
 - Minimum iOS deployment target set to iOS 14.0
-- add Mobile SDK EU1 QA configurations
 
 <a name="1.3.3"></a>
 ## [1.3.3] - 2024-05-15
