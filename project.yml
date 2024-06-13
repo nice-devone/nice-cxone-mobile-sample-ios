@@ -48,7 +48,6 @@ targetTemplates:
     sources:
       - path: iOSSDKExample/Sources
       - path: iOSSDKExample/Supporting Files
-      - path: ../shared/assets
     dependencies:
       - package: CXoneChatSDK
       - package: CXoneChatUI
