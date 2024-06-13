@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -35,21 +35,19 @@ struct SettingsFilePickerView: UIViewControllerRepresentable {
         }
 
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            guard let imageUrl = urls.first, imageUrl.startAccessingSecurityScopedResource() else {
+            guard let imageUrl = urls.first else {
                 Log.error(.failed("Unable to access image url."))
                 return
             }
-            
-            defer {
-                imageUrl.stopAccessingSecurityScopedResource()
-            }
-            
+
             do {
-                let data = try Data(contentsOf: imageUrl)
-                try FileManager.default.storeFileDataInDocuments(data, named: SettingsViewModel.brandLogoFileName)
-                
-                if let uiImage = UIImage(data: data) {
-                    parent.image = uiImage
+                try imageUrl.accessSecurelyScopedResource { url in
+                    let data = try Data(contentsOf: url)
+                    try FileManager.default.storeFileDataInDocuments(data, named: SettingsViewModel.brandLogoFileName)
+
+                    if let uiImage = UIImage(data: data) {
+                        parent.image = uiImage
+                    }
                 }
             } catch {
                 error.logError()

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -20,17 +20,16 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     
     // MARK: - Properties
     
-    private let deeplinkOption: DeeplinkOption?
-    
-    private let loginWithAmazon: LoginWithAmazonUseCase
-    private let getChannelConfiguration: GetChannelConfigurationUseCase
-    
-    private let configuration: Configuration
-    private let coordinator: LoginCoordinator
-    
     @Published var isLoading = true
     @Published var isLoadingTransparent = false
     @Published var shouldShowError = false
+    
+    let configuration: Configuration
+    
+    private let loginWithAmazon: LoginWithAmazonUseCase
+    private let getChannelConfiguration: GetChannelConfigurationUseCase
+    private let coordinator: LoginCoordinator
+    private let deeplinkOption: DeeplinkOption?
     
     // MARK: - Init
     
@@ -89,6 +88,12 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     
     func popToConfiguration() {
         Log.trace("Navigating to the configuration")
+        
+        isLoading = true
+        
+        RemoteNotificationsManager.shared.unregister()
+        LocalStorageManager.reset()
+        FileManager.default.eraseDocumentsFolder()
         
         coordinator.showConfiguration()
     }

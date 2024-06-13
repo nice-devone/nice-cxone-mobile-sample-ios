@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -14,24 +14,25 @@
 //
 
 import CXoneChatSDK
+
 import SwiftUI
 import Swinject
 
 struct ConfigurationView: View {
-    
+
     // MARK: - Properties
-    
+
     @State private var isShowingEnvironmentsSheet = false
     @State private var isShowingConfigurationsSheet = false
-    
+
     @ObservedObject var viewModel: ConfigurationViewModel
-    
+
     // MARK: - Builder
-    
+
     var body: some View {
         VStack {
             Spacer()
-            
+
             if viewModel.isDefaultConfigurationHidden {
                 customConfigurationSection
                     .transition(.opacity)
@@ -39,14 +40,14 @@ struct ConfigurationView: View {
                 defaultConfigurationSection
                     .transition(.opacity)
             }
-            
+
             Button(viewModel.isDefaultConfigurationHidden ? L10n.Configuration.Default.buttonTitle : L10n.Configuration.Custom.buttonTitle) {
                 withAnimation {
                     viewModel.isDefaultConfigurationHidden.toggle()
                 }
             }
             .padding(.vertical, 24)
-            
+
             Button {
                 viewModel.onConfirmButtonTapped()
             } label: {
@@ -83,14 +84,14 @@ struct ConfigurationView: View {
 // MARK: - Subviews
 
 private extension ConfigurationView {
-    
+
     var defaultConfigurationSection: some View {
         VStack {
             HStack {
                 Text(L10n.Configuration.environmentSelectionTitle)
-                
+
                 Spacer()
-                
+
                 Button(viewModel.environment.rawValue) {
                     isShowingConfigurationsSheet = true
                 }
@@ -100,14 +101,14 @@ private extension ConfigurationView {
                                 .default(Text(option.rawValue)) { viewModel.environment = option }
                         }
                     options.append(.cancel())
-                    
+
                     return ActionSheet(
                         title: Text(L10n.Configuration.environmentSelectionTitle),
                         buttons: options
                     )
                 }
             }
-            
+
             ValidatedTextField(
                 "1234",
                 text: $viewModel.brandId,
@@ -116,7 +117,7 @@ private extension ConfigurationView {
             )
             .keyboardType(.numberPad)
             .padding(.top, 24)
-            
+
             ValidatedTextField(
                 "chat_e11131fa...",
                 text: $viewModel.channelId,
@@ -130,9 +131,9 @@ private extension ConfigurationView {
     var customConfigurationSection: some View {
         HStack {
             Text(L10n.Configuration.configurationSelectionTitle)
-            
+
             Spacer()
-            
+
             Button(viewModel.customConfiguration.title) {
                 isShowingEnvironmentsSheet = true
             }
@@ -142,7 +143,7 @@ private extension ConfigurationView {
                         .default(Text(option.title)) { viewModel.customConfiguration = option }
                     }
                 options.append(.cancel())
-                
+
                 return ActionSheet(
                     title: Text(L10n.Configuration.environmentSelectionTitle),
                     buttons: options
@@ -156,21 +157,21 @@ private extension ConfigurationView {
 
 // swiftlint:disable force_unwrapping
 struct ConfigurationView_Previews: PreviewProvider {
-    
+
     private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
     private static var appModule = PreviewAppModule(coordinator: coordinator) {
         didSet {
             coordinator.assembler = appModule.assembler
         }
     }
-    
+
     static var previews: some View {
         Group {
             NavigationView {
                 appModule.resolver.resolve(ConfigurationView.self)!
             }
             .previewDisplayName("Light Mode")
-            
+
             NavigationView {
                 appModule.resolver.resolve(ConfigurationView.self)!
             }
@@ -179,3 +180,4 @@ struct ConfigurationView_Previews: PreviewProvider {
         }
     }
 }
+// swiftlint:enable force_unwrapping

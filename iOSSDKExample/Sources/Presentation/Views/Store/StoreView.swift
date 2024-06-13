@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ struct StoreView: View {
             },
             trailing: cartNavigationItem
         )
+        .navigationBarHidden(false)
     }
 }
 
@@ -143,7 +144,6 @@ private extension StoreView {
 
 // MARK: - Preview
 
-// swiftlint:disable force_unwrapping
 struct StoreView_Previews: PreviewProvider {
     
     private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
@@ -155,6 +155,7 @@ struct StoreView_Previews: PreviewProvider {
     
     static var previews: some View {
         Group {
+            // swiftlint:disable force_unwrapping
             NavigationView {
                 appModule.resolver.resolve(StoreView.self)!
             }
@@ -163,6 +164,7 @@ struct StoreView_Previews: PreviewProvider {
             NavigationView {
                 appModule.resolver.resolve(StoreView.self)!
             }
+            // swiftlint:enable force_unwrapping
             .preferredColorScheme(.dark)
             .previewDisplayName("Dark Mode")
         }

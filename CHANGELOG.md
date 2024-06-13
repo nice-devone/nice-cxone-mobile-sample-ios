@@ -1,8 +1,16 @@
+<a name="2.0.0-"></a>
+# [2.0.0] - 2024-06-13
+
+### Features
+- Minimum iOS deployment target set to iOS 14.0
+- add Mobile SDK EU1 QA configurations
+
 <a name="1.3.3"></a>
 ## [1.3.3] - 2024-05-15
 
 ### Bug Fixes
 - update SDK version to 1.3.3
+- make assignedAgent optional for the event
 
 <a name="1.3.2"></a>
 ## [1.3.2] - 2024-03-21
@@ -42,6 +50,7 @@
 - Fix Deploy to TestFlight action
 - Handle different thread correctly
 - Fix issue when multiple messages with matching ids are received
+
 ### Features
 - add login error state in case of unreachable API
 - Add basic validation for brandId and channelId
@@ -76,6 +85,7 @@
 - Fixed issue where SettingsView was crashing
 - Correct title when enter thread detail
 - Fixed problem in hexString where wrong color was being created.
+
 ### Features
 - change open Chat button background color
 - Login with Amazon SDK update + fixed Launch screen storyboard
@@ -196,7 +206,9 @@
     - failure
   - typing start/end
 
-[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/1.3.2...HEAD
+[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/1.3.3...2.0.0
+[1.3.3]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/1.3.2...1.3.3
 [1.3.2]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/1.2.0...1.3.0

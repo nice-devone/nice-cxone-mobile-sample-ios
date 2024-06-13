@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ import Combine
 import SwiftUI
 
 struct ValidatedTextField: View {
-    
+
     // MARK: - Properties
-    
+
     let label: String?
 
     let title: String
-    
+
     let validator: ((String) -> String?)?
-    
+
     @Binding var text: String
-    
+
     @State var error: String?
 
     // MARK: - Init
-    
+
     init(
         _ title: String,
         text: Binding<String>,
@@ -45,28 +45,28 @@ struct ValidatedTextField: View {
         self.error = error
         self.label = label
     }
-    
+
     // MARK: - Builder
-    
+
     var body: some View {
         let error = validator?(text)
-        
+
         VStack(alignment: .leading, spacing: 4) {
             if let label {
                 Text(label)
                     .font(.caption)
                     .foregroundColor(.gray)
             }
-            
+
             VStack(alignment: .leading) {
                 TextField(title, text: $text)
                     .font(.body)
                     .autocorrectionDisabled()
                     .autocapitalization(.none)
-                
+
                 Divider()
                     .background(error == nil ? Color(.separator) : .red)
-                
+
                 if let error {
                     Text(error)
                         .font(.caption)
@@ -90,7 +90,7 @@ func numeric(_ text: String) -> String? {
 func email(_ text: String) -> String? {
     let emailRegEx = #"^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,64}$"#
     let isValidFormat = text.range(of: emailRegEx, options: [.regularExpression]) != nil
-    
+
     return !isValidFormat ? L10n.Common.invalidEmail : nil
 }
 
@@ -116,18 +116,18 @@ struct ValidatedTextField_Previews: PreviewProvider {
             ScrollView {
                 VStack(spacing: 24) {
                     ValidatedTextField("Placeholder", text: $text, label: "Text")
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: required, label: "Required Text")
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: numeric, label: "Numeric")
                         .keyboardType(.decimalPad)
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: allOf(numeric, numeric), label: "Numeric")
                         .keyboardType(.decimalPad)
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: email, label: "Email")
                         .keyboardType(.emailAddress)
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: allOf(required, email), label: "Required Email")
                         .keyboardType(.emailAddress)
                 }
@@ -135,23 +135,23 @@ struct ValidatedTextField_Previews: PreviewProvider {
             .padding(.horizontal, 24)
         }
         .previewDisplayName("Light Mode")
-        
+
         Group {
             ScrollView {
                 VStack(spacing: 24) {
                     ValidatedTextField("Placeholder", text: $text, label: "Text")
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: required, label: "Required Text")
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: numeric, label: "Numeric")
                         .keyboardType(.decimalPad)
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: allOf(numeric, numeric), label: "Numeric")
                         .keyboardType(.decimalPad)
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: email, label: "Email")
                         .keyboardType(.emailAddress)
-                    
+
                     ValidatedTextField("Placeholder", text: $text, validator: allOf(required, email), label: "Required Email")
                         .keyboardType(.emailAddress)
                 }
