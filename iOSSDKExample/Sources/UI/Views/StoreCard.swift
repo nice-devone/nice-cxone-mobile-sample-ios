@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -65,9 +65,8 @@ struct StoreCard: View {
 
 // MARK: - Preview
 
-// swiftlint:disable force_unwrapping
 struct StoreCard_Previews: PreviewProvider {
-    
+    // swiftlint:disable force_unwrapping
     @State private static var products = [
         ProductEntity(
             id: 1,
@@ -94,6 +93,8 @@ struct StoreCard_Previews: PreviewProvider {
             ]
         )
     ]
+    // swiftlint:enable force_unwrapping
+    
     static var previews: some View {
         Group {
             HStack(alignment: .top) {

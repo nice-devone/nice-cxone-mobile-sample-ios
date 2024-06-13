@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ import Swinject
 import SwinjectAutoregistration
 
 struct PresentationAssembly: Assembly {
-    
+
     // MARK: - Properties
-    
+
     private let coordinator: LoginCoordinator
-    
+
     private var storeCoordinator: StoreCoordinator {
         coordinator.storeCoordinator
     }
-    
+
     // MARK: - Init
-    
+
     init(coordinator: LoginCoordinator) {
         self.coordinator = coordinator
     }
-    
+
     // MARK: - Methods
-    
+
     func assemble(container: Container) {
         assembleLoginRelatedViews(container: container)
         assembleStoreRelatedViews(container: container)
     }
-    
+
     func assembleLoginRelatedViews(container: Container) {
         container.register(LoginView.self) { resolver, configuration, deeplinkOption in
             LoginView(
@@ -60,7 +60,7 @@ struct PresentationAssembly: Assembly {
             SettingsView(viewModel: SettingsViewModel())
         }
     }
-    
+
     func assembleStoreRelatedViews(container: Container) {
         container.register(PaymentDoneView.self) { _ in
             PaymentDoneView(viewModel: PaymentDoneViewModel(coordinator: storeCoordinator))

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -27,15 +27,12 @@ struct LoginView: View {
     var body: some View {
         LoadingView(isVisible: $viewModel.isLoading, isTransparent: $viewModel.isLoadingTransparent) {
             VStack(alignment: .center) {
-                if !viewModel.shouldShowError {
+                if viewModel.shouldShowError {
                     Text("🙁")
                         .font(.system(size: 40))
                     
                     Text(L10n.Common.genericError)
                         .multilineTextAlignment(.center)
-                    
-                    Button(L10n.Login.Repeat.buttonTitle, action: viewModel.onRepeatButtonTapped)
-                        .padding(.top, 24)
                 } else {
                     Text(L10n.Login.Oauth.availableProvidersTitle)
                         .fontWeight(.bold)
@@ -59,17 +56,31 @@ struct LoginView: View {
                 }
             }
             .onAppear(perform: viewModel.onAppear)
+            .alert(isPresented: $viewModel.shouldShowError) {
+                Alert(
+                    title: Text(L10n.Common.oops),
+                    message: Text(L10n.Login.ConfigurationFetchFailed.message(viewModel.configuration.brandId, viewModel.configuration.channelId)),
+                    primaryButton: .default(Text(L10n.Login.Repeat.buttonTitle), action: viewModel.onRepeatButtonTapped),
+                    secondaryButton: .destructive(Text(L10n.Common.cancel), action: viewModel.popToConfiguration)
+                )
+            }
             .navigationBarTitle(L10n.Login.title)
-            .navigationBarItems(
-                leading: Button(action: viewModel.signOut) {
-                    Asset.Common.disconnect
-                        .opacity(viewModel.isLoading ? 0 : 1)
-                },
-                trailing: Button(action: viewModel.navigateToSettings) {
-                    Asset.Common.settings
-                        .opacity(viewModel.isLoading ? 0 : 1)
-                }
-            )
+            .if(!(viewModel.isLoading || viewModel.shouldShowError)) { view in
+                view
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button(action: viewModel.signOut) {
+                                Asset.Common.disconnect
+                            }
+                        }
+                        
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button(action: viewModel.navigateToSettings) {
+                                Asset.Common.settings
+                            }
+                        }
+                    }
+            }
         }
     }
 }
@@ -101,7 +112,6 @@ private extension LoginView {
 
 // MARK: - Preview
 
-// swiftlint:disable force_unwrapping
 struct LoginView_Previews: PreviewProvider {
     
     private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
@@ -110,6 +120,7 @@ struct LoginView_Previews: PreviewProvider {
             coordinator.assembler = appModule.assembler
         }
     }
+    // swiftlint:disable force_unwrapping
     private static let viewModel = LoginViewModel(
         coordinator: coordinator,
         configuration: Configuration(
@@ -121,6 +132,7 @@ struct LoginView_Previews: PreviewProvider {
         loginWithAmazon: appModule.resolver.resolve(LoginWithAmazonUseCase.self)!,
         getChannelConfiguration: appModule.resolver.resolve(GetChannelConfigurationUseCase.self)!
     )
+    // swiftlint:enable force_unwrapping
     
     static var previews: some View {
         Group {

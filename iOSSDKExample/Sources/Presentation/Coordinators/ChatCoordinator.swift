@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -33,28 +33,32 @@ class ChatCoordinator: Coordinator {
         self.defaultChatCoordinator = DefaultChatCoordinator(navigationController: navigationController)
         super.init(navigationController: navigationController)
         
-        LogManager.isEnabled = true
-        LogManager.delegate = self
+        CXoneChatUI.LogManager.configure(level: .trace, verbosity: .full)
     }
     
     // MARK: - Methods
     
     func start(with deeplinkOption: DeeplinkOption?) {
         navigationController.setCustomAppearance()
-
+        defaultChatCoordinator.chatLocalization = ChatLocalization()
         defaultChatCoordinator.style = ChatStyle.initFromChatAppearance()
-        
-        if LocalStorageManager.firstName?.isEmpty == false || LocalStorageManager.lastName?.isEmpty == false {
+
+        if let customerIdentity = CXoneChat.shared.customer.get(), customerIdentity.fullName?.isEmpty == false {
+            LocalStorageManager.firstName = customerIdentity.firstName
+            LocalStorageManager.lastName = customerIdentity.lastName
+            
+            startChat(deeplinkOption: deeplinkOption)
+        } else if LocalStorageManager.firstName?.isEmpty == false || LocalStorageManager.lastName?.isEmpty == false {
             CXoneChat.shared.customer.setName(firstName: LocalStorageManager.firstName ?? "", lastName: LocalStorageManager.lastName ?? "")
             
             startChat(deeplinkOption: deeplinkOption)
         } else {
             let entities: [FormCustomFieldType] = [
-                TextFieldEntity(label: "First Name", isRequired: false, ident: "firstName", isEmail: false),
-                TextFieldEntity(label: "Last Name", isRequired: false, ident: "lastName", isEmail: false)
+                TextFieldEntity(label: L10n.ThreadList.NewThread.UserDetails.firstName, isRequired: true, ident: "firstName", isEmail: false),
+                TextFieldEntity(label: L10n.ThreadList.NewThread.UserDetails.lastName, isRequired: true, ident: "lastName", isEmail: false)
             ]
 
-            defaultChatCoordinator.presentForm(title: "User Details", customFields: entities) { [weak self] customFields in
+            defaultChatCoordinator.presentForm(title: L10n.ThreadList.NewThread.UserDetails.title, customFields: entities) { [weak self] customFields in
                 self?.setCustomerName(from: customFields)
                 
                 self?.startChat(deeplinkOption: deeplinkOption)

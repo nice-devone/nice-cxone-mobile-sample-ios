@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@ import CXoneChatSDK
 class GetChannelConfigurationUseCase {
     
     func callAsFunction(configuration: Configuration) async throws -> ChannelConfiguration {
+        guard CXoneChat.shared.state == .initial else {
+            // Chat has been prepared, return the current configuration
+            return CXoneChat.shared.connection.channelConfiguration
+        }
+        
         if let environment = configuration.environment {
             return try await CXoneChat.shared.connection.getChannelConfiguration(
                 environment: environment,

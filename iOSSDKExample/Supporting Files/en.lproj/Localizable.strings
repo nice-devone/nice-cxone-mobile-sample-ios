@@ -3,8 +3,9 @@
 "common.close" = "Close";
 "common.continue" = "Continue";
 "common.confirm" = "Confirm";
-"common.required_field" = "Required Field";
+"common.required_field" = "Required field";
 "common.invalid_email" = "Invalid e-mail";
+"common.invalid_number" = "Invalid number";
 "common.ok" = "OK";
 "common.oops" = "Oops!";
 "common.generic_error" = "Something went wrong. Try it again later or contact the CXone Mobile team.";
@@ -14,8 +15,6 @@
 "common.sign_out" = "Sign Out";
 "common.reconnecting" = "Reconnecting...";
 "common.search" = "Search";
-"common.invalid_number" = "Invalid Number";
-"common.invalid_email" = "Invalid E-mail";
 
 // Configuration
 "configuration.title" = "Configuration";
@@ -73,6 +72,7 @@
 "login.guest.button_title" = "Continue as guest";
 "login.unavailable_oauth.message" = "There are no authenticators available. Try it again later or contact the CXone Mobile team.";
 "login.repeat.button_title" = "Repeat";
+"login.configuration_fetch_failed.message" = "Unable to load channel configuration for brand ID \"%1$d\" and channel ID \"%2$@\"";
 
 // Thread list
 "thread_list.title" = "Threads";
@@ -104,7 +104,7 @@
 "thread_detail.cell_message.status_delivered" = "Delivered";
 "thread_detail.cell_message.status_read" = "Read";
 "thread_detail.messaging.sending_placeholder" = "Sending...";
-"thread_detail.edit_custom_fields.title" = "Edit of Custom Fields";
+"thread_detail.edit_prechat_fields.title" = "Edit of Prechat Custom Fields";
 "thread_detail.update_thread_name.title" = "Update Thread Name";
 "thread_detail.update_thread_name.message" = "Enter a name for this thread";
 "thread_detail.update_thread_name.placeholder" = "Thread Name";
