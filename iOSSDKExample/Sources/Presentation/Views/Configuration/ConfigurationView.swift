@@ -18,7 +18,7 @@ import CXoneChatSDK
 import SwiftUI
 import Swinject
 
-struct ConfigurationView: View {
+struct ConfigurationView: View, Alertable {
 
     // MARK: - Properties
 
@@ -47,36 +47,25 @@ struct ConfigurationView: View {
                 }
             }
             .padding(.vertical, 24)
-
-            Button {
-                viewModel.onConfirmButtonTapped()
-            } label: {
+            
+            Button(action: viewModel.onConfirmButtonTapped) {
                 Text(L10n.Common.continue)
                     .fontWeight(.bold)
             }
             .buttonStyle(PrimaryButtonStyle())
             .padding(.bottom, 10)
-            .alert(isPresented: $viewModel.isShowingInvalidFieldsAlert) {
-                Alert(
-                    title: Text(L10n.Configuration.Default.MissingFields.title),
-                    message: Text(L10n.Configuration.Default.MissingFields.message)
-                )
-            }
         }
         .background(Color.backgroundColor)
         .padding(.horizontal, 24)
         .onAppear(perform: viewModel.onAppear)
+        .alert(item: $viewModel.alertType, content: alertContent)
         .animation(.easeInOut(duration: 0.2))
         .navigationBarTitle(L10n.Configuration.title)
         .navigationBarBackButtonHidden()
         .navigationBarItems(
-            trailing: Button(
-                action: {
-                    viewModel.navigateToSettings()
-                }, label: {
-                    Asset.Common.settings
-                }
-            )
+            trailing: Button(action: viewModel.navigateToSettings) {
+                Asset.Common.settings
+            }
         )
     }
 }
@@ -116,7 +105,7 @@ private extension ConfigurationView {
                 label: L10n.Configuration.Default.brandIdPlaceholder
             )
             .keyboardType(.numberPad)
-            .padding(.top, 24)
+            .padding(.top, 10)
 
             ValidatedTextField(
                 "chat_e11131fa...",
@@ -125,31 +114,47 @@ private extension ConfigurationView {
                 label: L10n.Configuration.Default.channelIdPlaceholder
             )
             .padding(.top, 10)
+
+            customCustomerIDSection
         }
     }
 
     var customConfigurationSection: some View {
-        HStack {
-            Text(L10n.Configuration.configurationSelectionTitle)
-
-            Spacer()
-
-            Button(viewModel.customConfiguration.title) {
-                isShowingEnvironmentsSheet = true
+        VStack {
+            HStack {
+                Text(L10n.Configuration.configurationSelectionTitle)
+                
+                Spacer()
+                
+                Button(viewModel.customConfiguration.title) {
+                    isShowingEnvironmentsSheet = true
+                }
+                .actionSheet(isPresented: $isShowingEnvironmentsSheet) {
+                    var options: [ActionSheet.Button] = viewModel.configurations
+                        .map { option in
+                                .default(Text(option.title)) { viewModel.customConfiguration = option }
+                        }
+                    options.append(.cancel())
+                    
+                    return ActionSheet(
+                        title: Text(L10n.Configuration.environmentSelectionTitle),
+                        buttons: options
+                    )
+                }
             }
-            .actionSheet(isPresented: $isShowingEnvironmentsSheet) {
-                var options: [ActionSheet.Button] = viewModel.configurations
-                    .map { option in
-                        .default(Text(option.title)) { viewModel.customConfiguration = option }
-                    }
-                options.append(.cancel())
-
-                return ActionSheet(
-                    title: Text(L10n.Configuration.environmentSelectionTitle),
-                    buttons: options
-                )
-            }
+            
+            customCustomerIDSection
         }
+    }
+    
+    var customCustomerIDSection: some View {
+        ValidatedTextField(
+            viewModel.customerIdExample,
+            text: $viewModel.customerId,
+            label: L10n.Configuration.UserDetails.customerIdPlaceholder,
+            hint: L10n.Configuration.UserDetails.customerIdDescription
+        )
+        .font(.footnote)
     }
 }
 

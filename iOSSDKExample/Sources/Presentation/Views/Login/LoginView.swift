@@ -16,7 +16,7 @@
 import CXoneChatSDK
 import SwiftUI
 
-struct LoginView: View {
+struct LoginView: View, Alertable {
     
     // MARK: - Properties
     
@@ -25,26 +25,38 @@ struct LoginView: View {
     // MARK: - Builder
     
     var body: some View {
-        LoadingView(isVisible: $viewModel.isLoading, isTransparent: $viewModel.isLoadingTransparent) {
-            VStack(alignment: .center) {
-                if viewModel.shouldShowError {
-                    Text("🙁")
-                        .font(.system(size: 40))
-                    
-                    Text(L10n.Common.genericError)
-                        .multilineTextAlignment(.center)
-                } else {
+        LoadingView(isVisible: $viewModel.isLoading) {
+            VStack(alignment: .center, spacing: 16) {
+                VStack(spacing: 4) {
                     Text(L10n.Login.Oauth.availableProvidersTitle)
                         .fontWeight(.bold)
-                        .font(.caption)
+                        .font(.headline)
                         .foregroundColor(Color(.systemGray))
                     
-                    Button(action: viewModel.invokeLoginWithAmazon) {
-                        Asset.OAuth.loginWithAmazon.swiftUIImage
+                    if !viewModel.isOAuthEnabled {
+                        Text(L10n.Login.Oauth.Disabled.description)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
                     }
-                    
-                    guestLoginDivider
-                    
+                }
+                
+                Button(action: viewModel.invokeLoginWithAmazon) {
+                    Asset.OAuth.loginWithAmazon.swiftUIImage
+                        .opacity(viewModel.isOAuthEnabled ? 1 : 0.3)
+                }
+                .disabled(!viewModel.isOAuthEnabled)
+                
+                guestLoginDivider
+                
+                VStack {
+                    ValidatedTextField("John", text: $viewModel.firstName, validator: required, label: L10n.Login.Guest.UserDetails.firstName)
+
+                    ValidatedTextField("Doe", text: $viewModel.lastName, validator: required, label: L10n.Login.Guest.UserDetails.lastName)
+                }
+                .padding(.horizontal, 12)
+                
+                Button(action: viewModel.onGuestLoginTapped) {
                     Text(L10n.Login.Guest.buttonTitle)
                         .fontWeight(.bold)
                         .frame(maxWidth: 210)
@@ -52,35 +64,28 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .background(Color.primaryButtonColor)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .onTapGesture(perform: viewModel.navigateToStore)
                 }
             }
-            .onAppear(perform: viewModel.onAppear)
-            .alert(isPresented: $viewModel.shouldShowError) {
-                Alert(
-                    title: Text(L10n.Common.oops),
-                    message: Text(L10n.Login.ConfigurationFetchFailed.message(viewModel.configuration.brandId, viewModel.configuration.channelId)),
-                    primaryButton: .default(Text(L10n.Login.Repeat.buttonTitle), action: viewModel.onRepeatButtonTapped),
-                    secondaryButton: .destructive(Text(L10n.Common.cancel), action: viewModel.popToConfiguration)
-                )
-            }
-            .navigationBarTitle(L10n.Login.title)
-            .if(!(viewModel.isLoading || viewModel.shouldShowError)) { view in
-                view
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button(action: viewModel.signOut) {
-                                Asset.Common.disconnect
-                            }
-                        }
-                        
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button(action: viewModel.navigateToSettings) {
-                                Asset.Common.settings
-                            }
+            .padding(.horizontal, 20)
+        }
+        .onAppear(perform: viewModel.onAppear)
+        .alert(item: $viewModel.alertType, content: alertContent)
+        .navigationBarTitle(L10n.Login.title)
+        .navigationBarBackButtonHidden()
+        .if(!viewModel.isLoading) { view in
+                view.toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button(action: viewModel.signOut) {
+                            Asset.Common.disconnect
                         }
                     }
-            }
+                 
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: viewModel.navigateToSettings) {
+                            Asset.Common.settings
+                        }
+                    }
+                }
         }
     }
 }
@@ -95,7 +100,6 @@ private extension LoginView {
                 Divider()
                     .background(Color(.systemGray2))
             }
-            .padding(.horizontal, 20)
             
             Text(L10n.Login.Guest.dividerTitle)
                 .font(.headline)
@@ -105,7 +109,6 @@ private extension LoginView {
                 Divider()
                     .background(Color(.systemGray2))
             }
-            .padding(.horizontal, 20)
         }
     }
 }

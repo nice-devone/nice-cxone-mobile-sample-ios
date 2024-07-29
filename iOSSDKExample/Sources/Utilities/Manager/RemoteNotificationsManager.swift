@@ -54,6 +54,7 @@ public class RemoteNotificationsManager: NSObject {
                         Log.error("requestAuthorization failed")
                         
                         self?.onRegistrationFinished?()
+                        
                         return
                     }
                     

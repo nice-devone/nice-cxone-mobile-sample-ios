@@ -20,9 +20,12 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     
     // MARK: - Properties
     
+    @Published var firstName = ""
+    @Published var lastName = ""
+    @Published var isOAuthEnabled = false
     @Published var isLoading = true
     @Published var isLoadingTransparent = false
-    @Published var shouldShowError = false
+    @Published var alertType: AlertType?
     
     let configuration: Configuration
     
@@ -67,10 +70,6 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     func signOut() {
         Log.trace("Signing out")
         
-        RemoteNotificationsManager.shared.unregister()
-        LocalStorageManager.reset()
-        FileManager.default.eraseDocumentsFolder()
-        
         popToConfiguration()
     }
     
@@ -89,26 +88,32 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     func popToConfiguration() {
         Log.trace("Navigating to the configuration")
         
-        isLoading = true
-        
-        RemoteNotificationsManager.shared.unregister()
+        CXoneChat.signOut()
         LocalStorageManager.reset()
         FileManager.default.eraseDocumentsFolder()
+        RemoteNotificationsManager.shared.unregister()
         
         coordinator.showConfiguration()
     }
     
-    func navigateToStore() {
-        Log.trace("Navigating to the store")
+    func onGuestLoginTapped() {
+        guard !firstName.isEmpty, !lastName.isEmpty else {
+            return
+        }
         
-        coordinator.showDashboard(deeplinkOption: deeplinkOption)
+        Log.trace("Set customer identity to \(firstName) \(lastName)")
+        
+        LocalStorageManager.firstName = firstName
+        LocalStorageManager.lastName = lastName
+        CXoneChat.shared.customer.setName(firstName: firstName, lastName: lastName)
+        
+        navigateToStore()
     }
     
     func invokeLoginWithAmazon() {
         Log.trace("Logging with Amazon")
         
         isLoading = true
-        isLoadingTransparent = true
         
         Task { @MainActor in
             do {
@@ -119,8 +124,13 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
                 error.logError()
                 
                 isLoading = false
-                isLoadingTransparent = false
-                shouldShowError = true
+                
+                alertType = .loginError(
+                    brandId: configuration.brandId,
+                    channelId: configuration.channelId,
+                    primaryAction: onRepeatButtonTapped,
+                    secondaryAction: popToConfiguration
+                )
             }
         }
     }
@@ -129,6 +139,12 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
 // MARK: - Private methods
 
 private extension LoginViewModel {
+    
+    func navigateToStore() {
+        Log.trace("Navigate to the store")
+        
+        coordinator.showDashboard(deeplinkOption: deeplinkOption)
+    }
     
     func prepareAndFetchConfiguration() {
         Log.trace("Checking OAuth login options")
@@ -151,16 +167,27 @@ private extension LoginViewModel {
 
                 let channelConfig = try await getChannelConfiguration(configuration: configuration)
                 
-                if !channelConfig.isAuthorizationEnabled, !UIDevice.current.isPreview {
+                let isOAuthEnabled = channelConfig.isAuthorizationEnabled
+                let isRealDevice = !UIDevice.current.isPreview
+                let isCustomerIdentitySet = LocalStorageManager.firstName?.isEmpty == false && LocalStorageManager.lastName?.isEmpty == false
+                
+                if !isOAuthEnabled, isCustomerIdentitySet, isRealDevice {
                     navigateToStore()
                 } else {
+                    self.isOAuthEnabled = isOAuthEnabled
+                    
                     isLoading = false
                 }
             } catch {
                 error.logError()
                 
                 isLoading = false
-                shouldShowError = true
+                alertType = .loginError(
+                    brandId: configuration.brandId,
+                    channelId: configuration.channelId,
+                    primaryAction: onRepeatButtonTapped,
+                    secondaryAction: popToConfiguration
+                )
             }
         }
     }

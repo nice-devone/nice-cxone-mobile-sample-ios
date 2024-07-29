@@ -43,42 +43,23 @@ struct SettingsView: View {
 private extension SettingsView {
     
     var sdkInfoSectionView: some View {
-        let showRestoreNameSection = viewModel.firstName?.isEmpty == false || viewModel.lastName?.isEmpty == false
-        
-        return Section(header: Text(L10n.Settings.Sdk.title), footer: showRestoreNameSection ? Text(L10n.Settings.Sdk.footerRestoreCustomerName) : nil) {
+        Section(header: Text(L10n.Settings.Sdk.title)) {
             HStack {
                 Text(L10n.Settings.Sdk.version)
 
                 Spacer()
 
                 Text(viewModel.sdkVersion)
-                    .font(Font.body.bold())
+                    .fontWeight(.bold)
             }
             
-            if showRestoreNameSection {
-                VStack(alignment: .leading) {
-                    HStack {
-                        Text(L10n.Settings.Sdk.RestoreCustomerName.label)
-
-                        Spacer()
-
-                        Button(L10n.Settings.Sdk.RestoreCustomerName.buttonTitle) {
-                            withAnimation {
-                                viewModel.restoreCustomerName()
-                            }
-                        }
-                    }
-                    
-                    HStack(alignment: .bottom, spacing: 2) {
-                        Text(L10n.Settings.Sdk.RestoreCustomerName.currentName)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        
-                        Text(String(format: "%@ %@", viewModel.firstName ?? "", viewModel.lastName ?? ""))
-                            .font(.footnote)
-                            .fontWeight(.bold)
-                    }
-                }
+            HStack(alignment: .bottom, spacing: 2) {
+                Text(L10n.Settings.Sdk.RestoreCustomerName.currentName)
+                
+                Spacer()
+                
+                Text(String(format: "%@ %@", viewModel.firstName ?? "", viewModel.lastName ?? ""))
+                    .fontWeight(.bold)
             }
         }
     }

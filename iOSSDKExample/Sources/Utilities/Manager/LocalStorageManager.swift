@@ -145,14 +145,9 @@ struct Storage<T: Codable> {
     // MARK: - Properties
     
     private let key: LocalStorageManager.Keys
-    private var cachedValue: T?
     
     var wrappedValue: T? {
         get {
-            if let cachedValue {
-                return cachedValue
-            }
-            
             guard let data = UserDefaults.standard.object(forKey: key.rawValue) as? Data else {
                 return nil
             }
@@ -167,8 +162,6 @@ struct Storage<T: Codable> {
         }
         set {
             do {
-                cachedValue = newValue
-                
                 if let newValue {
                     let data = try JSONEncoder().encode(newValue)
                     

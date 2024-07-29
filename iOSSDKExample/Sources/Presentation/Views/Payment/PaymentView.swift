@@ -24,7 +24,7 @@ struct PaymentView: View {
     // MARK: - Builder
     
     var body: some View {
-        LoadingView(isVisible: $viewModel.isLoading, isTransparent: .constant(true)) {
+        LoadingView(isVisible: $viewModel.isLoading) {
             VStack(alignment: .leading) {
                 Text(L10n.Payment.cardNumberTitle)
                     .font(.headline)

@@ -67,11 +67,10 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
     func signOut() {
         Log.trace("Signing out")
         
-        RemoteNotificationsManager.shared.unregister()
-        
         CXoneChat.signOut()
         LocalStorageManager.reset()
         FileManager.default.eraseDocumentsFolder()
+        RemoteNotificationsManager.shared.unregister()
         
         coordinator.popToConfiguration?()
     }

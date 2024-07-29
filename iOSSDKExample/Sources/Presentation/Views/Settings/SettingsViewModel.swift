@@ -127,13 +127,6 @@ class SettingsViewModel: ObservableObject {
             return
         }
     }
-    
-    func restoreCustomerName() {
-        firstName = nil
-        lastName = nil
-        LocalStorageManager.firstName = nil
-        LocalStorageManager.lastName = nil
-    }
 }
 
 // MARK: - Private methods
