@@ -41,7 +41,7 @@ struct StoreView: View {
     // MARK: - Builder
     
     var body: some View {
-        LoadingView(isVisible: $viewModel.isLoading, isTransparent: .constant(true)) {
+        LoadingView(isVisible: $viewModel.isLoading) {
             ZStack(alignment: .bottomTrailing) {
                 storeContent
                 

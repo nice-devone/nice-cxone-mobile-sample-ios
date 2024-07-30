@@ -24,12 +24,13 @@ class ConfigurationViewModel: ObservableObject {
     private let coordinator: LoginCoordinator
     
     @Published private(set) var configurations = [Configuration]()
+    @Published var customerId = ""
     @Published var brandId = ""
     @Published var channelId = ""
     @Published var environment: CXoneChatSDK.Environment = .NA1
     @Published var customConfiguration = Configuration(title: "", brandId: 0, channelId: "", environmentName: "", chatUrl: "", socketUrl: "")
     @Published var isDefaultConfigurationHidden = false
-    @Published var isShowingInvalidFieldsAlert = false
+    @Published var alertType: AlertType?
     
     private var defaultConfiguration: Configuration {
         Configuration(brandId: Int(brandId) ?? 0, channelId: channelId, environment: environment)
@@ -38,10 +39,16 @@ class ConfigurationViewModel: ObservableObject {
         isDefaultConfigurationHidden ? customConfiguration : defaultConfiguration
     }
     
+    let customerIdExample = UUID().uuidString
+    
+    var willEnterForegroundPublisher: NotificationCenter.Publisher? = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+    
     // MARK: - Init
     
     init(coordinator: LoginCoordinator) {
         self.coordinator = coordinator
+        
+        self.willEnterForegroundPublisher = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
     }
     
     // MARK: - Methods
@@ -49,18 +56,31 @@ class ConfigurationViewModel: ObservableObject {
     func onAppear() {
         Log.trace("Configuration view appeared")
         
+        willEnterForegroundPublisher = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+        
         loadConfigurations()
     }
     
     func onConfirmButtonTapped() {
         Log.trace("User pressed confirm button")
         
-        if isConfigurationValid() {
-            navigateToLogin()
-        } else {
+        guard isConfigurationValid() else {
             Log.warning(.failed("BrandId or channelId is not valid."))
             
-            isShowingInvalidFieldsAlert = true
+            alertType = .configMissingFieldsError()
+            return
+        }
+        
+        do {
+            if !customerId.isEmpty {
+                try CXoneChat.shared.customer.set(CustomerIdentity(id: customerId, firstName: nil, lastName: nil))
+            }
+            
+            navigateToLogin()
+        } catch {
+            error.logError()
+            
+            alertType = .genericError(primaryAction: nil)
         }
     }
     
@@ -72,6 +92,8 @@ class ConfigurationViewModel: ObservableObject {
     
     func navigateToLogin() {
         Log.trace("Navigating to the login")
+        
+        willEnterForegroundPublisher = nil
         
         coordinator.showLogin(configuration: currentConfiguration, deeplinkOption: nil)
     }

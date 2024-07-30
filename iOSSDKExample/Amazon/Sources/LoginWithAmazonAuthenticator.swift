@@ -63,7 +63,7 @@ class LoginWithAmazonAuthenticator: OAuthenticator {
     
     /// Attempt to clear OAuth login status of this authenticator
     func signOut() async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             manager.signOut { error in
                 if let error {
                     continuation.resume(throwing: error)

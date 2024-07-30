@@ -21,10 +21,9 @@ struct ValidatedTextField: View {
     // MARK: - Properties
 
     let label: String?
-
     let title: String
-
     let validator: ((String) -> String?)?
+    let hint: String?
 
     @Binding var text: String
 
@@ -37,13 +36,15 @@ struct ValidatedTextField: View {
         text: Binding<String>,
         validator: ((String) -> String?)? = nil,
         label: String? = nil,
-        error: String? = nil
+        error: String? = nil,
+        hint: String? = nil
     ) {
         self.title = title
         self._text = text
         self.validator = validator
         self.error = error
         self.label = label
+        self.hint = hint
     }
 
     // MARK: - Builder
@@ -71,6 +72,10 @@ struct ValidatedTextField: View {
                     Text(error)
                         .font(.caption)
                         .foregroundColor(.red)
+                } else if let hint {
+                    Text(hint)
+                        .font(.footnote)
+                        .foregroundColor(.gray)
                 }
             }
         }

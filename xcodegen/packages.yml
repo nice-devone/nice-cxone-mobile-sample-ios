@@ -16,7 +16,7 @@
 packages:
   Kingfisher:
     url: https://github.com/onevcat/Kingfisher.git
-    branch: version6-xcode13
+    from: 7.0.0
   PKCE:
     url: https://github.com/hendrickson-tyler/swift-pkce
     from: 1.0.0
@@ -31,7 +31,7 @@ packages:
     from: 10.0.0
   CXoneChatSDK:
     url: https://github.com/nice-devone/nice-cxone-mobile-sdk-ios.git
-    from: 2.0.1
+    from: 2.1.0
   CXoneChatUI:
     url: https://github.com/nice-devone/nice-cxone-mobile-ui-ios.git
-    from: 2.0.1
+    from: 2.1.0

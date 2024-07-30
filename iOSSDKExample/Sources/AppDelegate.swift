@@ -24,10 +24,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - Properties
     
     var window: UIWindow?
+    
     private var appModule: AppModule?
     private var loginCoordinator: LoginCoordinator?
     private var deeplinkOption: DeeplinkOption?
-   
+    private var currentDeviceToken: Data?
+    
     // MARK: - Methods
     
     func application(
@@ -38,9 +40,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Log.configure(isEnabled: true, isWriteToFileEnabled: true)
 
         LoginWithAmazonAuthenticator.initialize()
-        
-        // Register feature flags defined in the `Root.plist` of the `Settings.bundle`
-        FeatureFlag.registerFeatureFlags()
         
         // Setup CXoneChat SDK Log manager
         CXoneChat.configureLogger(level: .trace, verbosity: .full)
@@ -108,7 +107,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate: UNUserNotificationCenterDelegate {
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        guard currentDeviceToken != deviceToken else {
+            return
+        }
+        
         Log.trace("Did register for remote notification")
+        
+        self.currentDeviceToken = deviceToken
         
         CXoneChat.shared.customer.setDeviceToken(deviceToken)
         

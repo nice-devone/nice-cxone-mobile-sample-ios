@@ -20,7 +20,6 @@ struct LoadingView<Content>: View where Content: View {
     // MARK: Properties
     
     @Binding var isVisible: Bool
-    @Binding var isTransparent: Bool
     
     var content: () -> Content
 
@@ -31,12 +30,9 @@ struct LoadingView<Content>: View where Content: View {
             content()
                 .disabled(self.isVisible)
                 .blur(radius: self.isVisible ? 10 : 0)
-                .opacity(self.isTransparent || !isVisible ? 1 : 0)
 
-            VStack {
-                ActivityIndicator(isAnimating: $isVisible, style: .large)
-            }
-            .opacity(self.isVisible ? 1 : 0)
+            ActivityIndicator(isAnimating: $isVisible, style: .large)
+                .opacity(self.isVisible ? 1 : 0)
         }
     }
 }

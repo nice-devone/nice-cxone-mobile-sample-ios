@@ -49,7 +49,7 @@ struct SettingsThemeColorView: View {
                     
                     didUpdateColor(title, Color(hex: colorCodeString))
                 }
-                .introspect(.textField, on: .iOS(.v14, .v15, .v16, .v17)) { field in
+                .introspect(.textField, on: .iOS(.v15, .v16, .v17)) { field in
                     field.returnKeyType = .done
                 }
                 

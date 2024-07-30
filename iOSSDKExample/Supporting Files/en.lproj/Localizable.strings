@@ -20,6 +20,8 @@
 "configuration.title" = "Configuration";
 "configuration.environment_selection_title" = "Environments";
 "configuration.configuration_selection_title" = "Configurations";
+"configuration.user_details.customer_id_placeholder" = "Customer ID";
+"configuration.user_details.customer_id_description" = "Setting this property can simulate OAuth behaviour. Conversations are associated with the user based on the ID.";
 "configuration.custom.configuration_label" = "Configuration";
 "configuration.custom.button_title" = "Use a custom configuration";
 "configuration.default.environment_label" = "Environment";
@@ -33,10 +35,7 @@
 // Settings
 "settings.title" = "Settings";
 "settings.sdk.title" = "SDK";
-"settings.sdk.restore_customer_name.label" = "Restore Customer Name";
-"settings.sdk.restore_customer_name.button_title" = "Reset";
-"settings.sdk.restore_customer_name.current_name" = "Current name:";
-"settings.sdk.footer_restore_customer_name" = "Restoring the customer's name allows the form with the first and last name fields to be displayed";
+"settings.sdk.restore_customer_name.current_name" = "Customer";
 "settings.sdk.version" = "Version";
 "settings.logs.title" = "Logs";
 "settings.logs.share.label" = "Open Share Dialog";
@@ -68,7 +67,10 @@
 // Login
 "login.title" = "Login";
 "login.oauth.available_providers_title" = "Available OAuth providers";
-"login.guest.divider_title" = "or";
+"login.oauth.disabled.description" = "OAuth login is disabled. Please use guest login or update channel configuration.";
+"login.guest.divider_title" = "OR";
+"login.guest.user_details.first_name" = "First Name";
+"login.guest.user_details.last_name" = "Last Name";
 "login.guest.button_title" = "Continue as guest";
 "login.unavailable_oauth.message" = "There are no authenticators available. Try it again later or contact the CXone Mobile team.";
 "login.repeat.button_title" = "Repeat";
@@ -83,9 +85,6 @@
 "thread_list.empty_title" = "No Threads";
 "thread_list.new_thread.unable_to_create.title" = "Unable to create new thread";
 "thread_list.new_thread.unable_to_create.message" = "Your brand supports only a single conversation.";
-"thread_list.new_thread.user_details.title" = "User Details";
-"thread_list.new_thread.user_details.first_name" = "First Name";
-"thread_list.new_thread.user_details.last_name" = "Last Name";
 "thread_list.new_thread.prechat_survey.title" = "Precontact Survey Form";
 "thread_list.no_agent" = "No Agent";
 "thread_list.cell.custom_message.image" = "Image";
@@ -103,8 +102,8 @@
 "thread_detail.cell_message.status_sent" = "Sent";
 "thread_detail.cell_message.status_delivered" = "Delivered";
 "thread_detail.cell_message.status_read" = "Read";
-"thread_detail.messaging.sending_placeholder" = "Sending...";
-"thread_detail.edit_prechat_fields.title" = "Edit of Prechat Custom Fields";
+"thread_detail.messaging.sending_placeholder" = "Processing";
+"thread_detail.edit_custom_fields.title" = "Edit of Custom Fields";
 "thread_detail.update_thread_name.title" = "Update Thread Name";
 "thread_detail.update_thread_name.message" = "Enter a name for this thread";
 "thread_detail.update_thread_name.placeholder" = "Thread Name";

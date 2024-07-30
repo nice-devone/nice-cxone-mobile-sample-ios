@@ -26,7 +26,7 @@ class Log {
     
     private static let formatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SS"
+        formatter.dateFormat = "H:mm:ss.SS dd.MM.yyyy"
         
         return formatter
     }()
@@ -151,12 +151,10 @@ private extension Log {
             guard let logUrl = getCurrentLogUrl() else {
                 return
             }
-            guard let data = "\(message)\n".data(using: .utf8) else {
-                error(.unableToParse("data"))
-                return
-            }
             
             do {
+                let data = Data("\(message)\n".utf8)
+                
                 if let outputStream = OutputStream(url: logUrl, append: true) {
                     outputStream.open()
                     
@@ -197,14 +195,15 @@ private extension Log {
         do {
             try FileManager.default.createDirectory(at: logsUrl, withIntermediateDirectories: true, attributes: nil)
             
-            let formatter = formatter
-            formatter.dateFormat = "dd.MM.yyyy"
-            let logFile = formatter.string(from: Date()) + ".txt"
-            let logUrl = logsUrl.appendingPathComponent(logFile)
-            
-            self.currentLogFileUrl = logUrl
-            
-            return logUrl
+            return (formatter.copy() as? DateFormatter).map { copy in
+                copy.dateFormat = "dd.MM.yyyy"
+                let logFile = copy.string(from: Date()) + ".txt"
+                let logUrl = logsUrl.appendingPathComponent(logFile)
+                
+                self.currentLogFileUrl = logUrl
+                
+                return logUrl
+            }
         } catch {
             logger.error("\(getFormattedMessage(error.localizedDescription, icon: "❌"), privacy: .public)")
             return nil

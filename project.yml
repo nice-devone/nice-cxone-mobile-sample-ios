@@ -40,7 +40,7 @@ targetTemplates:
   Common:
     type: application
     platform: iOS
-    deploymentTarget: "14.0"
+    deploymentTarget: "15.0"
     settings:
       base:
         PRODUCT_NAME: iOSSDKExample
@@ -86,12 +86,16 @@ targetTemplates:
         basedOnDependencyAnalysis: true
     postBuildScripts:
       - script: |
+          # Prepare build number in the format "yyMMdd.HHmm"
           buildNumber=$(date +'%y%m%d.%H%M')
 
+          # Output the build number
           echo "Updating build number to $buildNumber"
 
+          # Update the build number in the Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
 
+          # Update the build number in the dSYM Info.plist if it exists
           if [ -f "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist" ]; then
             /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist"
           fi

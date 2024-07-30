@@ -42,28 +42,8 @@ class ChatCoordinator: Coordinator {
         navigationController.setCustomAppearance()
         defaultChatCoordinator.chatLocalization = ChatLocalization()
         defaultChatCoordinator.style = ChatStyle.initFromChatAppearance()
-
-        if let customerIdentity = CXoneChat.shared.customer.get(), customerIdentity.fullName?.isEmpty == false {
-            LocalStorageManager.firstName = customerIdentity.firstName
-            LocalStorageManager.lastName = customerIdentity.lastName
-            
-            startChat(deeplinkOption: deeplinkOption)
-        } else if LocalStorageManager.firstName?.isEmpty == false || LocalStorageManager.lastName?.isEmpty == false {
-            CXoneChat.shared.customer.setName(firstName: LocalStorageManager.firstName ?? "", lastName: LocalStorageManager.lastName ?? "")
-            
-            startChat(deeplinkOption: deeplinkOption)
-        } else {
-            let entities: [FormCustomFieldType] = [
-                TextFieldEntity(label: L10n.ThreadList.NewThread.UserDetails.firstName, isRequired: true, ident: "firstName", isEmail: false),
-                TextFieldEntity(label: L10n.ThreadList.NewThread.UserDetails.lastName, isRequired: true, ident: "lastName", isEmail: false)
-            ]
-
-            defaultChatCoordinator.presentForm(title: L10n.ThreadList.NewThread.UserDetails.title, customFields: entities) { [weak self] customFields in
-                self?.setCustomerName(from: customFields)
-                
-                self?.startChat(deeplinkOption: deeplinkOption)
-            }
-        }
+        
+        startChat(deeplinkOption: deeplinkOption)
     }
 }
 
