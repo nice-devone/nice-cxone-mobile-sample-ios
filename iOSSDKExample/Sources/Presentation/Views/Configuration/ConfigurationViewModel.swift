@@ -73,7 +73,7 @@ class ConfigurationViewModel: ObservableObject {
         
         do {
             if !customerId.isEmpty {
-                try CXoneChat.shared.customer.set(CustomerIdentity(id: customerId, firstName: nil, lastName: nil))
+                try CXoneChat.shared.customer.set(customer: CustomerIdentity(id: customerId, firstName: nil, lastName: nil))
             }
             
             navigateToLogin()

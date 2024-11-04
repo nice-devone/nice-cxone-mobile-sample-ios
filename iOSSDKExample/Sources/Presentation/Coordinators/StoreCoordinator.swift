@@ -21,27 +21,18 @@ class StoreCoordinator: Coordinator {
     
     // MARK: - Properties
     
-    var chatCoordinator: ChatCoordinator {
-        subCoordinators
-            .first { $0 is ChatCoordinator } as! ChatCoordinator // swiftlint:disable:this force_cast
-    }
-    
+    let chatCoordinator: MyChatCoordinator
+
     var popToConfiguration: (() -> Void)?
     
     // MARK: - Init
     
     override init(navigationController: UINavigationController) {
+        chatCoordinator = MyChatCoordinator(navigationController: navigationController)
+
         super.init(navigationController: navigationController)
-        
-        let chatCoordinator = ChatCoordinator(navigationController: navigationController)
-        chatCoordinator.assembler = self.assembler
-        subCoordinators.append(chatCoordinator)
-        
+
         navigationController.setNormalAppearance()
-        
-        chatCoordinator.popToConfiguration = { [weak self] in
-            self?.showConfiguration()
-        }
     }
     
     // MARK: - Methods
@@ -96,7 +87,7 @@ extension StoreCoordinator {
     }
     
     func openChat(deeplinkOption: DeeplinkOption?) {
-        chatCoordinator.start(with: deeplinkOption)
+        chatCoordinator.start(with: deeplinkOption, in: navigationController)
     }
 }
 // swiftlint:enable force_unwrapping

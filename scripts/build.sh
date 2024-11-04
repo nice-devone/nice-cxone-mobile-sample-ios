@@ -16,10 +16,12 @@
 
 . scripts/common.sh
 
-DESTINATION="platform=iOS Simulator,OS=latest,name=iPhone 14"
-
 clean
 
 setup
 
-build build -destination "$DESTINATION"
+pushd sample
+
+xcode build \
+      -scheme "${SCHEME}" \
+      -destination "${RUN_DESTINATION}"

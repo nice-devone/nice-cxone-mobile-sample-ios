@@ -70,7 +70,9 @@
 "login.oauth.disabled.description" = "OAuth login is disabled. Please use guest login or update channel configuration.";
 "login.guest.divider_title" = "OR";
 "login.guest.user_details.first_name" = "First Name";
+"login.guest.user_details.first_name_placeholder" = "John";
 "login.guest.user_details.last_name" = "Last Name";
+"login.guest.user_details.last_name_placeholder" = "Doe";
 "login.guest.button_title" = "Continue as guest";
 "login.unavailable_oauth.message" = "There are no authenticators available. Try it again later or contact the CXone Mobile team.";
 "login.repeat.button_title" = "Repeat";

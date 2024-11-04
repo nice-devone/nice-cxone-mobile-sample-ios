@@ -97,8 +97,12 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     }
     
     func onGuestLoginTapped() {
-        guard !firstName.isEmpty, !lastName.isEmpty else {
-            return
+        // Fallback to placeholder if the user didn't provide the name
+        if firstName.isEmpty {
+            self.firstName = L10n.Login.Guest.UserDetails.firstNamePlaceholder
+        }
+        if lastName.isEmpty {
+            self.lastName = L10n.Login.Guest.UserDetails.lastNamePlaceholder
         }
         
         Log.trace("Set customer identity to \(firstName) \(lastName)")

@@ -50,9 +50,17 @@ struct LoginView: View, Alertable {
                 guestLoginDivider
                 
                 VStack {
-                    ValidatedTextField("John", text: $viewModel.firstName, validator: required, label: L10n.Login.Guest.UserDetails.firstName)
+                    ValidatedTextField(
+                        L10n.Login.Guest.UserDetails.firstNamePlaceholder, 
+                        text: $viewModel.firstName,
+                        label: L10n.Login.Guest.UserDetails.firstName
+                    )
 
-                    ValidatedTextField("Doe", text: $viewModel.lastName, validator: required, label: L10n.Login.Guest.UserDetails.lastName)
+                    ValidatedTextField(
+                        L10n.Login.Guest.UserDetails.lastNamePlaceholder, 
+                        text: $viewModel.lastName,
+                        label: L10n.Login.Guest.UserDetails.lastName
+                    )
                 }
                 .padding(.horizontal, 12)
                 
