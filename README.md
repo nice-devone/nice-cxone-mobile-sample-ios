@@ -7,6 +7,19 @@ CXone Mobile SDK lets you integrate CXone into your enterprise iOS mobile phone 
 The following sample code will help configure and customize application Digital First Omnichannel chat integration experience.
 
 
+## Requirements
+
+- iOS 15.0+
+- Swift 5+
+
+
+## Modules
+
+- [Core](https://github.com/nice-devone/nice-cxone-mobile-sdk-ios)
+- [UI](https://github.com/nice-devone/nice-cxone-mobile-ui-ios) (⚠️ still under development, not yet actively supported)
+- Sample app
+
+
 ## How to Run the Application
 
 - Clone the SDK repository
@@ -22,4 +35,4 @@ The following sample code will help configure and customize application Digital 
 
 
 ## Samples
-Detailed described [samples](https://github.com/nice-devone/nice-cxone-mobile-sample-ios/blob/develop/docs/samples.md) of example usage of the CXoneChatSDK can be find in the docs folder allong with [case studies](https://github.com/nice-devone/nice-cxone-mobile-sample-ios/tree/develop/docs).
+Detailed described [samples](https://github.com/nice-devone/nice-cxone-mobile-sdk-ios/blob/main/docs/samples.md) of example usage of the CXoneChatSDK can be find in the docs folder allong with [case studies](https://github.com/nice-devone/nice-cxone-mobile-sdk-ios/tree/main/docs).

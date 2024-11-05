@@ -14,19 +14,16 @@
 # FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 #
 
-PROJECT_DIR="$(pwd)"
-NAME="iOSSDKExample"
-BUILD="$PROJECT_DIR/build"
-PROJECT="${NAME}".xcodeproj
-BUILDLOG=$BUILD/build.log
-SCHEME=${NAME}
-ARCHIVE=$BUILD/"${NAME}".xcarchive
-ZIPFILE=$BUILD/"${NAME}".zip
+set -o pipefail
+
+. scripts/setup_workflow_variables.sh
 
 clean() {
-    rm -rf sample/iOSSDKExample.xcodeproj \
-       "iOSSDKExample/Support Files/Generated" \
-       ~/Library/Developer/Xcode/DerivedData/iOSSDKExample-*
+    rm -rf \
+       sample/iOSSDKExample.xcodeproj \
+       "sample/iOSSDKExample/Support Files/Generated" \
+       ~/Library/Developer/Xcode/DerivedData/iOSSDKExample-* \
+       cxone-chat-ui/Sources/Resources/Generated
 
     # sometimes this mysteriously fails once, but works when run again
     if [ -x $BUILD ] ; then
@@ -51,6 +48,16 @@ swiftgen() {
 }
 
 setup() {
+    pushd sample
+    setup_sample
+    popd
+
+    pushd cxone-chat-ui
+    setup_ui
+    popd
+}
+
+setup_sample() {
     # insure that local.yml exists
     echo -n >> local.yml
 
@@ -66,14 +73,11 @@ setup() {
     mkdir -p "$BUILD"
 }
 
-build() {
-    local target=$1
-    shift
+setup_ui() {
+    # install swiftgen if needed
+    install_swiftgen
     
-    xcodebuild $target \
-	       -project $PROJECT \
-	       -scheme $SCHEME \
-	       DEBUG_INFOMATION_FORMAT=dwarf-with-dsym \
-	       ENABLE_BITCODE=NO \
-	       "$@"
+    mkdir -p "Sources/Resources/Generated"
+
+    swiftgen config -c .swiftgen.yml
 }

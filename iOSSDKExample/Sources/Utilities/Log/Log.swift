@@ -13,10 +13,20 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
+import FirebaseCrashlytics
 import os
 import UIKit
 
 class Log {
+    
+    // MARK: - Sub Objects
+    
+    enum LogType: String {
+        case error = "ERROR"
+        case warning = "WARNING"
+        case info = "INFO"
+        case trace = "TRACE"
+    }
     
     // MARK: - Properties
     
@@ -87,6 +97,7 @@ class Log {
         
         writeToFile(message)
         logger.notice("\(message, privacy: .public)")
+        Crashlytics.crashlytics().log(message)
     }
     
     class func error(_ error: CommonError, fun: StaticString = #function, file: StaticString = #file, line: UInt = #line) {
@@ -98,9 +109,7 @@ class Log {
             return
         }
         
-        let formattedMessage = getFormattedMessage(message, icon: "❌", fun: fun, file: file, line: line)
-        writeToFile(formattedMessage)
-        logger.error("\(formattedMessage, privacy: .public)")
+        logMessage(message, type: .error, fun: fun, file: file, line: line)
     }
     
     class func warning(_ error: CommonError, fun: StaticString = #function, file: StaticString = #file, line: UInt = #line) {
@@ -112,9 +121,7 @@ class Log {
             return
         }
         
-        let formattedMessage = getFormattedMessage(message, icon: "⚠️", fun: fun, file: file, line: line)
-        writeToFile(formattedMessage)
-        logger.warning("\(formattedMessage, privacy: .public)")
+        logMessage(message, type: .warning, fun: fun, file: file, line: line)
     }
     
     class func info(_ message: String, fun: StaticString = #function, file: StaticString = #file, line: UInt = #line) {
@@ -122,9 +129,7 @@ class Log {
             return
         }
         
-        let formattedMessage = getFormattedMessage(message, icon: "ℹ️", fun: fun, file: file, line: line)
-        writeToFile(formattedMessage)
-        logger.info("\(formattedMessage, privacy: .public)")
+        logMessage(message, type: .info, fun: fun, file: file, line: line)
     }
     
     class func trace(_ message: String, fun: StaticString = #function, file: StaticString = #file, line: UInt = #line) {
@@ -132,15 +137,45 @@ class Log {
             return
         }
         
-        let formattedMessage = getFormattedMessage(message, icon: "❇️", fun: fun, file: file, line: line)
-        writeToFile(formattedMessage)
-        logger.trace("\(formattedMessage, privacy: .public)")
+        logMessage(message, type: .trace, fun: fun, file: file, line: line)
     }
 }
 
 // MARK: - Private methods
 
 private extension Log {
+    
+    class func logMessage(
+        _ message: String,
+        type: LogType,
+        toFile: Bool = true,
+        toLogger: Bool = true,
+        toCrashlytics: Bool = true,
+        fun: StaticString = #function,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        let formattedMessage = getFormattedMessage(message, type: type, fun: fun, file: file, line: line)
+        
+        if toFile {
+            writeToFile(formattedMessage)
+        }
+        if toCrashlytics {
+            Crashlytics.crashlytics().log(formattedMessage)
+        }
+        if toLogger {
+            switch type {
+            case .error:
+                logger.error("\(formattedMessage, privacy: .public)")
+            case .warning:
+                logger.warning("\(formattedMessage, privacy: .public)")
+            case .info:
+                logger.info("\(formattedMessage, privacy: .public)")
+            case .trace:
+                logger.trace("\(formattedMessage, privacy: .public)")
+            }
+        }
+    }
     
     class func writeToFile(_ message: String) {
         guard isWriteToFileEnabled else {
@@ -175,7 +210,7 @@ private extension Log {
                     try data.write(to: logUrl)
                 }
             } catch {
-                logger.error("\(getFormattedMessage("Unable to write into file", icon: "❌"), privacy: .public)")
+                logMessage("Unable to write into file", type: .error, toFile: false)
             }
         }
     }
@@ -186,7 +221,7 @@ private extension Log {
         }
         
         guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            logger.error("\(getFormattedMessage("Unable to get document directory", icon: "❌"), privacy: .public)")
+            logMessage("Unable to get document directory", type: .error)
             return nil
         }
         
@@ -205,15 +240,21 @@ private extension Log {
                 return logUrl
             }
         } catch {
-            logger.error("\(getFormattedMessage(error.localizedDescription, icon: "❌"), privacy: .public)")
+            logMessage(error.localizedDescription, type: .error)
             return nil
         }
     }
     
-    class func getFormattedMessage(_ message: String, icon: String, fun: StaticString = #function, file: StaticString = #file, line: UInt = #line) -> String {
-        let time = formatter.string(from: Date())
-        
-        return String(format: "%@ [%@:%d]: %@ %@: %@", time, file.description.lastPathComponent, line, icon, fun.description.withoutParameters, message)
+    class func getFormattedMessage(_ message: String, type: LogType, fun: StaticString = #function, file: StaticString = #file, line: UInt = #line) -> String {
+        String(
+            format: "%@ [%@:%d]: %@ %@: %@",
+            formatter.string(from: Date()),
+            file.description.lastPathComponent,
+            line,
+            type.rawValue,
+            fun.description.withoutParameters,
+            message
+        )
     }
 }
 
@@ -222,12 +263,7 @@ private extension Log {
 private extension String {
     
     var lastPathComponent: String {
-        guard let url = URL(string: self) else {
-            Log.logger.error("\(Log.getFormattedMessage("could not init URL from string - \(self)", icon: "❌"), privacy: .public)")
-            return self
-        }
-        
-        return url.lastPathComponent
+        URL(string: self)?.lastPathComponent ?? self
     }
     
     var withoutParameters: String {
