@@ -30,6 +30,8 @@ packages:
     url: https://github.com/firebase/firebase-ios-sdk.git
     from: 10.0.0
   CXoneChatSDK:
-    path: ../cxone-chat-sdk/
+    url: https://github.com/nice-devone/nice-cxone-mobile-sdk-ios.git
+    from: 2.2.0
   CXoneChatUI:
-    path: ../cxone-chat-ui/
+    url: https://github.com/nice-devone/nice-cxone-mobile-ui-ios.git
+    from: 2.2.0
