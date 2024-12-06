@@ -81,3 +81,40 @@ setup_ui() {
 
     swiftgen config -c .swiftgen.yml
 }
+
+xcode() {
+    local target=$1
+    shift
+    
+    xcodebuild $target \
+	       DEBUG_INFOMATION_FORMAT=dwarf-with-dsym \
+	       ENABLE_BITCODE=NO \
+	       -skipPackagePluginValidation \
+	       -skipMacroValidation \
+	       "$@"
+}
+
+archive() {
+    local archive="$1"
+    shift
+    
+    xcode archive \
+	  -configuration Release \
+	  -scheme $SCHEME \
+	  -archivePath "${archive}" \
+	  -destination generic/platform=iOS
+}
+
+exportToIPA() {
+    local archive="$1"
+    local optionsPlist="$2"
+    local ipaPath="$3"
+    shift 2
+    
+    xcode \
+	-exportArchive \
+	-archivePath "${archive}" \
+        -exportOptionsPlist "$optionsPlist" \
+        -allowProvisioningUpdates \
+        -exportPath "$ipaPath"
+}

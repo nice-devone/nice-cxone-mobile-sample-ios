@@ -15,8 +15,8 @@ The following sample code will help configure and customize application Digital 
 
 ## Modules
 
-- [Core](https://github.com/nice-devone/nice-cxone-mobile-sdk-ios)
-- [UI](https://github.com/nice-devone/nice-cxone-mobile-ui-ios) (⚠️ still under development, not yet actively supported)
+- [Core](https://github.com/nice-devone/nice-cxone-mobile-sample-ios/tree/develop/cxone-chat-sdk)
+- [UI](https://github.com/nice-devone/nice-cxone-mobile-sample-ios/tree/develop/cxone-chat-ui) (⚠️ still under development, not yet actively supported)
 - Sample app
 
 
@@ -35,4 +35,4 @@ The following sample code will help configure and customize application Digital 
 
 
 ## Samples
-Detailed described [samples](https://github.com/nice-devone/nice-cxone-mobile-sdk-ios/blob/main/docs/samples.md) of example usage of the CXoneChatSDK can be find in the docs folder allong with [case studies](https://github.com/nice-devone/nice-cxone-mobile-sdk-ios/tree/main/docs).
+Detailed described [samples](https://github.com/nice-devone/nice-cxone-mobile-sample-ios/blob/develop/docs/samples.md) of example usage of the CXoneChatSDK can be find in the docs folder allong with [case studies](https://github.com/nice-devone/nice-cxone-mobile-sample-ios/tree/develop/docs).
