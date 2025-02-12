@@ -14,6 +14,7 @@
 //
 
 import CXoneChatSDK
+import CXoneChatUI
 import SwiftUI
 import UIKit
 
@@ -23,19 +24,14 @@ class SettingsViewModel: ObservableObject {
     
     @Published var firstName = LocalStorageManager.firstName
     @Published var lastName = LocalStorageManager.lastName
-    @Published var presentingBrandLogoActionSheet = false
     @Published var shouldShareLogs = false
-    @Published var showingFileManager = false
-    @Published var showingImagePicker = false
     @Published var showRemoveLogsAlert = false
     @Published var showInvalidColorError = false
     
-    static let brandLogoFileName = "brandLogo.png"
-    
-    var brandLogo: UIImage?
     var invalidColorTitle: String?
     
-    let sdkVersion = CXoneChat.version
+    let sdkVersion = CXoneChatSDKModule.version
+    let uiVersion = CXoneChatUIModule.version
     
     var navigationBarColor: Color { ChatAppearance.navigationBarColor }
     var navigationBarElementsColor: Color { ChatAppearance.navigationBarElementsColor }
@@ -61,30 +57,6 @@ class SettingsViewModel: ObservableObject {
             error.logError()
             
             return L10n.Settings.Logs.Remove.Message.failure
-        }
-    }
-    
-    func getBrandLogoImage() -> Image {
-        Log.trace("Loading brand logo from documents directory")
-        
-        if let image = try? UIImage.load(Self.brandLogoFileName, from: .documentDirectory) {
-            self.brandLogo = image
-            
-            return Image(uiImage: image)
-        } else {
-            return Asset.Settings.brandLogoPlaceholder
-        }
-    }
-    
-    func removeBrandLogo() {
-        Log.trace("Removing brand logo from documents directory")
-        
-        do {
-            try FileManager.default.removeFileInDocuments(named: Self.brandLogoFileName)
-            
-            self.brandLogo = nil
-        } catch {
-            error.logError()
         }
     }
     

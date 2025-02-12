@@ -13,7 +13,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
-import CXoneChatSDK
 import CXoneChatUI
 import SwiftUI
 import Swinject
@@ -49,7 +48,7 @@ class MyChatCoordinator: ChatCoordinator {
 
 // MARK: - LogDelegate
 
-extension MyChatCoordinator: CXoneChatUI.LogDelegate {
+extension MyChatCoordinator: LogDelegate {
     
     func logError(_ message: String) {
         Log.message("[UI] \(message)")
@@ -84,8 +83,7 @@ private extension ChatStyle {
             formTextColor: ChatAppearance.formTextColor,
             formErrorColor: ChatAppearance.formErrorColor,
             buttonTextColor: ChatAppearance.buttonTextColor,
-            buttonBackgroundColor: ChatAppearance.buttonBackgroundColor,
-            navigationBarLogo: try? Image(uiImage: UIImage.load(SettingsViewModel.brandLogoFileName, from: .documentDirectory))
+            buttonBackgroundColor: ChatAppearance.buttonBackgroundColor
         )
     }
 }

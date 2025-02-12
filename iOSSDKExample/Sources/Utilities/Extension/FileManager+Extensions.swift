@@ -33,28 +33,4 @@ extension FileManager {
             error.logError()
         }
     }
-    
-    func removeFileInDocuments(named: String) throws {
-        Log.trace("Removing file \(named) from documents")
-        
-        guard let documentsPath = urls(for: .documentDirectory, in: .userDomainMask).first?.relativePath else {
-            Log.error(.failed("Unable to get documents path"))
-            return
-        }
-        
-        try removeItem(atPath: URL(fileURLWithPath: documentsPath).appendingPathComponent(named).path)
-    }
-    
-    func storeFileDataInDocuments(_ data: Data, named: String) throws {
-        Log.trace("Storing file \(named) into documents")
-        
-        guard let documentsUrl = urls(for: .documentDirectory, in: .userDomainMask).first else {
-            Log.error(.failed("Unable to get documents path"))
-            return
-        }
-        
-        let destinationUrl = documentsUrl.appendingPathComponent(named)
-        
-        try data.write(to: destinationUrl, options: [.atomic])
-    }
 }

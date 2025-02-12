@@ -36,6 +36,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        // Setup Crashlytics
+        FirebaseApp.configure()
+        
         // Setup local Log manager
         Log.configure(isEnabled: true, isWriteToFileEnabled: true)
 
@@ -44,9 +47,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Setup CXoneChat SDK Log manager
         CXoneChat.configureLogger(level: .trace, verbosity: .full)
         CXoneChat.shared.logDelegate = self
-        
-        // Setup Crashlytics
-        FirebaseApp.configure()
         
         // Reset Badge Number
         UIApplication.shared.applicationIconBadgeNumber = 0

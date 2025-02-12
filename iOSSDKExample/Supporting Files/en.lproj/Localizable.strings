@@ -36,7 +36,8 @@
 "settings.title" = "Settings";
 "settings.sdk.title" = "SDK";
 "settings.sdk.restore_customer_name.current_name" = "Customer";
-"settings.sdk.version" = "Version";
+"settings.ui.title" = "UI";
+"settings.module.version" = "Version";
 "settings.logs.title" = "Logs";
 "settings.logs.share.label" = "Open Share Dialog";
 "settings.logs.share.button" = "Share";
@@ -44,9 +45,6 @@
 "settings.logs.remove.button" = "Remove";
 "settings.logs.remove.message.success" = "Logs Removed Successfully";
 "settings.logs.remove.message.failure" = "Unable to Parse Logs";
-"settings.brand_logo.title" = "Brand Logo";
-"settings.brand_logo.label" = "You can specify an image as a brand logo which is going to be visible in the top of the chat thread. Press to upload it.";
-"settings.brand_logo.title" = "Brand Logo";
 "settings.theme.title" = "Theme";
 "settings.theme.info" = "This section allows you to customize the appearance of the chat thread. If a text field is left blank, the default value for that color will be used.";
 "settings.theme.no_color.placeholder" = "Enter Color";

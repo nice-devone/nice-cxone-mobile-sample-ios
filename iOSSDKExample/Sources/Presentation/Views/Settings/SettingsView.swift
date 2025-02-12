@@ -27,9 +27,9 @@ struct SettingsView: View {
         Form {
             sdkInfoSectionView
 
+            uiInfoSectionView
+            
             logsSectionView
-
-            brandLogoSectionView
 
             themeColorSectionView
         }
@@ -45,7 +45,7 @@ private extension SettingsView {
     var sdkInfoSectionView: some View {
         Section(header: Text(L10n.Settings.Sdk.title)) {
             HStack {
-                Text(L10n.Settings.Sdk.version)
+                Text(L10n.Settings.Module.version)
 
                 Spacer()
 
@@ -59,6 +59,19 @@ private extension SettingsView {
                 Spacer()
                 
                 Text(String(format: "%@ %@", viewModel.firstName ?? "", viewModel.lastName ?? ""))
+                    .fontWeight(.bold)
+            }
+        }
+    }
+    
+    var uiInfoSectionView: some View {
+        Section(header: Text(L10n.Settings.Ui.title)) {
+            HStack {
+                Text(L10n.Settings.Module.version)
+
+                Spacer()
+
+                Text(viewModel.uiVersion)
                     .fontWeight(.bold)
             }
         }
@@ -89,48 +102,6 @@ private extension SettingsView {
                 .alert(isPresented: $viewModel.showRemoveLogsAlert) {
                     Alert(title: Text(L10n.Settings.Logs.Remove.label), message: Text(viewModel.removeLogs()))
                 }
-            }
-        }
-    }
-
-    var brandLogoSectionView: some View {
-        Section(header: Text(L10n.Settings.BrandLogo.title)) {
-            Text(L10n.Settings.BrandLogo.label)
-
-            HStack {
-                Spacer()
-
-                viewModel.getBrandLogoImage()
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 50, height: 50, alignment: .center)
-                    .foregroundColor(.blue)
-                    .onTapGesture {
-                        viewModel.presentingBrandLogoActionSheet.toggle()
-                    }
-
-                Spacer()
-            }
-            .actionSheet(isPresented: $viewModel.presentingBrandLogoActionSheet) {
-                ActionSheet(
-                    title: Text(L10n.FileLoader.title),
-                    buttons: [
-                        .default(Text(L10n.FileLoader.imageFromLibrary)) {
-                            viewModel.showingImagePicker.toggle()
-                        },
-                        .default(Text(L10n.FileLoader.fileManager)) {
-                            viewModel.showingFileManager.toggle()
-                        },
-                        .destructive(Text(L10n.FileLoader.remove), action: viewModel.removeBrandLogo),
-                        .cancel()
-                    ]
-                )
-            }
-            .sheet(isPresented: $viewModel.showingFileManager) {
-                SettingsFilePickerView(image: $viewModel.brandLogo)
-            }
-            .sheet(isPresented: $viewModel.showingImagePicker) {
-                SettingsImagePickerView(image: $viewModel.brandLogo)
             }
         }
     }
@@ -221,26 +192,11 @@ private extension SettingsView {
 
 // MARK: - Previews
 
-struct SettingsView_Previews: PreviewProvider {
+#Preview {
+    let appModule = PreviewAppModule(coordinator: LoginCoordinator(navigationController: UINavigationController()))
     
-    static private let coordinator = LoginCoordinator(navigationController: UINavigationController())
-    static private let appModule = PreviewAppModule(coordinator: coordinator)
-
-    static var previews: some View {
-        Group {
-            NavigationView {
-                // swiftlint:disable:next force_unwrapping
-                appModule.resolver.resolve(SettingsView.self)!
-            }
-            .preferredColorScheme(.light)
-            .previewDisplayName("Light Mode")
-
-            NavigationView {
-                // swiftlint:disable:next force_unwrapping
-                appModule.resolver.resolve(SettingsView.self)!
-            }
-            .preferredColorScheme(.dark)
-            .previewDisplayName("Dark Mode")
-        }
+    return NavigationView {
+        // swiftlint:disable:next force_unwrapping
+        appModule.resolver.resolve(SettingsView.self)!
     }
 }

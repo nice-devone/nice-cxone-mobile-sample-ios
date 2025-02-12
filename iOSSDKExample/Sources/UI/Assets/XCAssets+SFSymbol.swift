@@ -28,10 +28,6 @@ extension Asset {
         static let check = Image(systemName: "checkmark")
     }
     
-    enum Settings {
-        static let brandLogoPlaceholder: Image = Image(systemName: "photo")
-    }
-    
     enum Chat {
         static let newThread: Image = Image(systemName: "plus")
         static let sendEvents: Image = Image(systemName: "arrow.up.square")
