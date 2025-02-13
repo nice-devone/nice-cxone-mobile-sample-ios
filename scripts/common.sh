@@ -20,10 +20,9 @@ set -o pipefail
 
 clean() {
     rm -rf \
-       sample/iOSSDKExample.xcodeproj \
-       "sample/iOSSDKExample/Support Files/Generated" \
-       ~/Library/Developer/Xcode/DerivedData/iOSSDKExample-* \
-       cxone-chat-ui/Sources/Resources/Generated
+        iOSSDKExample.xcodeproj \
+        "iOSSDKExample/Support Files/Generated" \
+        ~/Library/Developer/Xcode/DerivedData/iOSSDKExample-*
 
     # sometimes this mysteriously fails once, but works when run again
     if [ -x $BUILD ] ; then
@@ -36,7 +35,7 @@ install_swiftgen() {
     pushd $BUILD/swiftgen
 
     if ! [ -x bin/swiftgen ] ; then
-        curl -L -o swiftgen.zip https://github.com/SwiftGen/SwiftGen/releases/download/6.6.2/swiftgen-6.6.2.zip
+        curl -L -o swiftgen.zip https://github.com/SwiftGen/SwiftGen/releases/download/$SWIFTGEN_VERSION/swiftgen-$SWIFTGEN_VERSION.zip
         unzip swiftgen.zip
     fi
 
@@ -48,16 +47,6 @@ swiftgen() {
 }
 
 setup() {
-    pushd sample
-    setup_sample
-    popd
-
-    pushd cxone-chat-ui
-    setup_ui
-    popd
-}
-
-setup_sample() {
     # insure that local.yml exists
     echo -n >> local.yml
 
@@ -71,13 +60,4 @@ setup_sample() {
     xcodegen
 
     mkdir -p "$BUILD"
-}
-
-setup_ui() {
-    # install swiftgen if needed
-    install_swiftgen
-    
-    mkdir -p "Sources/Resources/Generated"
-
-    swiftgen config -c .swiftgen.yml
 }

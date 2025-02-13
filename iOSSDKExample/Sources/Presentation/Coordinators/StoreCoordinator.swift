@@ -29,7 +29,6 @@ class StoreCoordinator: Coordinator {
     
     override init(navigationController: UINavigationController) {
         chatCoordinator = MyChatCoordinator(navigationController: navigationController)
-
         super.init(navigationController: navigationController)
 
         navigationController.setNormalAppearance()

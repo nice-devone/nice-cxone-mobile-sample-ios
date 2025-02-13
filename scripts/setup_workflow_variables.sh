@@ -32,16 +32,16 @@ prepare_env() {
 # Common
 prepare_env SWIFTGEN_VERSION '6.6.3'
 prepare_env XCODEGEN_VERSION '2.42.0'
-prepare_env XCODE_VERSION '15.4'
+prepare_env XCODE_VERSION '16.0'
 prepare_env SWIFT_VERSION '5.10'
-prepare_env IOS_VERSION '17.5'
+prepare_env IOS_VERSION '18.0'
 prepare_env DETECT_VERSION '8.4.0'
 
 export RUNNER_TEMP="${RUNNER_TEMP:-$(pwd)}"
 
 prepare_env SDK_SCHEME "CXoneChatSDK"
 prepare_env SAMPLE_SCHEME "iOSSDKExample"
-prepare_env RUN_DESTINATION "platform=iOS Simulator,OS=$IOS_VERSION,name=iPhone 15"
+prepare_env RUN_DESTINATION "platform=iOS Simulator,OS=$IOS_VERSION,name=iPhone 16"
 prepare_env PROJECT_DIR "$RUNNER_TEMP"
 prepare_env ARCHIVE "${RUNNER_TEMP}/build/iOSSDKExample.xcarchive"
 

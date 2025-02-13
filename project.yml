@@ -86,8 +86,8 @@ targetTemplates:
         basedOnDependencyAnalysis: true
     postBuildScripts:
       - script: |
-          # Prepare build number in the format "yyMMdd.HHmm"
-          buildNumber=$(date +'%y%m%d.%H%M')
+          # Prepare build number in the format "yyyyMMddHHmm"
+          buildNumber=$(date +'%Y%m%d%H%M')
 
           # Output the build number
           echo "Updating build number to $buildNumber"

@@ -31,6 +31,7 @@ The following sample code will help configure and customize application Digital 
     sh scripts/setup.sh
     ```
 - Open project via `iOSSDKExample.xcodeproj`
+- Trust & Enable the MockableMacro
 - Build & run application
 
 
