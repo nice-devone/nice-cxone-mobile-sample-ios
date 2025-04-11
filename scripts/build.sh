@@ -19,3 +19,9 @@
 clean
 
 setup
+
+pushd sample
+
+xcode build \
+      -scheme "${SCHEME}" \
+      -destination "${RUN_DESTINATION}"
