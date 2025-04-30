@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     @Published var lastName = ""
     @Published var isOAuthEnabled = false
     @Published var isLoading = true
-    @Published var isLoadingTransparent = false
     @Published var alertType: AlertType?
     
     let configuration: Configuration
@@ -56,15 +55,15 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     override func onAppear() {
         Log.trace("Login view appeared")
         
-        #if !targetEnvironment(simulator)
+        coordinator.navigationController.navigationBar.defaultAppearance()
+        UIAlertController.defaultAppearance()
+        UISegmentedControl.defaultAppearance()
+        
         RemoteNotificationsManager.shared.onRegistrationFinished = { [weak self] in
             self?.prepareAndFetchConfiguration()
         }
         
         RemoteNotificationsManager.shared.registerIfNeeded()
-        #else
-        prepareAndFetchConfiguration()
-        #endif
     }
     
     func signOut() {

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -67,17 +67,16 @@ struct CartSummaryView: View {
                     .boldHeadline(foregroundColor: .accentColor)
             }
             
-            Button {
-                onCheckout()
-            } label: {
+            Button(action: onCheckout) {
                 Text(L10n.Cart.Summary.Checkout.title)
                     .fontWeight(.bold)
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(PrimaryButtonStyle())
+            .buttonStyle(.primary)
             .padding(.top, 24)
         }
         .padding([.top, .leading, .trailing], 16)
-        .padding(.bottom, UIDevice.hasBottomSafeAreaInsets ? 32 : 16)
+        .padding(.bottom, UIDevice.hasHomeButton ? 16 : 32)
         .background(Color(.systemGray6))
         .cornerRadius(20, corners: [.topLeft, .topRight])
         .padding(.top, -14)

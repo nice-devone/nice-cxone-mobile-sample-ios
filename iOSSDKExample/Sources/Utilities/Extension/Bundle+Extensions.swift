@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -17,16 +17,25 @@ import SwiftUI
 
 extension Bundle {
     
-    var version: String {
-        guard let releaseVersion = infoDictionary?["CFBundleShortVersionString"] as? String else {
-            Log.error(.unableToParse("releaseVersion", from: infoDictionary))
-            return ""
-        }
+    var buildVersion: String {
         guard let buildVersion = infoDictionary?["CFBundleVersion"] as? String else {
             Log.error(.unableToParse("buildVersion", from: infoDictionary))
-            return ""
+            return "Unknown"
         }
         
-        return String(format: "%@ (%@)", releaseVersion, buildVersion)
+        return buildVersion
+    }
+    
+    var branchName: String {
+        guard let branchName = infoDictionary?["GitBranch"] as? String else {
+            Log.error(.unableToParse("branchName", from: infoDictionary))
+            return "Unknown"
+        }
+        
+        return branchName
+    }
+    
+    var branchTag: String? {
+        infoDictionary?["GitTag"] as? String
     }
 }

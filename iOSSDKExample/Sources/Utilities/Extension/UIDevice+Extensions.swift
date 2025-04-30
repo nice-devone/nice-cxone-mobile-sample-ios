@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,20 @@ import UIKit
 
 extension UIDevice {
 
-    var isPreview: Bool {
-        ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+    static var hasHomeButton: Bool {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)
+        
+        guard let safeAreaBottom = keyWindow?.safeAreaInsets.bottom else {
+            return false
+        }
+        
+        return safeAreaBottom <= 0
     }
     
-    class var hasBottomSafeAreaInsets: Bool {
-        let bottom = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.last?.safeAreaInsets.bottom ?? 0
-        
-        return bottom > 0
+    var isPreview: Bool {
+        ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     }
 }

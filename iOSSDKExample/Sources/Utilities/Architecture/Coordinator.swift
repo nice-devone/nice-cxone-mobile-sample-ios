@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ open class Coordinator {
     // MARK: - Methods
     
     func popTo(_ controller: AnyClass, animated: Bool = true) {
-        navigationController.popToViewController(ofClass: controller)
+        navigationController.popToViewController(ofClass: controller, animated: animated)
     }
 }
 
@@ -49,7 +49,7 @@ open class Coordinator {
 
 private extension UINavigationController {
     
-    func popToViewController(ofClass: AnyClass, animated: Bool = true) {
+    func popToViewController(ofClass: AnyClass, animated: Bool) {
         if let viewController = viewControllers.last(where: { $0.isKind(of: ofClass) }) {
             popToViewController(viewController, animated: animated)
         }

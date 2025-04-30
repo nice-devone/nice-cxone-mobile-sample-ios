@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+# Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 #
 # Licensed under the NICE License;
 # you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ targetTemplates:
     dependencies:
       - package: CXoneChatSDK
       - package: CXoneChatUI
-      - package: Kingfisher
+      - package: CXoneGuideUtility
       - package: PKCE
       - package: Swinject
       - package: SwinjectAutoregistration
@@ -84,20 +84,82 @@ targetTemplates:
         name: SwiftGen
         runOnlyWhenInstalling: true
         basedOnDependencyAnalysis: true
-    postBuildScripts:
+    preBuildScripts:
       - script: |
+          # Get current git branch
+          gitBranch=$(git rev-parse --abbrev-ref HEAD)
+          
           # Prepare build number in the format "yyyyMMddHHmm"
           buildNumber=$(date +'%Y%m%d%H%M')
 
-          # Output the build number
-          echo "Updating build number to $buildNumber"
+          # Get tag name if available
+          gitTag=$(git tag --points-at HEAD | grep .)
+
+          # Store values in temporary files for post-build script
+          echo "$buildNumber" > "${DERIVED_FILE_DIR}/build_number.txt"
+          echo "$gitBranch" > "${DERIVED_FILE_DIR}/git_branch.txt"
+
+          if [ -n "$gitTag" ]; then
+            echo "$gitTag" > "${DERIVED_FILE_DIR}/git_tag.txt"
+          fi
+
+          # Update the build number in the source Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "${SRCROOT}/generated/iOSSDKExample_info.plist"
+          # Add the git branch to the source Info.plist
+          /usr/libexec/PlistBuddy -c "Add :GitBranch string $gitBranch" "${SRCROOT}/generated/iOSSDKExample_info.plist" || /usr/libexec/PlistBuddy -c "Set :GitBranch $gitBranch" "${SRCROOT}/generated/iOSSDKExample_info.plist"
+          # Add the git tag to the source Info.plist if available
+          if [ -n "$gitTag" ]; then
+            /usr/libexec/PlistBuddy -c "Add :GitTag string $gitTag" "${SRCROOT}/generated/iOSSDKExample_info.plist" || /usr/libexec/PlistBuddy -c "Set :GitTag $gitTag" "${SRCROOT}/generated/iOSSDKExample_info.plist"
+          fi
+        name: Generate Source Build Number
+        basedOnDependencyAnalysis: false
+    postBuildScripts:
+      - script: |
+          # Read values from temporary files created in pre-build
+          if [ -f "${DERIVED_FILE_DIR}/build_number.txt" ]; then
+            buildNumber=$(cat "${DERIVED_FILE_DIR}/build_number.txt")
+          else
+            # Fallback in case the file doesn't exist
+            buildNumber="Unknown"
+          fi
+          
+          if [ -f "${DERIVED_FILE_DIR}/git_branch.txt" ]; then
+            gitBranch=$(cat "${DERIVED_FILE_DIR}/git_branch.txt")
+          else
+            # Fallback in case the file doesn't exist
+            gitBranch=$(git rev-parse --abbrev-ref HEAD)
+          fi
+
+          if [ -f "${DERIVED_FILE_DIR}/git_tag.txt" ]; then
+            gitTag=$(cat "${DERIVED_FILE_DIR}/git_tag.txt")
+          else
+            # Fallback in case the file doesn't exist
+            gitTag=$(git tag --points-at HEAD | grep .)
+          fi
+          
 
           # Update the build number in the Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+          
+          # Add the git branch to the Info.plist
+          /usr/libexec/PlistBuddy -c "Add :GitBranch string $gitBranch" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}" || /usr/libexec/PlistBuddy -c "Set :GitBranch $gitBranch" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+          
+          # Add the git tag to the Info.plist if available
+          if [ -n "$gitTag" ]; then
+            /usr/libexec/PlistBuddy -c "Add :GitTag string $gitTag" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}" || /usr/libexec/PlistBuddy -c "Set :GitTag $gitTag" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+          fi
 
           # Update the build number in the dSYM Info.plist if it exists
           if [ -f "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist" ]; then
             /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist"
+            
+            # Add the git branch to the dSYM Info.plist
+            /usr/libexec/PlistBuddy -c "Add :GitBranch string $gitBranch" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist" || /usr/libexec/PlistBuddy -c "Set :GitBranch $gitBranch" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist"
+            
+            # Add the git tag to the dSYM Info.plist if available
+            if [ -n "$gitTag" ]; then
+              /usr/libexec/PlistBuddy -c "Add :GitTag string $gitTag" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist" || /usr/libexec/PlistBuddy -c "Set :GitTag $gitTag" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist"
+            fi
           fi
         name: Generate Build Number
         basedOnDependencyAnalysis: false

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
-import Swinject
+import CXoneGuideUtility
+import FirebaseCrashlytics
 
-extension ObjectScope {
+import Foundation
 
-    /// An instance provided by the `Container` is shared within the `Container` and its child `Containers`.
-    static let resetableContainer = ObjectScope(
-        storageFactory: PermanentStorage.init,
-        description: "resetableContainer"
-    )
+struct CrashlyticsLogWriter: LogWriter {
+    func log(record: LogRecord) {
+        Crashlytics.crashlytics().log(record.formatted)
+    }
 }

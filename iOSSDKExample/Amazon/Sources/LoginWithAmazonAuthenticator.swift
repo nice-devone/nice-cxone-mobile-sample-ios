@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ class LoginWithAmazonAuthenticator: OAuthenticator {
 
     private let manager: AMZNAuthorizationManager
 
-    /// authenticator name
+    // periphery:ignore - may be used in the future
     let authenticatorName = "Amazon"
 
     // MARK: - Init
@@ -38,11 +38,6 @@ class LoginWithAmazonAuthenticator: OAuthenticator {
 
     // MARK: - Methods
 
-    /// attempt OAuth authentication using this authenticator
-    ///
-    /// - parameters:
-    ///     - withChallenge: Challenge string
-    ///     - onCompletion: routine to invoke on completion of request
     func authorize(withChallenge: String) async throws -> OAAuthenticationHandler {
         let request = AMZNAuthorizeRequest()
         request.scopes = [AMZNProfileScope.userID(), AMZNProfileScope.profile()]
@@ -61,7 +56,7 @@ class LoginWithAmazonAuthenticator: OAuthenticator {
         }
     }
     
-    /// Attempt to clear OAuth login status of this authenticator
+    // periphery:ignore - Currently not used because we are not able to try the sign out properly (DE-42542)
     func signOut() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             manager.signOut { error in
@@ -74,12 +69,6 @@ class LoginWithAmazonAuthenticator: OAuthenticator {
         }
     }
 
-    /// handle an open url request from the application, this may be required to complete
-    /// some varieties of OAuth
-    ///
-    /// - parameters:
-    ///     - url: url being opened
-    ///     - sourceApplication: name of application originating request
     func handleOpen(url: URL, sourceApplication: String?) -> Bool {
         AMZNAuthorizationManager.handleOpen(url, sourceApplication: sourceApplication)
     }

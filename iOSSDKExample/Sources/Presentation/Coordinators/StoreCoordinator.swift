@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
+import CXoneChatUI
 import SwiftUI
 import Swinject
 import UIKit
@@ -28,10 +29,8 @@ class StoreCoordinator: Coordinator {
     // MARK: - Init
     
     override init(navigationController: UINavigationController) {
-        chatCoordinator = MyChatCoordinator(navigationController: navigationController)
+        chatCoordinator = MyChatCoordinator()
         super.init(navigationController: navigationController)
-
-        navigationController.setNormalAppearance()
     }
     
     // MARK: - Methods
@@ -50,7 +49,12 @@ class StoreCoordinator: Coordinator {
 extension StoreCoordinator {
     
     func showSettings() {
-        let controller = UIHostingController(rootView: resolver.resolve(SettingsView.self)!)
+        let onColorChanged: () -> Void = {
+            #warning("Re-enable after 3.0.0 release")
+            // chatCoordinator?.chatStyle = ChatAppearance.getChatStyle()
+        }
+        
+        let controller = UIHostingController(rootView: resolver.resolve(SettingsView.self, argument: onColorChanged)!)
 
         navigationController.show(controller, sender: self)
     }
@@ -79,14 +83,12 @@ extension StoreCoordinator {
         navigationController.show(controller, sender: self)
     }
     
-    func showConfiguration() {
-        let controller = UIHostingController(rootView: resolver.resolve(ConfigurationView.self)!)
-        
-        navigationController.setViewControllers([controller], animated: true)
-    }
-    
-    func openChat(deeplinkOption: DeeplinkOption?) {
-        chatCoordinator.start(with: deeplinkOption, in: navigationController)
+    func openChat(modally: Bool, deeplinkOption: DeeplinkOption?) {
+        chatCoordinator.start(with: deeplinkOption, modally: modally, in: navigationController) { [weak self] in
+            self?.navigationController.navigationBar.defaultAppearance()
+            UISegmentedControl.defaultAppearance()
+            UIAlertController.defaultAppearance()
+        }
     }
 }
 // swiftlint:enable force_unwrapping

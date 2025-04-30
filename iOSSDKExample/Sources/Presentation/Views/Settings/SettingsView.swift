@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            buildSectionView
+            
             sdkInfoSectionView
 
             uiInfoSectionView
@@ -33,6 +35,7 @@ struct SettingsView: View {
 
             themeColorSectionView
         }
+        .onDisappear(perform: viewModel.onDisappear)
         .alert(isPresented: $viewModel.showInvalidColorError, title: L10n.Common.attention, message: L10n.Settings.Theme.NoColor.alertMessage)
         .navigationBarTitle(L10n.Settings.title)
     }
@@ -74,6 +77,103 @@ private extension SettingsView {
                 Text(viewModel.uiVersion)
                     .fontWeight(.bold)
             }
+            
+            Picker(L10n.Settings.Ui.ChatPresentationStyle.title, selection: $viewModel.chatPresentationStyle) {
+                Text(L10n.Settings.Ui.ChatPresentationStyle.optionModal).tag(ChatPresentationStyle.modal)
+                Text(L10n.Settings.Ui.ChatPresentationStyle.optionFullscreen).tag(ChatPresentationStyle.fullScreen)
+            }
+            .onChange(of: viewModel.chatPresentationStyle, perform: viewModel.chatPresentationStyleChanged)
+            
+            Group {
+                additionalContactCustomFields
+                
+                additionalCustomerCustomFields
+            }
+        }
+        .animation(.default, value: viewModel.additionalContactCustomFields)
+        .animation(.default, value: viewModel.additionalCustomerCustomFields)
+    }
+    
+    @ViewBuilder
+    var additionalContactCustomFields: some View {
+        HStack {
+            Text(L10n.Settings.Ui.ChatAdditionalContactCustomFields.title)
+                .fontWeight(.medium)
+            
+            Spacer()
+            
+            if !viewModel.isAdditionalContactFieldVisible {
+                Button(L10n.Common.add) {
+                    withAnimation {
+                        viewModel.isAdditionalContactFieldVisible = true
+                    }
+                }
+            }
+        }
+        
+        SettingsAdditionalCustomFieldsView(
+            isVisible: $viewModel.isAdditionalContactFieldVisible,
+            customFields: viewModel.additionalContactCustomFields,
+            onConfirm: viewModel.setAdditionalContactCustomField,
+            onRemove: viewModel.removeAdditionalContactCustomField
+        )
+    }
+    
+    @ViewBuilder
+    var additionalCustomerCustomFields: some View {
+        HStack {
+            Text(L10n.Settings.Ui.ChatAdditionalCustomerCustomFields.title)
+                .fontWeight(.medium)
+            
+            Spacer()
+            
+            if !viewModel.isAdditionalCustomerFieldVisible {
+                Button(L10n.Common.add) {
+                    withAnimation {
+                        viewModel.isAdditionalCustomerFieldVisible = true
+                    }
+                }
+            }
+        }
+        
+        SettingsAdditionalCustomFieldsView(
+            isVisible: $viewModel.isAdditionalCustomerFieldVisible,
+            customFields: viewModel.additionalCustomerCustomFields,
+            onConfirm: viewModel.setAdditionalCustomerCustomField,
+            onRemove: viewModel.removeAdditionalCustomerCustomField
+        )
+    }
+    
+    var buildSectionView: some View {
+        Section(header: Text(L10n.Settings.Build.title)) {
+            HStack {
+                Text(L10n.Settings.Build.buildNumber)
+
+                Spacer()
+
+                Text(viewModel.appBuildNumber)
+                    .fontWeight(.bold)
+            }
+            
+            HStack {
+                Text(L10n.Settings.Build.branchName)
+                
+                Spacer()
+                
+                Text(viewModel.appBranchName)
+                    .fontWeight(.bold)
+            }
+            
+            if let tag = viewModel.appBranchTag {
+                HStack {
+                    Text(L10n.Settings.Build.branchTag)
+                    
+                    Spacer()
+                    
+                    Text(tag)
+                        .fontWeight(.bold)
+                }
+            }
         }
     }
 
@@ -111,78 +211,71 @@ private extension SettingsView {
             Text(L10n.Settings.Theme.info)
 
             SettingsThemeColorView(
-                color: viewModel.navigationBarColor,
-                title: L10n.Settings.Theme.ChatNavigationBarColorField.placeholder
+                color: ChatAppearance.primaryColor,
+                title: L10n.Settings.Theme.Primary.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
 
             SettingsThemeColorView(
-                color: viewModel.navigationBarElementsColor,
-                title: L10n.Settings.Theme.ChatNavigationElementsColorField.placeholder
+                color: ChatAppearance.onPrimaryColor,
+                title: L10n.Settings.Theme.OnPrimary.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
 
             SettingsThemeColorView(
-                color: viewModel.backgroundColor,
-                title: L10n.Settings.Theme.ChatBackgroundColorField.placeholder
+                color: ChatAppearance.backgroundColor,
+                title: L10n.Settings.Theme.Background.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
 
             SettingsThemeColorView(
-                color: viewModel.agentCellColor,
-                title: L10n.Settings.Theme.ChatAgentCellColorField.placeholder
+                color: ChatAppearance.onBackgroundColor,
+                title: L10n.Settings.Theme.OnBackground.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
 
             SettingsThemeColorView(
-                color: viewModel.customerCellColor,
-                title: L10n.Settings.Theme.ChatCustomerCellColorField.placeholder
+                color: ChatAppearance.accentColor,
+                title: L10n.Settings.Theme.Accent.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
 
             SettingsThemeColorView(
-                color: viewModel.agentFontColor,
-                title: L10n.Settings.Theme.ChatAgentFontColorField.placeholder
+                color: ChatAppearance.onAccentColor,
+                title: L10n.Settings.Theme.OnAccent.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
 
             SettingsThemeColorView(
-                color: viewModel.customerFontColor,
-                title: L10n.Settings.Theme.ChatCustomerFontColorField.placeholder
+                color: ChatAppearance.agentBackgroundColor,
+                title: L10n.Settings.Theme.AgentBackground.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
             
             SettingsThemeColorView(
-                color: viewModel.formTextColor,
-                title: L10n.Settings.Theme.ChatFormTextColor.placeholder
+                color: ChatAppearance.agentTextColor,
+                title: L10n.Settings.Theme.AgentText.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
             
             SettingsThemeColorView(
-                color: viewModel.formErrorColor,
-                title: L10n.Settings.Theme.ChatFormErrorColor.placeholder
+                color: ChatAppearance.customerBackgroundColor,
+                title: L10n.Settings.Theme.CustomerBackground.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
             
             SettingsThemeColorView(
-                color: viewModel.buttonTextColor,
-                title: L10n.Settings.Theme.ChatButtonTextColor.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
-            
-            SettingsThemeColorView(
-                color: viewModel.buttonBackgroundColor,
-                title: L10n.Settings.Theme.ChatButtonBackgroundColor.placeholder
+                color: ChatAppearance.customerTextColor,
+                title: L10n.Settings.Theme.CustomerText.placeholder
             ) { fieldTitle, color in
                 viewModel.colorDidChange(color: color, for: fieldTitle)
             }
@@ -190,13 +283,10 @@ private extension SettingsView {
     }
 }
 
-// MARK: - Previews
+// MARK: - Preview
 
 #Preview {
-    let appModule = PreviewAppModule(coordinator: LoginCoordinator(navigationController: UINavigationController()))
-    
-    return NavigationView {
-        // swiftlint:disable:next force_unwrapping
-        appModule.resolver.resolve(SettingsView.self)!
+    NavigationView {
+        SettingsView(viewModel: SettingsViewModel { })
     }
 }

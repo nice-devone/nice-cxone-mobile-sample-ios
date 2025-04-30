@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -15,14 +15,39 @@
 
 import SwiftUI
 
+extension ButtonStyle where Self == PrimaryButtonStyle {
+
+    static var primary: PrimaryButtonStyle {
+        PrimaryButtonStyle()
+    }
+}
+
+// MARK: - ButtonStyle+Primary
+
 struct PrimaryButtonStyle: ButtonStyle {
+    
+    // MARK: - Properties
+    
+    private static let horizontalPadding: CGFloat = 16
+    private static let pressedOpacity: Double = 0.8
+    private static let backgroundCornerRadius: CGFloat = 8
+    
+    // MARK: - Methods
     
     func makeBody(configuration: ButtonStyle.Configuration) -> some View {
         configuration.label
             .adjustForA11y()
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, Self.horizontalPadding)
             .foregroundColor(.white)
-            .background(configuration.isPressed ? Color.primaryButtonColor.opacity(0.8) : Color.primaryButtonColor)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .background(configuration.isPressed ? Color.primaryButtonColor.opacity(Self.pressedOpacity) : Color.primaryButtonColor)
+            .clipShape(RoundedRectangle(cornerRadius: Self.backgroundCornerRadius))
     }
+}
+
+// MARK: - Preview
+
+#Preview {
+    Button("Button") { }
+        .padding()
+        .buttonStyle(.primary)
 }
