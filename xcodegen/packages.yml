@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021-2023. NICE Ltd. All rights reserved.
+# Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 #
 # Licensed under the NICE License;
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
 #
 
 packages:
-  Kingfisher:
-    url: https://github.com/onevcat/Kingfisher.git
-    from: 7.0.0
   PKCE:
     url: https://github.com/hendrickson-tyler/swift-pkce
     from: 1.0.0
@@ -28,10 +25,13 @@ packages:
     from: 2.0.0
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk.git
-    from: 10.0.0
+    from: 11.0.0
   CXoneChatSDK:
     url: https://github.com/nice-devone/nice-cxone-mobile-sdk-ios.git
-    from: 2.3.1
+    from: 3.0.0-rc
   CXoneChatUI:
     url: https://github.com/nice-devone/nice-cxone-mobile-ui-ios.git
-    from: 2.3.1
+    from: 3.0.0-rc1
+  CXoneGuideUtility:
+    url: https://github.com/nice-devone/nice-cxone-mobile-guide-utility-ios.git
+    from: 3.0.0-rc

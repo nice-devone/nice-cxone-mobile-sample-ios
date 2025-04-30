@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
-import Kingfisher
 import SwiftUI
 
 struct StoreCard: View {
@@ -30,10 +29,12 @@ struct StoreCard: View {
     
     var body: some View {
         VStack {
-            KFImage(thumbnailUrl)
-                .resizable()
-                .scaledToFit()
-                .cornerRadius(10, corners: [.topLeft, .topRight])
+            AsyncImage(url: thumbnailUrl) { image in
+                image.image?
+                    .resizable()
+                    .scaledToFit()
+                    .cornerRadius(10, corners: [.topLeft, .topRight])
+            }
             
             VStack {
                 Text(title)

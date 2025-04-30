@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ struct CartSummaryView: View {
             .padding(.top, 24)
         }
         .padding([.top, .leading, .trailing], 16)
-        .padding(.bottom, UIDevice.hasBottomSafeAreaInsets ? 32 : 16)
+        .padding(.bottom, UIDevice.hasHomeButton ? 16 : 32)
         .background(Color(.systemGray6))
         .cornerRadius(20, corners: [.topLeft, .topRight])
         .padding(.top, -14)

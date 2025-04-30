@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ struct PaymentDoneView: View {
     
     var body: some View {
         VStack {
-            Asset.Common.success
+            Asset.Images.Common.success
                 .resizable()
                 .frame(width: 100, height: 100)
                 .foregroundColor(.green)

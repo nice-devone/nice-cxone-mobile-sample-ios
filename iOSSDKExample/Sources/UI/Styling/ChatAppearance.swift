@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -13,78 +13,109 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
+import CXoneChatUI
 import SwiftUI
 
 enum ChatAppearance {
+    private typealias Theme = Asset.Colors.ChatDefaultTheme
     
-    static var navigationBarColor: Color {
+    static var primaryColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatNavigationBarLightColor ?? .white,
-            dark: LocalStorageManager.chatNavigationBarDarkColor ?? .black
+            light: LocalStorageManager.primaryLightColor ?? Theme.primary.swiftUIColor,
+            dark: LocalStorageManager.primaryDarkColor ?? Theme.primaryDark.swiftUIColor
         )
     }
-    static var navigationBarElementsColor: Color {
+    static var onPrimaryColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatNavigationElementsLightColor ?? Color(.systemBlue),
-            dark: LocalStorageManager.chatNavigationElementsDarkColor ?? Color(.systemBlue)
+            light: LocalStorageManager.onPrimaryLightColor ?? Theme.onPrimary.swiftUIColor,
+            dark: LocalStorageManager.onPrimaryDarkColor ?? Theme.onPrimaryDark.swiftUIColor
         )
     }
     static var backgroundColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatBackgroundLightColor ?? .white,
-            dark: LocalStorageManager.chatBackgroundDarkColor ?? .black
+            light: LocalStorageManager.backgroundLightColor ?? Theme.background.swiftUIColor,
+            dark: LocalStorageManager.backgroundDarkColor ?? Theme.backgroundDark.swiftUIColor
         )
     }
-    static var agentCellColor: Color {
+    static var onBackgroundColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatAgentCellLightColor ?? Color(.lightGray),
-            dark: LocalStorageManager.chatAgentCellDarkColor ?? Color(.lightGray)
+            light: LocalStorageManager.onBackgroundLightColor ?? Theme.onBackground.swiftUIColor,
+            dark: LocalStorageManager.onBackgroundDarkColor ?? Theme.onBackgroundDark.swiftUIColor
         )
     }
-    static var customerCellColor: Color {
+    static var accentColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatCustomerCellLightColor ?? Color(.systemBlue),
-            dark: LocalStorageManager.chatCustomerCellDarkColor ?? Color(.systemBlue)
+            light: LocalStorageManager.accentLightColor ?? Theme.accent.swiftUIColor,
+            dark: LocalStorageManager.accentDarkColor ?? Theme.accentDark.swiftUIColor
         )
     }
-    static var agentFontColor: Color {
+    static var onAccentColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatAgentFontLightColor ?? .black,
-            dark: LocalStorageManager.chatAgentFontDarkColor ?? .black
+            light: LocalStorageManager.onAccentLightColor ?? Theme.onAccent.swiftUIColor,
+            dark: LocalStorageManager.onAccentDarkColor ?? Theme.onAccentDark.swiftUIColor
         )
     }
-    static var customerFontColor: Color {
+    static var agentBackgroundColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatCustomerFontLightColor ?? .white,
-            dark: LocalStorageManager.chatCustomerFontDarkColor ?? .white
-        )
-    }
-    
-    static var formTextColor: Color {
-        .themedColor(
-            light: LocalStorageManager.chatFormTextLightColor ?? .black,
-            dark: LocalStorageManager.chatFormTextDarkColor ?? .white
+            light: LocalStorageManager.agentBackgroundLightColor ?? Theme.agentBackground.swiftUIColor,
+            dark: LocalStorageManager.agentBackgroundDarkColor ?? Theme.agentBackgroundDark.swiftUIColor
         )
     }
     
-    static var formErrorColor: Color {
+    static var agentTextColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatFormErrorLightColor ?? .red,
-            dark: LocalStorageManager.chatFormErrorDarkColor ?? .red
+            light: LocalStorageManager.agentTextLightColor ?? Theme.agentText.swiftUIColor,
+            dark: LocalStorageManager.agentTextDarkColor ?? Theme.agentTextDark.swiftUIColor
         )
     }
     
-    static var buttonBackgroundColor: Color {
+    static var customerBackgroundColor: Color {
         .themedColor(
-            light: LocalStorageManager.chatButtonBackgroundLightColor ?? .accentColor,
-            dark: LocalStorageManager.chatButtonBackgroundDarkColor ?? .accentColor
+            light: LocalStorageManager.customerBackgroundLightColor ?? Theme.customerBackground.swiftUIColor,
+            dark: LocalStorageManager.customerBackgroundDarkColor ?? Theme.customerBackgroundDark.swiftUIColor
         )
     }
     
-    static var buttonTextColor: Color {
+    static var customerTextColor: Color {
+        // This color need to be updated to use Color+Extensions
         .themedColor(
-            light: LocalStorageManager.chatButtonTextLightColor ?? .white,
-            dark: LocalStorageManager.chatButtonTextDarkColor ?? .white
+            light: LocalStorageManager.customerTextLightColor ?? Theme.customerText.swiftUIColor,
+            dark: LocalStorageManager.customerTextDarkColor ?? Theme.customerTextDark.swiftUIColor
         )
+    }
+}
+
+// MARK: - Methods
+
+extension ChatAppearance {
+    
+    // periphery:ignore - will be used after the 3.0.0 release
+    static func getChatStyle() -> ChatStyle {
+        let lightModeColors = CustomizableStyleColorsImpl(
+            primary: LocalStorageManager.primaryLightColor ?? Theme.primary.swiftUIColor,
+            onPrimary: LocalStorageManager.onPrimaryLightColor ?? Theme.onPrimary.swiftUIColor,
+            background: LocalStorageManager.backgroundLightColor ?? Theme.background.swiftUIColor,
+            onBackground: LocalStorageManager.onBackgroundLightColor ?? Theme.onBackground.swiftUIColor,
+            accent: LocalStorageManager.accentLightColor ?? Theme.accent.swiftUIColor,
+            onAccent: LocalStorageManager.onAccentLightColor ?? Theme.onAccent.swiftUIColor,
+            agentBackground: LocalStorageManager.agentBackgroundLightColor ?? Theme.agentBackground.swiftUIColor,
+            agentText: LocalStorageManager.agentTextLightColor ?? Theme.agentText.swiftUIColor,
+            customerBackground: LocalStorageManager.customerBackgroundLightColor ?? Theme.customerBackground.swiftUIColor,
+            customerText: LocalStorageManager.customerTextLightColor ?? Theme.customerText.swiftUIColor
+        )
+        let darkModeColors = CustomizableStyleColorsImpl(
+            primary: LocalStorageManager.primaryDarkColor ?? Theme.primaryDark.swiftUIColor,
+            onPrimary: LocalStorageManager.onPrimaryDarkColor ?? Theme.onPrimaryDark.swiftUIColor,
+            background: LocalStorageManager.backgroundDarkColor ?? Theme.backgroundDark.swiftUIColor,
+            onBackground: LocalStorageManager.onBackgroundDarkColor ?? Theme.onBackgroundDark.swiftUIColor,
+            accent: LocalStorageManager.accentDarkColor ?? Theme.accentDark.swiftUIColor,
+            onAccent: LocalStorageManager.onAccentDarkColor ?? Theme.onAccentDark.swiftUIColor,
+            agentBackground: LocalStorageManager.agentBackgroundDarkColor ?? Theme.agentBackgroundDark.swiftUIColor,
+            agentText: LocalStorageManager.agentTextDarkColor ?? Theme.agentTextDark.swiftUIColor,
+            customerBackground: LocalStorageManager.customerBackgroundDarkColor ?? Theme.customerBackgroundDark.swiftUIColor,
+            customerText: LocalStorageManager.customerTextDarkColor ?? Theme.customerTextDark.swiftUIColor
+        )
+        
+        return ChatStyle(colorsManager: StyleColorsManager(light: lightModeColors, dark: darkModeColors))
     }
 }

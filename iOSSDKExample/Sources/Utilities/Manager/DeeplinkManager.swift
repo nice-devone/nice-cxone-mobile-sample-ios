@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -22,14 +22,7 @@ enum DeeplinkOption {
     case thread(UUID)
 }
 
-protocol DeeplinkHandler {
-    
-    static func canOpenUrl(_ url: URL) -> Bool
-    
-    static func handleUrl(_ url: URL) -> DeeplinkOption?
-}
-
-class ThreadsDeeplinkHandler: DeeplinkHandler {
+class ThreadsDeeplinkHandler {
     
     static func canOpenUrl(_ url: URL) -> Bool {
         switch true {
@@ -67,18 +60,6 @@ private extension ThreadsDeeplinkHandler {
 }
 
 private extension URL {
-    
-    var queryParameters: [String: String]? {
-        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: true),
-              let queryItems = components.queryItems
-        else {
-            return nil
-        }
-        
-        return queryItems.reduce(into: [String: String]()) { (result, item) in
-            result[item.name] = item.value
-        }
-    }
     
     func getQueryValue(for param: String) -> String? {
         guard let url = URLComponents(string: self.absoluteString) else {

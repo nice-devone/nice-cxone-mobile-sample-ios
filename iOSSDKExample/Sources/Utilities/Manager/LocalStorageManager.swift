@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -23,28 +23,29 @@ struct LocalStorageManager {
         case configuration
         case firstName
         case lastName
-        case chatNavigationBarLightColor
-        case chatNavigationBarDarkColor
-        case chatNavigationElementsLightColor
-        case chatNavigationElementsDarkColor
-        case chatBackgroundLightColor
-        case chatBackgroundDarkColor
-        case chatAgentCellLightColor
-        case chatAgentCellDarkColor
-        case chatCustomerCellLightColor
-        case chatCustomerCellDarkColor
-        case chatAgentFontLightColor
-        case chatAgentFontDarkColor
-        case chatCustomerFontLightColor
-        case chatCustomerFontDarkColor
-        case chatFormTextLightColor
-        case chatFormTextDarkColor
-        case chatFormErrorLightColor
-        case chatFormErrorDarkColor
-        case chatButtonBackgroundLightColor
-        case chatButtonBackgroundDarkColor
-        case chatButtonTextLightColor
-        case chatButtonTextDarkColor
+        case primaryLightColor
+        case primaryDarkColor
+        case onPrimaryLightColor
+        case onPrimaryDarkColor
+        case backgroundLightColor
+        case backgroundDarkColor
+        case onBackgroundLightColor
+        case onBackgroundDarkColor
+        case accentLightColor
+        case accentDarkColor
+        case onAccentLightColor
+        case onAccentDarkColor
+        case agentBackgroundLightColor
+        case agentBackgroundDarkColor
+        case agentTextLightColor
+        case agentTextDarkColor
+        case customerBackgroundLightColor
+        case customerBackgroundDarkColor
+        case customerTextLightColor
+        case customerTextDarkColor
+        case chatPresentationStyle
+        case additionalCustomerCustomFields
+        case additionalContactCustomFields
     }
     
     // MARK: - Properties
@@ -58,71 +59,74 @@ struct LocalStorageManager {
     @Storage(key: .lastName)
     static var lastName: String?
     
-    @Storage(key: .chatNavigationBarLightColor)
-    static var chatNavigationBarLightColor: Color?
+    @Storage(key: .primaryLightColor)
+    static var primaryLightColor: Color?
     
-    @Storage(key: .chatNavigationBarDarkColor)
-    static var chatNavigationBarDarkColor: Color?
+    @Storage(key: .primaryDarkColor)
+    static var primaryDarkColor: Color?
     
-    @Storage(key: .chatNavigationElementsLightColor)
-    static var chatNavigationElementsLightColor: Color?
+    @Storage(key: .onPrimaryLightColor)
+    static var onPrimaryLightColor: Color?
     
-    @Storage(key: .chatNavigationElementsDarkColor)
-    static var chatNavigationElementsDarkColor: Color?
+    @Storage(key: .onPrimaryDarkColor)
+    static var onPrimaryDarkColor: Color?
     
-    @Storage(key: .chatBackgroundLightColor)
-    static var chatBackgroundLightColor: Color?
+    @Storage(key: .backgroundLightColor)
+    static var backgroundLightColor: Color?
     
-    @Storage(key: .chatBackgroundDarkColor)
-    static var chatBackgroundDarkColor: Color?
+    @Storage(key: .backgroundDarkColor)
+    static var backgroundDarkColor: Color?
     
-    @Storage(key: .chatAgentCellLightColor)
-    static var chatAgentCellLightColor: Color?
+    @Storage(key: .onBackgroundLightColor)
+    static var onBackgroundLightColor: Color?
     
-    @Storage(key: .chatAgentCellDarkColor)
-    static var chatAgentCellDarkColor: Color?
+    @Storage(key: .onBackgroundDarkColor)
+    static var onBackgroundDarkColor: Color?
     
-    @Storage(key: .chatCustomerCellLightColor)
-    static var chatCustomerCellLightColor: Color?
+    @Storage(key: .accentLightColor)
+    static var accentLightColor: Color?
     
-    @Storage(key: .chatCustomerCellDarkColor)
-    static var chatCustomerCellDarkColor: Color?
+    @Storage(key: .accentDarkColor)
+    static var accentDarkColor: Color?
     
-    @Storage(key: .chatAgentFontLightColor)
-    static var chatAgentFontLightColor: Color?
+    @Storage(key: .onAccentLightColor)
+    static var onAccentLightColor: Color?
     
-    @Storage(key: .chatAgentFontDarkColor)
-    static var chatAgentFontDarkColor: Color?
+    @Storage(key: .onAccentDarkColor)
+    static var onAccentDarkColor: Color?
     
-    @Storage(key: .chatCustomerFontLightColor)
-    static var chatCustomerFontLightColor: Color?
+    @Storage(key: .agentBackgroundLightColor)
+    static var agentBackgroundLightColor: Color?
     
-    @Storage(key: .chatCustomerFontDarkColor)
-    static var chatCustomerFontDarkColor: Color?
+    @Storage(key: .agentBackgroundDarkColor)
+    static var agentBackgroundDarkColor: Color?
     
-    @Storage(key: .chatFormTextLightColor)
-    static var chatFormTextLightColor: Color?
+    @Storage(key: .agentTextLightColor)
+    static var agentTextLightColor: Color?
     
-    @Storage(key: .chatFormTextDarkColor)
-    static var chatFormTextDarkColor: Color?
+    @Storage(key: .agentTextDarkColor)
+    static var agentTextDarkColor: Color?
     
-    @Storage(key: .chatFormErrorLightColor)
-    static var chatFormErrorLightColor: Color?
+    @Storage(key: .customerBackgroundLightColor)
+    static var customerBackgroundLightColor: Color?
     
-    @Storage(key: .chatFormErrorDarkColor)
-    static var chatFormErrorDarkColor: Color?
+    @Storage(key: .customerBackgroundDarkColor)
+    static var customerBackgroundDarkColor: Color?
     
-    @Storage(key: .chatButtonBackgroundLightColor)
-    static var chatButtonBackgroundLightColor: Color?
+    @Storage(key: .customerTextLightColor)
+    static var customerTextLightColor: Color?
     
-    @Storage(key: .chatButtonBackgroundDarkColor)
-    static var chatButtonBackgroundDarkColor: Color?
+    @Storage(key: .customerTextDarkColor)
+    static var customerTextDarkColor: Color?
     
-    @Storage(key: .chatButtonTextLightColor)
-    static var chatButtonTextLightColor: Color?
+    @Storage(key: .chatPresentationStyle)
+    static var chatPresentationStyle: ChatPresentationStyle?
     
-    @Storage(key: .chatButtonTextDarkColor)
-    static var chatButtonTextDarkColor: Color?
+    @Storage(key: .additionalCustomerCustomFields)
+    static var additionalCustomerCustomFields: [String: String]?
+    
+    @Storage(key: .additionalContactCustomFields)
+    static var additionalContactCustomFields: [String: String]?
     
     // MARK: - Methods
     

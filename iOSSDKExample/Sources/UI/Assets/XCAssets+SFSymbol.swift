@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -16,28 +16,19 @@
 import SwiftUI
 import UIKit
 
-extension Asset {
+extension Asset.Images {
     
     enum Common {
         static let clear = Image(systemName: "xmark.circle.fill")
         static let success = Image(systemName: "checkmark.circle")
-        static let circle = Image(systemName: "circle")
         static let settings = Image(systemName: "gear")
         static let disconnect = Image(systemName: "bolt.slash.fill")
-        static let disclosure = Image(systemName: "chevron.right")
-        static let check = Image(systemName: "checkmark")
     }
     
-    enum Chat {
-        static let newThread: Image = Image(systemName: "plus")
-        static let sendEvents: Image = Image(systemName: "arrow.up.square")
-        static let editThreadName: Image = Image(systemName: "square.and.pencil")
-    }
-    
-    enum Message {
-        static let send: Image = Image(systemName: "arrow.up.circle.fill")
-        static let attachments: Image = Image(systemName: "arrow.up.doc")
-        static let record: Image = Image(systemName: "mic")
+    enum Settings {
+        static let removeCustomField = Image(systemName: "minus.circle")
+        static let addCustomField = Image(systemName: "plus.circle")
+        static let removeCustomFieldRow = Image(systemName: "trash")
     }
     
     enum Store {
@@ -48,8 +39,6 @@ extension Asset {
         enum Product {
             static let imagePlaceholder = Image(systemName: "photo")
             static let rating = Image(systemName: "star")
-            static let add = Image(systemName: "plus.circle.fill")
-            
         }
     }
 }

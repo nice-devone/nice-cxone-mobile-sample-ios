@@ -7,13 +7,13 @@
 "common.invalid_email" = "Invalid e-mail";
 "common.invalid_number" = "Invalid number";
 "common.ok" = "OK";
+"common.add" = "Add";
 "common.oops" = "Oops!";
 "common.generic_error" = "Something went wrong. Try it again later or contact the CXone Mobile team.";
-"common.notification_unknown_thread_error" = "Received remote notification from unknown thread.";
+"common.notification_unknown_thread_error" = "Received remote notification from unknown conversation.";
 "common.attention" = "Attention";
 "common.disconnect" = "Disconnect";
 "common.sign_out" = "Sign Out";
-"common.reconnecting" = "Reconnecting...";
 "common.search" = "Search";
 
 // Configuration
@@ -37,7 +37,20 @@
 "settings.sdk.title" = "SDK";
 "settings.sdk.restore_customer_name.current_name" = "Customer";
 "settings.ui.title" = "UI";
+"settings.ui.chat_presentation_style.title" = "Chat Presentation Style";
+"settings.ui.chat_presentation_style.option_modal" = "Modal";
+"settings.ui.chat_presentation_style.option_fullscreen" = "Full-screen";
+"settings.ui.chat_additional_contact_custom_fields.title" = "Additional Contact Fields";
+"settings.ui.chat_additional_customer_custom_fields.title" = "Additional Customer Fields";
+"settings.ui.chat_additional_custom_fields.key_label" = "key";
+"settings.ui.chat_additional_custom_fields.key_placeholder" = "Insert key";
+"settings.ui.chat_additional_custom_fields.value_label" = "value";
+"settings.ui.chat_additional_custom_fields.value_placeholder" = "Insert value";
+"settings.ui.chat_additional_custom_fields.row_delete" = "Delete";
 "settings.module.version" = "Version";
+"settings.build.title" = "Build";
+"settings.module.build_number" = "Build Number";
+"settings.module.branch_name" = "Branch Name";
 "settings.logs.title" = "Logs";
 "settings.logs.share.label" = "Open Share Dialog";
 "settings.logs.share.button" = "Share";
@@ -46,21 +59,23 @@
 "settings.logs.remove.message.success" = "Logs Removed Successfully";
 "settings.logs.remove.message.failure" = "Unable to Parse Logs";
 "settings.theme.title" = "Theme";
-"settings.theme.info" = "This section allows you to customize the appearance of the chat thread. If a text field is left blank, the default value for that color will be used.";
+"settings.theme.info" = "This section allows you to customize the appearance of the chat conversation. If a text field is left blank, the default value for that color will be used.";
 "settings.theme.no_color.placeholder" = "Enter Color";
 "settings.theme.no_color.error" = "Invalid color";
 "settings.theme.no_color.alertMessage" = "Color cannot be left blank. The UI will set the default color for the respective element(s).";
-"settings.theme.chat_navigationBar_color_field.placeholder" = "Navigation Bar Color";
-"settings.theme.chat_navigation_elements_color_field.placeholder" = "Navigation Bar Elements Color";
-"settings.theme.chat_background_color_field.placeholder" = "Chat Background Color";
-"settings.theme.chat_agent_cell_color_field.placeholder" = "Chat Agent Cell Color";
-"settings.theme.chat_customer_cell_color_field.placeholder" = "Chat Customer Cell Color";
-"settings.theme.chat_agent_font_color_field.placeholder" = "Chat Agent Font Color";
-"settings.theme.chat_customer_font_color_field.placeholder" = "Chat Customer Font Color";
-"settings.theme.chat_form_text_color.placeholder" = "Chat Form Text Color";
-"settings.theme.chat_form_error_color.placeholder" = "Chat Form Error Color";
-"settings.theme.chat_button_text_color.placeholder" = "Chat Button Text Color";
-"settings.theme.chat_button_background_color.placeholder" = "Chat Button Background Color";
+"settings.theme.primary.placeholder" = "Chat Primary Color";
+"settings.theme.on_primary.placeholder" = "Chat On Primary Color";
+"settings.theme.background.placeholder" = "Chat Background Color";
+"settings.theme.on_background.placeholder" = "Chat On Background Color";
+"settings.theme.accent.placeholder" = "Chat Accent Color";
+"settings.theme.on_accent.placeholder" = "Chat On Accent Color";
+"settings.theme.agent_background.placeholder" = "Chat Agent Background Color";
+"settings.theme.agent_text.placeholder" = "Chat Agent Text Color";
+"settings.theme.customer_background.placeholder" = "Chat Customer Background Color";
+"settings.theme.customer_text.placeholder" = "Chat Customer Text Color";
+"settings.build.title" = "Build";
+"settings.build.build_number" = "Build Number";
+"settings.build.branch_name" = "Branch Name";
 
 // Login
 "login.title" = "Login";
@@ -75,43 +90,6 @@
 "login.unavailable_oauth.message" = "There are no authenticators available. Try it again later or contact the CXone Mobile team.";
 "login.repeat.button_title" = "Repeat";
 "login.configuration_fetch_failed.message" = "Unable to load channel configuration for brand ID \"%1$d\" and channel ID \"%2$@\"";
-
-// Thread list
-"thread_list.title" = "Threads";
-"thread_list.disconnect_options.message" = "Do you want to disconnect and go back to the store or sign out from your selected brand and channel?";
-"thread_list.segment_control.available_threads" = "Current";
-"thread_list.segment_control.archived_threads" = "Archived";
-"thread_list.archive_thread" = "Archive";
-"thread_list.empty_title" = "No Threads";
-"thread_list.new_thread.unable_to_create.title" = "Unable to create new thread";
-"thread_list.new_thread.unable_to_create.message" = "Your brand supports only a single conversation.";
-"thread_list.new_thread.prechat_survey.title" = "Precontact Survey Form";
-"thread_list.no_agent" = "No Agent";
-"thread_list.cell.custom_message.image" = "Image";
-"thread_list.cell.custom_message.audio" = "Audio";
-"thread_list.cell.custom_message.video" = "Video";
-"thread_list.cell.custom_message.unsupported" = "Unsupported Content Type";
-"thread_list.cell.custom_message.rich_content" = "Rich content message";
-
-// Thread Detail
-"thread_detail.na" = "NA";
-"thread_detail.no_agent" = "No Agent";
-"thread_detail.assigned_agent.no_name" = "No Name";
-"thread_detail.cell_context_menu.share_content" = "Share";
-"thread_detail.cell_context_menu.copy_content" = "Copy";
-"thread_detail.cell_message.status_sent" = "Sent";
-"thread_detail.cell_message.status_delivered" = "Delivered";
-"thread_detail.cell_message.status_read" = "Read";
-"thread_detail.messaging.sending_placeholder" = "Processing";
-"thread_detail.edit_custom_fields.title" = "Edit of Custom Fields";
-"thread_detail.update_thread_name.title" = "Update Thread Name";
-"thread_detail.update_thread_name.message" = "Enter a name for this thread";
-"thread_detail.update_thread_name.placeholder" = "Thread Name";
-"thread_detail.message_from_different_thread.text" = "New message from %@";
-
-// Audio
-"audio_preview.recording" = "Recording...";
-"audio_preview.review_recorded_message" = "Review your recorder message";
 
 // Debug
 "debug.logs.share" = "Share Logs";

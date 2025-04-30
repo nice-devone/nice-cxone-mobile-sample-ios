@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -13,19 +13,13 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
-import Foundation
-
-extension String? {
+enum ChatPresentationStyle: String, CaseIterable, Identifiable, Codable {
+    
+    // MARK: - Cases
+    
+    case modal, fullScreen
     
     // MARK: - Properties
     
-    var isNilOrEmpty: Bool {
-        self?.isEmpty != false
-    }
-    
-    // MARK: - Methods
-    
-    func nilIfEmpty() -> String? {
-        isNilOrEmpty ? nil : self
-    }
+    var id: Self { self }
 }

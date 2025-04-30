@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ struct ProductDetailView: View {
                     Spacer()
                     
                     HStack(spacing: 2) {
-                        Asset.Store.Product.rating
+                        Asset.Images.Store.Product.rating
                             .font(.footnote)
                         
                         Text(viewModel.product.rating.description)
@@ -68,7 +68,7 @@ struct ProductDetailView: View {
                 .padding(.top, 20)
             }
             .padding([.top, .leading, .trailing], 16)
-            .padding(.bottom, UIDevice.hasBottomSafeAreaInsets ? 32 : 16)
+            .padding(.bottom, UIDevice.hasHomeButton ? 16 : 32)
             .background(Color(.systemGray6))
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .padding(.top, -24)
@@ -113,7 +113,7 @@ private extension ProductDetailView {
             viewModel.navigateToCart()
         } label: {
             ZStack {
-                Asset.Store.cart
+                Asset.Images.Store.cart
                 
                 if viewModel.itemsInCart > 0 {
                     Text(viewModel.itemsInCart.description)
@@ -142,7 +142,7 @@ private extension ProductDetailView {
                 }
             } label: {
                 HStack(spacing: 6) {
-                    Asset.Store.cart
+                    Asset.Images.Store.cart
                     
                     Text(L10n.ProductDetail.AddToCart.title)
                         .fontWeight(.bold)
@@ -164,7 +164,7 @@ private extension ProductDetailView {
                             .stroke(Color(.systemGray6), lineWidth: 4)
                     )
                     .offset(x: 12, y: -20)
-                    .animation(.spring())
+                    .animation(.spring(), value: viewModel.productQuantityInCart)
             }
         }
     }

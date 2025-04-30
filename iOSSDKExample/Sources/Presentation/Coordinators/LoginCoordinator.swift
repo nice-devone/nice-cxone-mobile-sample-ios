@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 //
 
 import CXoneChatSDK
+import CXoneChatUI
 import SwiftUI
 import Swinject
 import UIKit
@@ -27,6 +28,10 @@ class LoginCoordinator: Coordinator {
         // swiftlint:disable:next force_cast
             .first { $0 is StoreCoordinator } as! StoreCoordinator
     }
+    // periphery:ignore - will be used after the release 3.0.0
+    var chatCoordinator: ChatCoordinator {
+        storeCoordinator.chatCoordinator
+    }
     
     // MARK: - Init
     
@@ -38,7 +43,6 @@ class LoginCoordinator: Coordinator {
         subCoordinators.append(storeCoordinator)
         
         navigationController.navigationBar.prefersLargeTitles = true
-        navigationController.setNormalAppearance()
         
         storeCoordinator.popToConfiguration = { [weak self] in
             self?.showConfiguration()
@@ -63,8 +67,12 @@ class LoginCoordinator: Coordinator {
 extension LoginCoordinator {
     
     func showSettings() {
+        let onColorChanged: () -> Void = {
+            #warning("Re-enable after 3.0.0 release")
+            // chatCoordinator?.chatStyle = ChatAppearance.getChatStyle()
+        }
         // swiftlint:disable:next force_unwrapping
-        let controller = UIHostingController(rootView: resolver.resolve(SettingsView.self)!)
+        let controller = UIHostingController(rootView: resolver.resolve(SettingsView.self, argument: onColorChanged)!)
 
         navigationController.show(controller, sender: self)
     }

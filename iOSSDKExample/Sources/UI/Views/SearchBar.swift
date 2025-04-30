@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ struct SearchBar: View {
     var body: some View {
         HStack(spacing: 16) {
             HStack {
-                Asset.Store.search
+                Asset.Images.Store.search
                     .foregroundColor(Color(.systemGray2))
                 
                 TextField(L10n.Common.search, text: $text)
@@ -34,7 +34,7 @@ struct SearchBar: View {
                     .autocapitalization(.none)
                 
                 if !text.isEmpty {
-                    Asset.Common.clear
+                    Asset.Images.Common.clear
                         .imageScale(.medium)
                         .foregroundColor(Color(.systemGray2))
                         .onTapGesture {

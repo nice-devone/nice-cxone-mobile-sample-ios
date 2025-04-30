@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
-import Kingfisher
 import SwiftUI
 
 struct CartItem: View {
@@ -39,17 +38,18 @@ struct CartItem: View {
     
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
-            KFImage(product.thumbnailUrl)
-                .placeholder {
-                    Asset.Store.Product.imagePlaceholder
-                        .frame(width: 80, height: 80)
-                        .background(Color.gray)
-                        .cornerRadius(6)
-                }
-                .resizable()
-                .scaledToFit()
-                .frame(width: 100, height: 50)
-                .cornerRadius(6)
+            AsyncImage(url: product.thumbnailUrl) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 100, height: 50)
+                    .cornerRadius(6)
+            } placeholder: {
+                Asset.Images.Store.Product.imagePlaceholder
+                    .frame(width: 80, height: 80)
+                    .background(Color.gray)
+                    .cornerRadius(6)
+            }
             
             productDescription
             

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -44,18 +44,6 @@ extension View {
         }
     }
     
-    func alert(
-        isPresented: Binding<Bool>,
-        title: String = L10n.Common.oops,
-        message: String = L10n.Common.genericError,
-        primaryButton: Alert.Button,
-        secondaryButton: Alert.Button
-    ) -> some View {
-        alert(isPresented: isPresented) {
-            Alert(title: Text(title), message: Text(message), primaryButton: primaryButton, secondaryButton: secondaryButton)
-        }
-    }
-    
     /// Applies the given transform if the given condition evaluates to `true`.
     /// - Parameters:
     ///   - condition: The condition to evaluate.
@@ -65,19 +53,6 @@ extension View {
     func `if`<Content: View>(_ condition: Bool, content: (Self) -> Content) -> some View {
         if condition {
             content(self)
-        } else {
-            self
-        }
-    }
-    
-    // Closure given view and unwrapped optional value if optional is set.
-    /// - Parameters:
-    ///   - conditional: Optional value.
-    ///   - content: Closure to run on view with unwrapped optional.
-    @ViewBuilder
-    func ifNotNil<Content: View, T>(_ conditional: T?, @ViewBuilder _ content: (Self, _ value: T) -> Content) -> some View {
-        if let value = conditional {
-            content(self, value)
         } else {
             self
         }

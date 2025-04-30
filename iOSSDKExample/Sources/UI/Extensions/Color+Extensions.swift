@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ extension Color {
         case 3:
             (alpha, red, green, blue) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
         case 4:
-            (alpha, red, green, blue) = (255, int >> 12, int >> 8 & 0xF, int & 0xF)
+            (alpha, red, green, blue) = (255, (int >> 12) * 17, (int >> 8 & 0xF) * 17, (int & 0xF) * 17)
         case 6:
             (alpha, red, green, blue) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
         case 8:

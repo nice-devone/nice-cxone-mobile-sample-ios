@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -59,12 +59,11 @@ struct ConfigurationView: View, Alertable {
         .padding(.horizontal, 24)
         .onAppear(perform: viewModel.onAppear)
         .alert(item: $viewModel.alertType, content: alertContent)
-        .animation(.easeInOut(duration: 0.2))
         .navigationBarTitle(L10n.Configuration.title)
         .navigationBarBackButtonHidden()
         .navigationBarItems(
             trailing: Button(action: viewModel.navigateToSettings) {
-                Asset.Common.settings
+                Asset.Images.Common.settings
             }
         )
     }

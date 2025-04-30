@@ -1,9 +1,35 @@
-<a name="2.3.1"></a>
-# [2.3.1] - 2025-04-11
+<a name="unreleased"></a>
+# [Unreleased]
 
-### Dependencies
-- Update CXoneChatSDK from 2.3.0 to 2.3.1
-- Update CXoneChatUI from 2.3.0 to 2.3.1
+## CXoneChatUI
+
+### Fixes
+- Fixes an issue where tapping an image in the chat log would cause the viewer to open briefly and then dismiss. This was caused by incorrect ViewModel lifecycle management.
+- Fixed error when receiving audio messages from agents by improving filename sanitization and handling invalid characters
+- Fixed an issue where the EndConversationView would dismiss prematurely when thread state transitions occurred.
+
+## CXoneChatSDK
+
+### Breaking Changes
+- Message's SenderInfo is optional due to possible automated messages without sender identity (e.g. Welcome Message)
+- SenderInfo attributes `firstName`, `lastName` and `fullName` are optional 
+
+## CXoneChatSDK
+
+### Features
+- Add ChatConfiguration to be able to add additional configuration to the CXoneChatSDK
+
+## Sample
+
+### Features
+- Add a picker to the settings to view the chat full screen or modal
+- Update custom environment configuration list
+- Add options to add contact and customer custom fields as an additional CXoneChatSDK configuration
+
+## CI
+
+### Features
+- Faster the Deploy Application workflow 
 
 <a name="2.3.0"></a>
 # [2.3.0] - 2025-02-12
@@ -21,7 +47,19 @@
 ## CXoneChatUI
 
 ### Fixes
-- MessageGroupView no longer store group as a State property
+- MessageGroupView no longer stores group as a State property
+
+## CXoneChatUI
+
+### Features
+- Update Chat Message Corner Radius
+- Override default avatar image for an agent
+- Update Chat Message Group Messages Spacing
+
+## Sample
+
+### Fixes
+- Settings theme update applies to the chat correctly
 
 <a name="2.2.1"></a>
 # [2.2.1] - 2024-12-06
@@ -44,8 +82,9 @@
 - Deprecate `inContactId`, `loginUsername` and `emailAddress` for an Agent object
 - Improve handling of archiveThread
 - Added additional HTTP headers for `URLRequest`
-- deprecate CXoneChat.delegate in favor of CXoneChat.add/remove(delegate:)
+- Deprecate CXoneChat.delegate in favor of CXoneChat.add/remove(delegate:)
 - Change `set(_:)` to `set(customer:)` in CustomerProvider
+- Deprecate `CXoneChatDelegate.onAgentTyping(_:threadId:)` in favor of `CXoneChatDelegate.onAgentTyping(_:agent:threadId:)`
 
 ### Fixes
 - Increased the timeout duration for the server response during the ping/pong checks.
@@ -55,8 +94,28 @@
 ## CXoneChatUI
 
 ### Features
+- Update UI elements related to document thumbnails.
+- Redesign live chat popups
+- Redesign elements related to voice messages.
+- Redesign Message Group Header
+- Redesign Text Messages
+- Redesign UI elements related to the Precontact Survey
+- Redesign UI Elements related to image attachments.
 - Add colors related to the UI redesign
 - Removed branding for a chat
+- Update Offline overlay of a disconnect button
+- Update customizable and remove popup colors
+- Redesign rich content message - rich link
+- Redesign emoji message
+- Add missing docstring
+- Refactor StyleGuide constraints
+- NavigationView based navigation
+- Redesign Agent activity indicator
+- Update UI element that displays hierarchical data on the Precontact Survey.
+- Extend Agent activity indicator of the agent's avatar
+
+### Fixes
+- Send option content as a message with quick replies option selection 
 
 ### Fixes
 - Fix load more messages
@@ -74,6 +133,7 @@
 ### Features
 - Exclude hardcoded versions from workflows to GitHub repository variables
 - Bumps xavierLowmiller/xcodegen-action from 1.2.2 to 1.2.3
+- Integrate Periphery to CI
 
 ### Fixes
 - Exclude SwiftGen from workflows to separate script and fix "build", "deploy_app" and "deploy_documentation" workflows

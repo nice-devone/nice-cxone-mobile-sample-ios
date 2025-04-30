@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
-import Kingfisher
 import SwiftUI
 
 struct ImageCarouselView: View {
@@ -63,15 +62,16 @@ private struct CarouselView: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(imageUrls, id: \.self) { url in
-                KFImage(url)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: geometryProxy.size.width, height: geometryProxy.size.width - 100)
+                AsyncImage(url: url) { image in
+                    image.image?
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: geometryProxy.size.width, height: geometryProxy.size.width - 100)
+                }
             }
         }
         .frame(width: geometryProxy.size.width, height: geometryProxy.size.width - 100, alignment: .leading)
         .offset(x: CGFloat(currentIndex) * -geometryProxy.size.width, y: 0)
-        .animation(.spring())
         .gesture(
             DragGesture()
                 .onChanged { value in
@@ -127,7 +127,6 @@ private struct CarouselPageIndicator: View {
                             height: index == currentIndex ? 12 : 8
                         )
                         .foregroundColor(index == currentIndex ? .blue : Color(.systemGray4))
-                        .animation(.spring())
                 }
             }
             .padding(.vertical, 4)
@@ -146,8 +145,6 @@ private struct CarouselPageIndicator: View {
 
 // swiftlint:disable force_unwrapping
 struct ImageCarouselView_Previews: PreviewProvider {
-    
-    @State private static var index = 0
     
     static var previews: some View {
         Group {
