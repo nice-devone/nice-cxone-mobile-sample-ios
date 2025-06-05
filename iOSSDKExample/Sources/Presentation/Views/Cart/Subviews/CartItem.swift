@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ struct CartItem: View {
         HStack(alignment: .center, spacing: 16) {
             KFImage(product.thumbnailUrl)
                 .placeholder {
-                    Asset.Store.Product.imagePlaceholder
+                    Asset.Images.Store.Product.imagePlaceholder
                         .frame(width: 80, height: 80)
                         .background(Color.gray)
                         .cornerRadius(6)

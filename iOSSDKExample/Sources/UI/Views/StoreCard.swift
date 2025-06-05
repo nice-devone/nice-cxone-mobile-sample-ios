@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -26,11 +26,18 @@ struct StoreCard: View {
     @State var title: String
     @State var price: Double
     
+    private static let imagePlaceholderHeight: CGFloat = 50
+    
     // MARK: - Builder
     
     var body: some View {
         VStack {
             KFImage(thumbnailUrl)
+                .placeholder {
+                    Asset.Images.Store.Product.imagePlaceholder
+                        .foregroundStyle(Color(.systemGray))
+                        .frame(maxWidth: .infinity, minHeight: Self.imagePlaceholderHeight)
+                }
                 .resizable()
                 .scaledToFit()
                 .cornerRadius(10, corners: [.topLeft, .topRight])

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -22,17 +22,18 @@ class MyChatCoordinator: ChatCoordinator {
 
     // MARK: - Init
     
-    init(navigationController: UINavigationController) {
-        super.init(chatStyle: ChatStyle.initFromChatAppearance(), chatLocalization: ChatLocalization())
-
-        LogManager.configure(level: .trace, verbosity: .full)
-        LogManager.delegate = self
+    init() {
+        #warning("Re-enable after 3.0.0 release")
+        // super.init(chatStyle: ChatAppearance.getChatStyle())
+        super.init()
     }
     
     // MARK: - Methods
     
-    func start(with deepLinkOption: DeeplinkOption? = nil, in parentViewController: UIViewController) {
+    func start(with deepLinkOption: DeeplinkOption? = nil, modally: Bool, in parentViewController: UIViewController, onFinish: (() -> Void)? = nil) {
         Log.trace("Starting chat")
+        
+        provideAdditionalCustomFieldsIfNeeded()
         
         let threadToOpen: UUID?
 
@@ -42,48 +43,33 @@ class MyChatCoordinator: ChatCoordinator {
             threadToOpen = nil
         }
 
-        start(threadId: threadToOpen, in: parentViewController)
-    }
-}
-
-// MARK: - LogDelegate
-
-extension MyChatCoordinator: LogDelegate {
-    
-    func logError(_ message: String) {
-        Log.message("[UI] \(message)")
-    }
-
-    func logWarning(_ message: String) {
-        Log.message("[UI] \(message)")
-    }
-
-    func logInfo(_ message: String) {
-        Log.message("[UI] \(message)")
-    }
-
-    func logTrace(_ message: String) {
-        Log.message("[UI] \(message)")
+        start(
+            threadId: threadToOpen,
+            in: parentViewController,
+            presentModally: modally,
+            onFinish: onFinish
+        )
     }
 }
 
 // MARK: - Helpers
 
-private extension ChatStyle {
-    
-    static func initFromChatAppearance() -> ChatStyle {
-        ChatStyle(
-            navigationBarColor: ChatAppearance.navigationBarColor,
-            navigationBarElementsColor: ChatAppearance.navigationBarElementsColor,
-            backgroundColor: ChatAppearance.backgroundColor,
-            agentCellColor: ChatAppearance.agentCellColor,
-            agentFontColor: ChatAppearance.agentFontColor,
-            customerCellColor: ChatAppearance.customerCellColor,
-            customerFontColor: ChatAppearance.customerFontColor,
-            formTextColor: ChatAppearance.formTextColor,
-            formErrorColor: ChatAppearance.formErrorColor,
-            buttonTextColor: ChatAppearance.buttonTextColor,
-            buttonBackgroundColor: ChatAppearance.buttonBackgroundColor
-        )
+private extension MyChatCoordinator {
+ 
+    func provideAdditionalCustomFieldsIfNeeded() {
+        // Reset custom fields
+        chatConfiguration.additionalContactCustomFields = [:]
+        chatConfiguration.additionalCustomerCustomFields = [:]
+        
+        if let customFields = LocalStorageManager.additionalContactCustomFields, !customFields.isEmpty {
+            Log.trace("Providing additional contact custom fields")
+            
+            chatConfiguration.additionalContactCustomFields = customFields
+        }
+        if let customFields = LocalStorageManager.additionalCustomerCustomFields, !customFields.isEmpty {
+            Log.trace("Providing additional customer custom fields")
+            
+            chatConfiguration.additionalCustomerCustomFields = customFields
+        }
     }
 }

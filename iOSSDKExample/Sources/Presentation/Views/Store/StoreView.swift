@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -46,15 +46,10 @@ struct StoreView: View {
                 storeContent
                 
                 Button(action: viewModel.openChat) {
-                    Asset.Store.chat
+                    chatButtonLabel
                 }
-                .padding(12)
-                .foregroundColor(.white)
-                .background(
-                    Circle()
-                        .fill(Color.accentColor)
-                )
-                .offset(x: -12, y: -12)
+                .padding(.trailing, 12)
+                .padding(.bottom, UIDevice.hasHomeButton ? 12 : 0)
             }
         }
         .onAppear(perform: viewModel.onAppear)
@@ -76,15 +71,14 @@ struct StoreView: View {
                 Button {
                     isPresentingDisconnectAlert = true
                 } label: {
-                    Asset.Common.disconnect
+                    Asset.Images.Common.disconnect
                 }
                 
                 Button {
                     viewModel.showSettings()
                 } label: {
-                    Asset.Common.settings
+                    Asset.Images.Common.settings
                 }
-
             },
             trailing: cartNavigationItem
         )
@@ -96,12 +90,22 @@ struct StoreView: View {
 
 private extension StoreView {
 
+    var chatButtonLabel: some View {
+        Asset.Images.Store.chat
+            .padding(16)
+            .foregroundColor(.white)
+            .background(
+                Circle()
+                    .fill(Color.accentColor)
+            )
+    }
+    
     var cartNavigationItem: some View {
         Button(action: {
             viewModel.navigateToCart()
         }, label: {
             ZStack {
-                Asset.Store.cart
+                Asset.Images.Store.cart
                 
                 if viewModel.itemsInCart > 0 {
                     Text(viewModel.itemsInCart.description)
@@ -144,29 +148,15 @@ private extension StoreView {
 
 // MARK: - Preview
 
-struct StoreView_Previews: PreviewProvider {
-    
-    private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
-    private static var appModule = PreviewAppModule(coordinator: coordinator) {
-        didSet {
-            coordinator.assembler = appModule.assembler
-        }
-    }
-    
-    static var previews: some View {
-        Group {
-            // swiftlint:disable force_unwrapping
-            NavigationView {
-                appModule.resolver.resolve(StoreView.self)!
-            }
-            .previewDisplayName("Light Mode")
-            
-            NavigationView {
-                appModule.resolver.resolve(StoreView.self)!
-            }
-            // swiftlint:enable force_unwrapping
-            .preferredColorScheme(.dark)
-            .previewDisplayName("Dark Mode")
-        }
+#Preview {
+    NavigationView {
+        StoreView(
+            viewModel: StoreViewModel(
+                coordinator: StoreCoordinator(navigationController: UINavigationController()),
+                deeplinkOption: nil,
+                getProducts: GetProductsUseCase(repository: MockProductsRepositoryImpl()),
+                getCart: GetCartUseCase(repository: MockCartRepositoryImpl())
+            )
+        )
     }
 }

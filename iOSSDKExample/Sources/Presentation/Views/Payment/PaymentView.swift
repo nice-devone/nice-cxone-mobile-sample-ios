@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ struct PaymentView: View {
                     .padding(.top, 24)
                 
                 HStack(spacing: 16) {
-                    Asset.masterCard.swiftUIImage
+                    Asset.Images.masterCard.swiftUIImage
                         .resizable()
                         .scaledToFit()
                         .frame(width: 64, height: 44)
@@ -109,8 +109,9 @@ struct PaymentView: View {
                 } label: {
                     Text(L10n.Payment.confirmationButtonTitle)
                         .fontWeight(.bold)
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(PrimaryButtonStyle())
+                .buttonStyle(.primary)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)

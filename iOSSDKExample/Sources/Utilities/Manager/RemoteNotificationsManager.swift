@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ public class RemoteNotificationsManager: NSObject {
     
     public var onRegistrationFinished: (() -> Void)?
     
+    // periphery:ignore - false positive because it is used in a `registerIfNeeded` method that is also false positive
     private lazy var notificationCenter: UNUserNotificationCenter = .current()
     
     // MARK: - Init
@@ -42,8 +43,15 @@ public class RemoteNotificationsManager: NSObject {
         }
     }
     
+    // periphery:ignore - false positive because it is used only when running on a real device and not on a simulator
     public func registerIfNeeded() {
-        Log.trace("Checking remote notification registration status")
+        guard !UIApplication.shared.isRegisteredForRemoteNotifications else {
+            Log.trace("Skip registering for remote notifications: already registered")
+            onRegistrationFinished?()
+            return
+        }
+        
+        Log.trace("The app is not registered for remote notifications: attempt to register with a prompt for user permissions")
         
         notificationCenter.getNotificationSettings { [weak self] settings in
             if settings.authorizationStatus == .notDetermined {

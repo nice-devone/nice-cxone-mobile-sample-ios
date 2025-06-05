@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import SwiftUI
 import UIKit
 
 class SettingsViewModel: ObservableObject {
+    private typealias Theme = Asset.Colors.ChatDefaultTheme
     
     // MARK: - Properties
     
@@ -27,28 +28,42 @@ class SettingsViewModel: ObservableObject {
     @Published var shouldShareLogs = false
     @Published var showRemoveLogsAlert = false
     @Published var showInvalidColorError = false
+    @Published var chatPresentationStyle = LocalStorageManager.chatPresentationStyle ?? .modal
+    @Published var isAdditionalContactFieldVisible = false
+    @Published var isAdditionalCustomerFieldVisible = false
+    @Published var additionalContactCustomFields = LocalStorageManager.additionalContactCustomFields ?? [:]
+    @Published var additionalCustomerCustomFields = LocalStorageManager.additionalCustomerCustomFields ?? [:]
     
     var invalidColorTitle: String?
     
+    let appBuildNumber = Bundle.main.buildVersion
+    let appBranchName = Bundle.main.branchName
+    let appBranchTag = Bundle.main.branchTag
     let sdkVersion = CXoneChatSDKModule.version
     let uiVersion = CXoneChatUIModule.version
+    let onColorChanged: () -> Void
     
-    var navigationBarColor: Color { ChatAppearance.navigationBarColor }
-    var navigationBarElementsColor: Color { ChatAppearance.navigationBarElementsColor }
-    var backgroundColor: Color { ChatAppearance.backgroundColor }
-    var agentCellColor: Color { ChatAppearance.agentCellColor }
-    var customerCellColor: Color { ChatAppearance.customerCellColor }
-    var agentFontColor: Color { ChatAppearance.agentFontColor }
-    var customerFontColor: Color { ChatAppearance.customerFontColor }
-    var formTextColor: Color { ChatAppearance.formTextColor }
-    var formErrorColor: Color { ChatAppearance.formErrorColor }
-    var buttonTextColor: Color { ChatAppearance.buttonTextColor }
-    var buttonBackgroundColor: Color { ChatAppearance.buttonBackgroundColor }
+    private var colorDidChange = false
+    
+    // MARK: - Init
+    
+    init(onColorChanged: @escaping () -> Void) {
+        self.onColorChanged = onColorChanged
+    }
     
     // MARK: - Functions
     
+    func onDisappear() {
+        Log.trace("Settings view is disappearing")
+        
+        if colorDidChange {
+            onColorChanged()
+        }
+    }
+    
     func removeLogs() -> String {
         Log.trace("Removing application logs")
+        
         do {
             try Log.removeLogs()
             
@@ -58,6 +73,12 @@ class SettingsViewModel: ObservableObject {
             
             return L10n.Settings.Logs.Remove.Message.failure
         }
+    }
+    
+    func chatPresentationStyleChanged(_ style: ChatPresentationStyle) {
+        Log.trace("Chat presentation style changed to: \(style)")
+        
+        LocalStorageManager.chatPresentationStyle = style
     }
     
     func colorDidChange(color: Color?, for title: String) {
@@ -72,32 +93,60 @@ class SettingsViewModel: ObservableObject {
             showInvalidColorError = true
         }
         
+        colorDidChange = true
+        
         switch title {
-        case L10n.Settings.Theme.ChatNavigationBarColorField.placeholder:
-            onNavigationBarColorChanged(color)
-        case L10n.Settings.Theme.ChatNavigationElementsColorField.placeholder:
-            onNavigationElementsColorChanged(color)
-        case L10n.Settings.Theme.ChatBackgroundColorField.placeholder:
+        case L10n.Settings.Theme.Primary.placeholder:
+            primaryColorChanged(color)
+        case L10n.Settings.Theme.OnPrimary.placeholder:
+            onPrimaryColorChanged(color)
+        case L10n.Settings.Theme.Background.placeholder:
+            backgroundColorChanged(color)
+        case L10n.Settings.Theme.OnBackground.placeholder:
             onBackgroundColorChanged(color)
-        case L10n.Settings.Theme.ChatAgentCellColorField.placeholder:
-            onAgentCellColorChanged(color)
-        case L10n.Settings.Theme.ChatCustomerCellColorField.placeholder:
-            onCustomerCellColorChanged(color)
-        case L10n.Settings.Theme.ChatAgentFontColorField.placeholder:
-            onAgentFontColorChanged(color)
-        case L10n.Settings.Theme.ChatCustomerFontColorField.placeholder:
-            onCustomerFontColorChanged(color)
-        case L10n.Settings.Theme.ChatFormTextColor.placeholder:
-            onChatFormTextColorChanged(color)
-        case L10n.Settings.Theme.ChatFormErrorColor.placeholder:
-            onChatFormErrorColorChanged(color)
-        case L10n.Settings.Theme.ChatButtonTextColor.placeholder:
-            onButtonTextColorChanged(color)
-        case L10n.Settings.Theme.ChatButtonBackgroundColor.placeholder:
-            onButtonBackgroundColorChanged(color)
+        case L10n.Settings.Theme.Accent.placeholder:
+            accentColorChanged(color)
+        case L10n.Settings.Theme.OnAccent.placeholder:
+            onAccentColorChanged(color)
+        case L10n.Settings.Theme.AgentBackground.placeholder:
+            agentBackgroundColorChanged(color)
+        case L10n.Settings.Theme.AgentText.placeholder:
+            agentTextColorChanged(color)
+        case L10n.Settings.Theme.CustomerBackground.placeholder:
+            customerBackgroundColorChanged(color)
+        case L10n.Settings.Theme.CustomerText.placeholder:
+            customerTextColorChanged(color)
         default:
             return
         }
+    }
+    
+    func setAdditionalContactCustomField(_ field: String, value: String) {
+        Log.trace("Additional contact custom field `\(field)` has been set to `\(value)`")
+        
+        additionalContactCustomFields[field] = value
+        LocalStorageManager.additionalContactCustomFields = additionalContactCustomFields
+    }
+    
+    func removeAdditionalContactCustomField(_ field: String) {
+        Log.trace("Additional contact custom field `\(field)` has been removed")
+        
+        additionalContactCustomFields.removeValue(forKey: field)
+        LocalStorageManager.additionalContactCustomFields = additionalContactCustomFields
+    }
+    
+    func setAdditionalCustomerCustomField(_ field: String, value: String) {
+        Log.trace("Additional customer custom field `\(field)` has been set to `\(value)`")
+        
+        additionalCustomerCustomFields[field] = value
+        LocalStorageManager.additionalCustomerCustomFields = additionalCustomerCustomFields
+    }
+    
+    func removeAdditionalCustomerCustomField(_ field: String) {
+        Log.trace("Additional customer custom field `\(field)` has been removed")
+        
+        additionalCustomerCustomFields.removeValue(forKey: field)
+        LocalStorageManager.additionalCustomerCustomFields = additionalCustomerCustomFields
     }
 }
 
@@ -105,91 +154,83 @@ class SettingsViewModel: ObservableObject {
 
 private extension SettingsViewModel {
     
-    func onNavigationBarColorChanged(_ color: Color?) {
+    func primaryColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatNavigationBarDarkColor = color
+            LocalStorageManager.primaryDarkColor = color ?? Theme.primary.swiftUIColor
         } else {
-            LocalStorageManager.chatNavigationBarLightColor = color ?? Color(.systemBackground)
+            LocalStorageManager.primaryLightColor = color ?? Theme.primaryDark.swiftUIColor
         }
     }
 
-    func onNavigationElementsColorChanged(_ color: Color?) {
+    func onPrimaryColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatNavigationElementsDarkColor = color ?? Color(.systemBlue)
+            LocalStorageManager.onPrimaryDarkColor = color ?? Theme.onPrimary.swiftUIColor
         } else {
-            LocalStorageManager.chatNavigationElementsLightColor = color ?? Color(.systemBlue)
+            LocalStorageManager.onPrimaryLightColor = color ?? Theme.onPrimaryDark.swiftUIColor
+        }
+    }
+
+    func backgroundColorChanged(_ color: Color?) {
+        if UIApplication.isDarkModeActive {
+            LocalStorageManager.backgroundDarkColor = color ?? Theme.background.swiftUIColor
+        } else {
+            LocalStorageManager.backgroundLightColor = color ?? Theme.backgroundDark.swiftUIColor
         }
     }
 
     func onBackgroundColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatBackgroundDarkColor = color ?? Color(.systemBackground)
+            LocalStorageManager.onBackgroundDarkColor = color ?? Theme.onBackground.swiftUIColor
         } else {
-            LocalStorageManager.chatBackgroundLightColor = color ?? Color(.systemBackground)
+            LocalStorageManager.onBackgroundLightColor = color ?? Theme.onBackgroundDark.swiftUIColor
         }
     }
 
-    func onAgentCellColorChanged(_ color: Color?) {
+    func accentColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatAgentCellDarkColor = color ?? Color(.lightGray)
+            LocalStorageManager.accentDarkColor = color ?? Theme.accent.swiftUIColor
         } else {
-            LocalStorageManager.chatAgentCellLightColor = color ?? Color(.lightGray)
+            LocalStorageManager.accentLightColor = color ?? Theme.accentDark.swiftUIColor
         }
     }
 
-    func onCustomerCellColorChanged(_ color: Color?) {
+    func onAccentColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatCustomerCellDarkColor = color ?? Color(.systemBlue)
+            LocalStorageManager.onAccentDarkColor = color ?? Theme.onAccent.swiftUIColor
         } else {
-            LocalStorageManager.chatCustomerCellLightColor = color ?? Color(.systemBlue)
+            LocalStorageManager.onAccentLightColor = color ?? Theme.onAccentDark.swiftUIColor
         }
     }
 
-    func onAgentFontColorChanged(_ color: Color?) {
+    func agentBackgroundColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatAgentFontDarkColor = color ?? .black
+            LocalStorageManager.agentBackgroundDarkColor = color ?? Theme.agentBackground.swiftUIColor
         } else {
-            LocalStorageManager.chatAgentFontLightColor = color ?? .black
-        }
-    }
-
-    func onCustomerFontColorChanged(_ color: Color?) {
-        if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatCustomerFontDarkColor = color ?? .white
-        } else {
-            LocalStorageManager.chatCustomerFontLightColor = color ?? .white
+            LocalStorageManager.agentBackgroundLightColor = color ?? Theme.agentBackgroundDark.swiftUIColor
         }
     }
     
-    func onChatFormTextColorChanged(_ color: Color?) {
+    func agentTextColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatFormTextDarkColor = color ?? .black
+            LocalStorageManager.agentTextDarkColor = color ?? Theme.agentText.swiftUIColor
         } else {
-            LocalStorageManager.chatFormTextLightColor = color ?? .black
+            LocalStorageManager.agentTextLightColor = color ?? Theme.agentTextDark.swiftUIColor
         }
     }
     
-    func onChatFormErrorColorChanged(_ color: Color?) {
+    func customerBackgroundColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatFormErrorDarkColor = color ?? .red
+            LocalStorageManager.customerBackgroundDarkColor = color ?? Theme.customerBackground.swiftUIColor
         } else {
-            LocalStorageManager.chatFormErrorLightColor = color ?? .red
+            LocalStorageManager.customerBackgroundLightColor = color ?? Theme.customerBackgroundDark.swiftUIColor
         }
     }
     
-    func onButtonTextColorChanged(_ color: Color?) {
+    func customerTextColorChanged(_ color: Color?) {
         if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatButtonTextDarkColor = color ?? .accentColor
+            LocalStorageManager.customerTextDarkColor = color ?? Theme.customerText.swiftUIColor
         } else {
-            LocalStorageManager.chatButtonTextLightColor = color ?? .accentColor
-        }
-    }
-    
-    func onButtonBackgroundColorChanged(_ color: Color?) {
-        if UIApplication.isDarkModeActive {
-            LocalStorageManager.chatButtonBackgroundDarkColor = color ?? .white
-        } else {
-            LocalStorageManager.chatButtonBackgroundLightColor = color ?? .white
+            LocalStorageManager.customerTextLightColor = color ?? Theme.customerTextDark.swiftUIColor
         }
     }
 }

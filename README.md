@@ -15,9 +15,10 @@ The following sample code will help configure and customize application Digital 
 
 ## Modules
 
+- [Utility](https://github.com/nice-devone/nice-cxone-mobile-guide-utility-ios)
 - [Core](https://github.com/nice-devone/nice-cxone-mobile-sdk-ios)
-- [UI](https://github.com/nice-devone/nice-cxone-mobile-ui-ios) (⚠️ still under development, not yet actively supported)
-- Sample app
+- [UI](https://github.com/nice-devone/nice-cxone-mobile-ui-ios)
+- Sample
 
 
 ## How to Run the Application
@@ -31,7 +32,6 @@ The following sample code will help configure and customize application Digital 
     sh scripts/setup.sh
     ```
 - Open project via `iOSSDKExample.xcodeproj`
-- Trust & Enable the MockableMacro
 - Build & run application
 
 

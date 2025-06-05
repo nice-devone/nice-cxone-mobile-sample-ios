@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ struct LoginView: View, Alertable {
                 }
                 
                 Button(action: viewModel.invokeLoginWithAmazon) {
-                    Asset.OAuth.loginWithAmazon.swiftUIImage
+                    Asset.Images.OAuth.loginWithAmazon.swiftUIImage
                         .opacity(viewModel.isOAuthEnabled ? 1 : 0.3)
                 }
                 .disabled(!viewModel.isOAuthEnabled)
@@ -84,13 +84,13 @@ struct LoginView: View, Alertable {
                 view.toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button(action: viewModel.signOut) {
-                            Asset.Common.disconnect
+                            Asset.Images.Common.disconnect
                         }
                     }
                  
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: viewModel.navigateToSettings) {
-                            Asset.Common.settings
+                            Asset.Images.Common.settings
                         }
                     }
                 }

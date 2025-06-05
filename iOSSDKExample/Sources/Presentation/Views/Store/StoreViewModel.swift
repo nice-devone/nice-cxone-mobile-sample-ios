@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2024. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -52,8 +52,6 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
     override func onAppear() {
         super.onAppear()
         
-        coordinator.navigationController.setNormalAppearance()
-        
         loadCart()
         loadProducts()
         
@@ -63,6 +61,11 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
             self.deeplinkOption = nil
         }
     }
+}
+
+// MARK: - Actions
+
+extension StoreViewModel {
     
     func signOut() {
         Log.trace("Signing out")
@@ -84,7 +87,7 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
     func openChat() {
         Log.trace("Opening chat")
         
-        coordinator.openChat(deeplinkOption: deeplinkOption)
+        coordinator.openChat(modally: LocalStorageManager.chatPresentationStyle != .fullScreen, deeplinkOption: deeplinkOption)
     }
     
     func navigateToCart() {
