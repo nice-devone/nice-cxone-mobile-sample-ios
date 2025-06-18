@@ -45,6 +45,7 @@ struct LocalStorageManager {
         case chatButtonBackgroundDarkColor
         case chatButtonTextLightColor
         case chatButtonTextDarkColor
+        case oAuthEntity
     }
     
     // MARK: - Properties
@@ -123,6 +124,9 @@ struct LocalStorageManager {
     
     @Storage(key: .chatButtonTextDarkColor)
     static var chatButtonTextDarkColor: Color?
+    
+    @Storage(key: .oAuthEntity)
+    static var oAuthEntity: OAuthEntity?
     
     // MARK: - Methods
     
