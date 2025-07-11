@@ -82,20 +82,22 @@ private extension ConfigurationView {
                 Spacer()
 
                 Button(viewModel.environment.rawValue) {
-                    isShowingConfigurationsSheet = true
+                    isShowingEnvironmentsSheet = true
                 }
-                .actionSheet(isPresented: $isShowingConfigurationsSheet) {
-                    var options: [ActionSheet.Button] = CXoneChatSDK.Environment.allCases
-                        .map { option in
-                                .default(Text(option.rawValue)) { viewModel.environment = option }
+                .confirmationDialog(L10n.Configuration.environmentSelectionTitle, isPresented: $isShowingEnvironmentsSheet) {
+                    ForEach(CXoneChatSDK.Environment.allCases, id: \.hashValue) { option in
+                        Button(option.rawValue) {
+                            viewModel.environment = option
                         }
-                    options.append(.cancel())
-
-                    return ActionSheet(
-                        title: Text(L10n.Configuration.environmentSelectionTitle),
-                        buttons: options
-                    )
+                        .accessibilityIdentifier("configuration.default.environment_options.option_\(option.rawValue)")
+                    }
+                    
+                    Button(L10n.Common.cancel, role: .cancel) {
+                        isShowingEnvironmentsSheet = false
+                    }
+                    .accessibilityIdentifier("configuration.default.environment_options.option_cancel")
                 }
+                .accessibilityIdentifier("configuration.default.environment_options")
             }
 
             ValidatedTextField(
@@ -127,20 +129,24 @@ private extension ConfigurationView {
                 Spacer()
                 
                 Button(viewModel.customConfiguration.title) {
-                    isShowingEnvironmentsSheet = true
+                    isShowingConfigurationsSheet = true
                 }
-                .actionSheet(isPresented: $isShowingEnvironmentsSheet) {
-                    var options: [ActionSheet.Button] = viewModel.configurations
-                        .map { option in
-                                .default(Text(option.title)) { viewModel.customConfiguration = option }
+                .confirmationDialog(L10n.Configuration.configurationSelectionTitle, isPresented: $isShowingConfigurationsSheet) {
+                    ForEach(viewModel.configurations, id: \.hashValue) { option in
+                        Button {
+                            viewModel.customConfiguration = option
+                        } label: {
+                            Text(option.title)
                         }
-                    options.append(.cancel())
+                        .accessibilityIdentifier("configuration.custom.environment_options.option_\(option.title)")
+                    }
                     
-                    return ActionSheet(
-                        title: Text(L10n.Configuration.environmentSelectionTitle),
-                        buttons: options
-                    )
+                    Button(L10n.Common.cancel, role: .cancel) {
+                        isShowingConfigurationsSheet = false
+                    }
+                    .accessibilityIdentifier("configuration.custom.environment_options.option_cancel")
                 }
+                .accessibilityIdentifier("configuration.custom.environment_options")
             }
             
             customCustomerIDSection

@@ -1,3 +1,4 @@
+#!/bin/bash -xe
 #
 # Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
 #
@@ -5,7 +6,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    https://github.com/BrandEmbassy/cxone-mobile-sdk-IOS/blob/master/LICENSE
+#    https://github.com/nice-devone/nice-cxone-mobile-sample-ios/blob/main/LICENSE
 #
 # TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE CXONE MOBILE SDK IS PROVIDED ON
 # AN “AS IS” BASIS. NICE HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS
@@ -13,9 +14,26 @@
 # FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 #
 
-settings:
-  base:
-    BUNDLE_PREFIX: com.incontact.mobileSDK
-    DEVELOPMENT_TEAM: A9KL983VAD
-    MARKETING_VERSION: "3.0.1"
-    DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+set -o pipefail
+
+prepare_env() {
+    local name="$1"
+    local value="$2"
+
+    if [[ -z ${!name} ]] ; then
+	export "${name}"="${value}"
+
+	if [[ x$GITHUB_ENV != x ]] ; then
+	    echo "$name=${value}" >> $GITHUB_ENV
+	fi
+    fi
+}
+
+# Common
+prepare_env SWIFTGEN_VERSION '6.6.3'
+
+export RUNNER_TEMP="${RUNNER_TEMP:-$(pwd)}"
+
+prepare_env PROJECT_DIR "$RUNNER_TEMP"
+prepare_env BUILD "$PROJECT_DIR/build"
+

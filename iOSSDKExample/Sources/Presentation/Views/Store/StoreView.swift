@@ -45,7 +45,9 @@ struct StoreView: View {
             ZStack(alignment: .bottomTrailing) {
                 storeContent
                 
-                Button(action: viewModel.openChat) {
+                Button {
+                    viewModel.openChat()
+                } label: {
                     chatButtonLabel
                 }
                 .padding(.trailing, 12)
@@ -82,7 +84,6 @@ struct StoreView: View {
             },
             trailing: cartNavigationItem
         )
-        .navigationBarHidden(false)
     }
 }
 

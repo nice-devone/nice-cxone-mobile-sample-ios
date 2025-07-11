@@ -16,7 +16,7 @@
 import CXoneChatSDK
 import Foundation
 
-struct Configuration {
+struct Configuration: Hashable {
     
     // MARK: - Properties
     

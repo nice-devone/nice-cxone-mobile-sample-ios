@@ -21,6 +21,7 @@ import os
 import UIKit
 
 class Log: StaticLogger {
+    
     // MARK: - StaticLogger implementation
 
     nonisolated(unsafe) public static var instance: LogWriter? = PrintLogWriter()
@@ -62,10 +63,12 @@ class Log: StaticLogger {
         }
 
         if isSystemEnabled {
-            loggers.append(SystemLogWriter(logger: Logger(
+            let logger = Logger(
                 subsystem: Bundle.main.bundleIdentifier!, // swiftlint:disable:this force_unwrapping
                 category: "Application"
-            )))
+            )
+            
+            loggers.append(SystemLogWriter(logger: logger))
         }
 
         let instance = loggers.isEmpty ? nil : ForkLogWriter(loggers: loggers).format(format)

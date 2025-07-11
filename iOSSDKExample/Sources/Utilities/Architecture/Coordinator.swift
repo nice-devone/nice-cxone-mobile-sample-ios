@@ -22,6 +22,7 @@ open class Coordinator {
     
     var navigationController: UINavigationController
     
+    var isActive = false
     var subCoordinators = [Coordinator]()
     
     // swiftlint:disable:next force_unwrapping

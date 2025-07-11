@@ -19,21 +19,29 @@ import PKCE
 class LoginWithAmazonUseCase {
     
     func callAsFunction() async throws {
-        guard let authenticator = OAuthenticatorsManager.authenticator else {
-            throw CommonError.failed("Unable to get OAuth authenticator.")
-        }
-
-        let verifier = try generateCodeVerifier()
-        let challenge = try generateCodeChallenge(for: verifier)
-
-        CXoneChat.shared.customer.setCodeVerifier(verifier)
-
-        let (_, result) = try await authenticator.authorize(withChallenge: challenge)
-        
-        if let result {
-            CXoneChat.shared.customer.setAuthorizationCode(result.challengeResult)
+        if let entity = LocalStorageManager.oAuthEntity {
+            // Authorize silently with existing code verifier and challenge
+            CXoneChat.shared.customer.setCodeVerifier(entity.codeVerifier)
+            CXoneChat.shared.customer.setAuthorizationCode(entity.codeChallenge)
         } else {
-            throw CommonError.unableToParse("result")
+            // Authorize with UI prompt
+            guard let authenticator = OAuthenticatorsManager.authenticator else {
+                throw CommonError.failed("Unable to get OAuth authenticator.")
+            }
+            // Generate code verifier and challenge
+            let verifier = try generateCodeVerifier()
+            let challenge = try generateCodeChallenge(for: verifier)
+            
+            let (_, result) = try await authenticator.authorize(withChallenge: challenge)
+            
+            if let result {
+                LocalStorageManager.oAuthEntity = OAuthEntity(codeVerifier: verifier, codeChallenge: result.challengeResult)
+                
+                CXoneChat.shared.customer.setCodeVerifier(verifier)
+                CXoneChat.shared.customer.setAuthorizationCode(result.challengeResult)
+            } else {
+                throw CommonError.unableToParse("result")
+            }
         }
     }
 }

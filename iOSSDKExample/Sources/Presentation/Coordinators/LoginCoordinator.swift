@@ -51,12 +51,17 @@ class LoginCoordinator: Coordinator {
     
     // MARK: - Methods
     
-    func start(with deeplinkOption: DeeplinkOption?) {
+    func start(with deeplinkOption: DeeplinkOption? = nil) {
         navigationController.viewControllers.removeAll()
+        isActive = true
         
         if let configuration = LocalStorageManager.configuration {
+            Log.trace("Configuration found in local storage, showing login screen with deeplink: \(String(describing: deeplinkOption))")
+            
             showLogin(configuration: configuration, deeplinkOption: deeplinkOption)
         } else {
+            Log.trace("No configuration found in local storage, showing configuration screen")
+            
             showConfiguration()
         }
     }
@@ -84,7 +89,7 @@ extension LoginCoordinator {
         navigationController.setViewControllers([controller], animated: true)
     }
     
-    func showLogin(configuration: Configuration, deeplinkOption: DeeplinkOption?) {
+    func showLogin(configuration: Configuration, deeplinkOption: DeeplinkOption? = nil) {
         // swiftlint:disable:next force_unwrapping
         let controller = UIHostingController(rootView: resolver.resolve(LoginView.self, arguments: configuration, deeplinkOption)!)
         
@@ -92,6 +97,8 @@ extension LoginCoordinator {
     }
     
     func showDashboard(deeplinkOption: DeeplinkOption?) {
+        isActive = false
+        
         storeCoordinator.start(with: deeplinkOption)
     }
 }

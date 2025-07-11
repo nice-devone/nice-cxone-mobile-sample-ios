@@ -31,7 +31,8 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
     private let loginWithAmazon: LoginWithAmazonUseCase
     private let getChannelConfiguration: GetChannelConfigurationUseCase
     private let coordinator: LoginCoordinator
-    private let deeplinkOption: DeeplinkOption?
+    
+    private var deeplinkOption: DeeplinkOption?
     
     // MARK: - Init
     
@@ -59,11 +60,15 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
         UIAlertController.defaultAppearance()
         UISegmentedControl.defaultAppearance()
         
+        #if !targetEnvironment(simulator)
         RemoteNotificationsManager.shared.onRegistrationFinished = { [weak self] in
             self?.prepareAndFetchConfiguration()
         }
         
         RemoteNotificationsManager.shared.registerIfNeeded()
+        #else
+        prepareAndFetchConfiguration()
+        #endif
     }
     
     func signOut() {
@@ -91,6 +96,9 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
         LocalStorageManager.reset()
         FileManager.default.eraseDocumentsFolder()
         RemoteNotificationsManager.shared.unregister()
+        
+        // Reconfigure Logger
+        Log.configure(isWriteToFileEnabled: true)
         
         coordinator.showConfiguration()
     }
@@ -147,6 +155,8 @@ private extension LoginViewModel {
         Log.trace("Navigate to the store")
         
         coordinator.showDashboard(deeplinkOption: deeplinkOption)
+        
+        deeplinkOption = nil // Reset deeplink option after navigation
     }
     
     func prepareAndFetchConfiguration() {
