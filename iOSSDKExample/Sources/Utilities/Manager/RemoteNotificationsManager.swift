@@ -47,7 +47,6 @@ public class RemoteNotificationsManager: NSObject {
     public func registerIfNeeded() {
         guard !UIApplication.shared.isRegisteredForRemoteNotifications else {
             Log.trace("Skip registering for remote notifications: already registered")
-            onRegistrationFinished?()
             return
         }
         

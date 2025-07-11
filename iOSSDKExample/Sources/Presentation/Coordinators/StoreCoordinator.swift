@@ -35,7 +35,11 @@ class StoreCoordinator: Coordinator {
     
     // MARK: - Methods
     
-    func start(with deeplinkOption: DeeplinkOption?) {
+    func start(with deeplinkOption: DeeplinkOption? = nil) {
+        Log.trace("StoreCoordinator started with deeplinkOption: \(String(describing: deeplinkOption))")
+        
+        isActive = true
+        
         // swiftlint:disable:next force_unwrapping
         let controller = UIHostingController(rootView: resolver.resolve(StoreView.self, argument: deeplinkOption)!)
         

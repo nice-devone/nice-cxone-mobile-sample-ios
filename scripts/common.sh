@@ -16,6 +16,8 @@
 
 set -o pipefail
 
+. scripts/setup_workflow_variables.sh
+
 clean() {
     rm -rf \
         iOSSDKExample.xcodeproj \

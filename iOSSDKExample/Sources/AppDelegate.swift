@@ -24,12 +24,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // MARK: - Properties
     
+    var deeplinkOption: DeeplinkOption?
     var window: UIWindow?
     
     private var appModule: AppModule?
     private var loginCoordinator: LoginCoordinator?
-    private var deeplinkOption: DeeplinkOption?
     private var currentDeviceToken: Data?
+    
+    // Instance of AppDelegate for easy access of deeplinkOption throughout the app
+    // This workaround is used for a cold start of the application when the app is launched via a deeplink.
+    static private(set) var instance: AppDelegate! = nil
     
     // MARK: - Methods
     
@@ -37,6 +41,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        // Ensure AppDelegate instance is set
+        AppDelegate.instance = self
+        
         // Setup Crashlytics
         FirebaseApp.configure()
         
@@ -68,8 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // swiftlint:disable:next force_unwrapping
         self.appModule = AppModule(coordinator: loginCoordinator!)
         loginCoordinator?.assembler = appModule?.assembler
-        
-        loginCoordinator?.start(with: deeplinkOption)
+        loginCoordinator?.start()
         
         return true
     }
@@ -117,8 +123,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             CXoneChat.shared.connection.disconnect()
             
-            self.deeplinkOption = ThreadsDeeplinkHandler.handleUrl(url)
-            
+            // Don't store it in the AppDelegate, but handle it immediately
+            let deeplinkOption = ThreadsDeeplinkHandler.handleUrl(url)
             loginCoordinator?.start(with: deeplinkOption)
             
             return true
@@ -210,9 +216,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         Log.trace("Reset badge count to 0")
         
         // Check if this is a message notification from a different thread
-        if processNotificationAndNavigateToThread(notification: response.notification) {
+        if processLocalNotificationAndNavigateToThread(notification: response.notification) {
             Log.trace("Successfully posted notification to navigate directly to a CXoneChat's thread")
-        } else if handleDeeplinkIfNeeded(userInfo: userInfo) {
+        } else if processRemoteNotificationAndNavigateToThread(notification: response.notification) {
             Log.trace("Successfully handled application deeplink")
         } else {
             Log.trace("Could not handle notification - neither thread navigation nor deeplink handling succeeded")
@@ -224,10 +230,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 private extension AppDelegate {
     
-    func processNotificationAndNavigateToThread(notification: UNNotification) -> Bool {
+    func processLocalNotificationAndNavigateToThread(notification: UNNotification) -> Bool {
         let identifier = notification.request.identifier
         
-        Log.trace("Checking if notification is for chat inactive thread: \(identifier)")
+        Log.trace("Checking if notification is for chat inactive thread")
         
         guard identifier.hasPrefix(NotificationCenter.threadDeeplinkNotificationName) else {
             Log.trace("Notification identifier doesn't have expected prefix: \(NotificationCenter.threadDeeplinkNotificationName)")
@@ -252,25 +258,22 @@ private extension AppDelegate {
         return true
     }
     
-    func handleDeeplinkIfNeeded(userInfo: [AnyHashable: Any]) -> Bool {
-        Log.trace("Attempting to handle deeplink from userInfo: \(userInfo)")
+    func processRemoteNotificationAndNavigateToThread(notification: UNNotification) -> Bool {
+        Log.trace("Attempting to handle deeplink")
         
         // Existing deeplink handling
-        guard let data = userInfo["data"] as? NSDictionary else {
+        guard let data = notification.request.content.userInfo["data"] as? NSDictionary else {
             Log.error("No 'data' found in userInfo")
             return false
         }
-        
         guard let pinpoint = data["pinpoint"] as? NSDictionary else {
             Log.error("No 'pinpoint' found in data")
             return false
         }
-        
         guard let deeplink = pinpoint["deeplink"] as? String else {
             Log.error("No 'deeplink' found in pinpoint")
             return false
         }
-        
         guard let url = URL(string: deeplink) else {
             Log.error("Could not create URL from deeplink: \(deeplink)")
             return false
@@ -283,13 +286,20 @@ private extension AppDelegate {
         Log.trace("Can open URL: \(canOpenUrl)")
         
         if canOpenUrl {
-            Log.trace("Disconnecting from CXoneChat and handling URL")
+            let deeplinkOption = ThreadsDeeplinkHandler.handleUrl(url)
             
-            CXoneChat.shared.connection.disconnect()
-            
-            self.deeplinkOption = ThreadsDeeplinkHandler.handleUrl(url)
-            
-            loginCoordinator?.start(with: deeplinkOption)
+            if loginCoordinator?.storeCoordinator.chatCoordinator.isActive == true, case .thread(let threadId) = deeplinkOption {
+                // The chat is already active - post notification to navigate to the thread
+                NotificationCenter.default.postThreadDeeplinkNotification(threadId: threadId)
+            } else if loginCoordinator?.storeCoordinator.isActive == true {
+                // the store coordinator is active, but the chat is not - open chat
+                let modally = LocalStorageManager.chatPresentationStyle != .fullScreen
+                loginCoordinator?.storeCoordinator.openChat(modally: modally, deeplinkOption: deeplinkOption)
+            } else {
+                // The application is not in a state to handle the deeplink, so it's get stored in the AppDelegate
+                // and will be handled when the application is ready in the `StoreViewModel`
+                self.deeplinkOption = deeplinkOption
+            }
         }
         
         return canOpenUrl

@@ -23,7 +23,7 @@ class ConfigurationViewModel: ObservableObject {
     
     private let coordinator: LoginCoordinator
     
-    @Published private(set) var configurations = [Configuration]()
+    @Published private(set) var configurations = [iOSSDKExample.Configuration]()
     @Published var customerId = ""
     @Published var brandId = ""
     @Published var channelId = ""
@@ -99,7 +99,7 @@ class ConfigurationViewModel: ObservableObject {
         
         willEnterForegroundPublisher = nil
         
-        coordinator.showLogin(configuration: currentConfiguration, deeplinkOption: nil)
+        coordinator.showLogin(configuration: currentConfiguration)
     }
 }
 

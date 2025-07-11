@@ -25,12 +25,11 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
     @Published var isLoading = true
     @Published var error: Error?
     
-    private var deeplinkOption: DeeplinkOption?
-    
     private let getProducts: GetProductsUseCase
     private let getCart: GetCartUseCase
-    
     private let coordinator: StoreCoordinator
+    
+    private var deeplinkOption: DeeplinkOption?
     
     // MARK: - Init
     
@@ -55,10 +54,18 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
         loadCart()
         loadProducts()
         
-        if deeplinkOption != nil {
-            openChat()
+        if let deeplinkOption = AppDelegate.instance.deeplinkOption {
+            Log.trace("Opening chat from from cold start deeplink option: \(deeplinkOption)")
+            
+            AppDelegate.instance.deeplinkOption = nil
+            
+            openChat(with: deeplinkOption)
+        } else if let deeplinkOption {
+            Log.trace("Opening chat from from deeplink option: \(deeplinkOption)")
             
             self.deeplinkOption = nil
+            
+            openChat(with: deeplinkOption)
         }
     }
 }
@@ -75,6 +82,9 @@ extension StoreViewModel {
         FileManager.default.eraseDocumentsFolder()
         RemoteNotificationsManager.shared.unregister()
         
+        // Reconfigure Logger
+        Log.configure(isWriteToFileEnabled: true)
+        
         coordinator.popToConfiguration?()
     }
     
@@ -84,7 +94,7 @@ extension StoreViewModel {
         coordinator.showSettings()
     }
     
-    func openChat() {
+    func openChat(with deeplinkOption: DeeplinkOption? = nil) {
         Log.trace("Opening chat")
         
         coordinator.openChat(modally: LocalStorageManager.chatPresentationStyle != .fullScreen, deeplinkOption: deeplinkOption)

@@ -46,6 +46,7 @@ struct LocalStorageManager {
         case chatPresentationStyle
         case additionalCustomerCustomFields
         case additionalContactCustomFields
+        case oAuthEntity
     }
     
     // MARK: - Properties
@@ -127,6 +128,9 @@ struct LocalStorageManager {
     
     @Storage(key: .additionalContactCustomFields)
     static var additionalContactCustomFields: [String: String]?
+    
+    @Storage(key: .oAuthEntity)
+    static var oAuthEntity: OAuthEntity?
     
     // MARK: - Methods
     
