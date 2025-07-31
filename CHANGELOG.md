@@ -1,3 +1,10 @@
+<a name="3.0.2"></a>
+# [3.0.2] - 2025-07-31
+
+## Dependencies
+- Update CXoneChatUI from 3.0.1 to 3.0.2
+
+
 <a name="3.0.1"></a>
 # [3.0.1] - 2025-07-11
 
@@ -53,6 +60,7 @@
 - Update CXoneChatSDK from 2.2.1 to 2.3.0
 - Update CXoneChatUI from 2.2.1 to 2.3.0
 
+
 <a name="2.2.1"></a>
 # [2.2.1] - 2024-12-06
 
@@ -84,12 +92,14 @@
 - Update CXoneChatSDK from 2.0.1 to 2.1.0
 - Update CXoneChatUI from 2.0.1 to 2.1.0
 
+
 <a name="2.0.1"></a>
 # [2.0.1] - 2024-07-11
 
 ## Dependencies
 - Update CXoneChatSDK from 2.0.0 to 2.0.1
 - Update CXoneChatUI from 2.0.0 to 2.0.1
+
 
 <a name="2.0.0"></a>
 # [2.0.0] - 2024-05-22
@@ -117,12 +127,14 @@
 - Update CXoneChatSDK from 1.3.1 to 1.3.2
 - Update CXoneChatUI from 1.3.1 to 1.3.2
 
+
 <a name="1.3.1"></a>
 # [1.3.1] - 2024-03-12
 
 ## Dependencies
 - Update CXoneChatSDK from 1.3.0 to 1.3.1
 - Update CXoneChatUI from 1.3.0 to 1.3.1
+
 
 <a name="1.3.0"></a>
 # [1.3.0] - 2024-03-12
@@ -171,6 +183,7 @@
 ## Dependencies
 - Update CXoneChatSDK from 1.2.0 to 1.3.0
 - Update CXoneChatUI from 1.2.0 to 1.3.0
+
 
 <a name="1.2.0"></a>
 # [1.2.0] - 2023-09-22
@@ -327,7 +340,8 @@
     - failure
   - typing start/end
 
-[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.0.1...HEAD
+[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.0.2...HEAD
+[3.0.2]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.0.1...3.0.2
 [3.0.1]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/2.3.0...3.0.0
 [2.3.2]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/2.3.1...2.3.2
