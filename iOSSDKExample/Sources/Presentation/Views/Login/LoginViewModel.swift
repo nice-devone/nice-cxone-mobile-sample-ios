@@ -182,6 +182,10 @@ private extension LoginViewModel {
                     
                     isLoading = false
                 }
+            } catch CXoneChatError.sdkVersionNotSupported {
+                isLoading = false
+                            
+                alertType = .sdkVersionNotSupportedError(primaryAction: popToConfiguration)
             } catch {
                 error.logError()
                 

@@ -22,4 +22,3 @@ struct OAuthEntity: Codable {
     /// A hashed and encoded version of the `codeVerifier`, sent to the authorization server.
     let codeChallenge: String
 }
-

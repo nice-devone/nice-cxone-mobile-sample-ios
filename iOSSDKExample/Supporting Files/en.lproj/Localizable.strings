@@ -75,6 +75,7 @@
 "login.unavailable_oauth.message" = "There are no authenticators available. Try it again later or contact the CXone Mobile team.";
 "login.repeat.button_title" = "Repeat";
 "login.configuration_fetch_failed.message" = "Unable to load channel configuration for brand ID \"%1$d\" and channel ID \"%2$@\"";
+"login.unsupported_sdk_version.message" = "The SDK version you are using is not supported. Please update to a supported version to continue.";
 
 // Thread list
 "thread_list.title" = "Threads";

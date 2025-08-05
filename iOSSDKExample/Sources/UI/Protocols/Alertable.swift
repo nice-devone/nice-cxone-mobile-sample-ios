@@ -90,4 +90,12 @@ final class AlertType: Identifiable {
             primary: .cancel()
         )
     }
+    
+    static func sdkVersionNotSupportedError(primaryAction: @escaping () -> Void) -> AlertType {
+        AlertType(
+            title: L10n.Common.oops,
+            message: L10n.Login.UnsupportedSdkVersion.message,
+            primary: .destructive(Text(L10n.Common.confirm), action: primaryAction)
+        )
+    }
 }
