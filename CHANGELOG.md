@@ -1,3 +1,10 @@
+<a name="3.0.3"></a>
+# [3.0.3] - 2025-10-15
+
+## Dependencies
+- Update CXoneChatUI from 3.0.2 to 3.0.3
+
+
 <a name="3.0.2"></a>
 # [3.0.2] - 2025-07-31
 
