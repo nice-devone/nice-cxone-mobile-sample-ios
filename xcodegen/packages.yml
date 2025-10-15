@@ -31,7 +31,7 @@ packages:
     from: 3.0.1
   CXoneChatUI:
     url: https://github.com/nice-devone/nice-cxone-mobile-ui-ios.git
-    from: 3.0.2
+    from: 3.0.3
   CXoneGuideUtility:
     url: https://github.com/nice-devone/nice-cxone-mobile-guide-utility-ios.git
     from: 3.0.1
