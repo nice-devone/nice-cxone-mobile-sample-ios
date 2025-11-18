@@ -1,3 +1,15 @@
+<a name="3.1.0"></a>
+# [3.1.0] - 2025-11-18
+
+## Features
+- Update app logo and launch screen to NiCE CXone Mpower
+
+## Dependencies
+- Update CXoneChatSDK from 3.0.3 to 3.1.0
+- Update CXoneChatUI from 3.0.3 to 3.1.0
+- Update CXoneGuideUtility from 3.0.3 to 3.1.0
+
+
 <a name="3.0.3"></a>
 # [3.0.3] - 2025-10-15
 
