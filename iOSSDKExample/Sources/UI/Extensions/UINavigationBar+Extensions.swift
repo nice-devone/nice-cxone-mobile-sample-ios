@@ -35,6 +35,8 @@ extension UINavigationBar {
         standardAppearance = appearance
         compactAppearance = appearance
         scrollEdgeAppearance = appearance
+        compactScrollEdgeAppearance = appearance
+        
         tintColor = UIColor(Color.accentColor)
         isTranslucent = false
     }

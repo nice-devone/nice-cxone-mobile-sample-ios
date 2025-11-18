@@ -28,7 +28,7 @@ class ConfigurationViewModel: ObservableObject {
     @Published var brandId = ""
     @Published var channelId = ""
     @Published var environment: CXoneChatSDK.Environment = .NA1
-    @Published var customConfiguration = Configuration(title: "", brandId: 0, channelId: "", environmentName: "", chatUrl: "", socketUrl: "")
+    @Published var customConfiguration = Configuration(title: "", brandId: 0, channelId: "", environmentName: "", chatUrl: "", socketUrl: "", loggerUrl: "")
     @Published var isDefaultConfigurationHidden = false
     @Published var alertType: AlertType?
     

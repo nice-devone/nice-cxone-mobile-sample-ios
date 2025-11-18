@@ -89,6 +89,9 @@ targetTemplates:
           # Get current git branch
           gitBranch=$(git rev-parse --abbrev-ref HEAD)
           
+          # Get current git commit hash
+          gitCommit=$(git rev-parse --short HEAD)
+
           # Prepare build number in the format "yyyyMMddHHmm"
           buildNumber=$(date +'%Y%m%d%H%M')
 
@@ -98,6 +101,7 @@ targetTemplates:
           # Store values in temporary files for post-build script
           echo "$buildNumber" > "${DERIVED_FILE_DIR}/build_number.txt"
           echo "$gitBranch" > "${DERIVED_FILE_DIR}/git_branch.txt"
+          echo "$gitCommit" > "${DERIVED_FILE_DIR}/git_commit.txt"
 
           if [ -n "$gitTag" ]; then
             echo "$gitTag" > "${DERIVED_FILE_DIR}/git_tag.txt"
@@ -107,6 +111,8 @@ targetTemplates:
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "${SRCROOT}/generated/iOSSDKExample_info.plist"
           # Add the git branch to the source Info.plist
           /usr/libexec/PlistBuddy -c "Add :GitBranch string $gitBranch" "${SRCROOT}/generated/iOSSDKExample_info.plist" || /usr/libexec/PlistBuddy -c "Set :GitBranch $gitBranch" "${SRCROOT}/generated/iOSSDKExample_info.plist"
+          # Add the git commit to the source Info.plist
+          /usr/libexec/PlistBuddy -c "Add :GitCommit string $gitCommit" "${SRCROOT}/generated/iOSSDKExample_info.plist" || /usr/libexec/PlistBuddy -c "Set :GitCommit $gitCommit" "${SRCROOT}/generated/iOSSDKExample_info.plist"
           # Add the git tag to the source Info.plist if available
           if [ -n "$gitTag" ]; then
             /usr/libexec/PlistBuddy -c "Add :GitTag string $gitTag" "${SRCROOT}/generated/iOSSDKExample_info.plist" || /usr/libexec/PlistBuddy -c "Set :GitTag $gitTag" "${SRCROOT}/generated/iOSSDKExample_info.plist"
@@ -130,6 +136,13 @@ targetTemplates:
             gitBranch=$(git rev-parse --abbrev-ref HEAD)
           fi
 
+          if [ -f "${DERIVED_FILE_DIR}/git_commit.txt" ]; then
+            gitCommit=$(cat "${DERIVED_FILE_DIR}/git_commit.txt")
+          else
+            # Fallback in case the file doesn't exist
+            gitCommit=$(git rev-parse --short HEAD)
+          fi
+
           if [ -f "${DERIVED_FILE_DIR}/git_tag.txt" ]; then
             gitTag=$(cat "${DERIVED_FILE_DIR}/git_tag.txt")
           else
@@ -144,6 +157,8 @@ targetTemplates:
           # Add the git branch to the Info.plist
           /usr/libexec/PlistBuddy -c "Add :GitBranch string $gitBranch" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}" || /usr/libexec/PlistBuddy -c "Set :GitBranch $gitBranch" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
           
+          # Add the git commit to the Info.plist
+          /usr/libexec/PlistBuddy -c "Add :GitCommit string $gitCommit" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}" || /usr/libexec/PlistBuddy -c "Set :GitCommit $gitCommit" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
           # Add the git tag to the Info.plist if available
           if [ -n "$gitTag" ]; then
             /usr/libexec/PlistBuddy -c "Add :GitTag string $gitTag" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}" || /usr/libexec/PlistBuddy -c "Set :GitTag $gitTag" "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
@@ -155,6 +170,9 @@ targetTemplates:
             
             # Add the git branch to the dSYM Info.plist
             /usr/libexec/PlistBuddy -c "Add :GitBranch string $gitBranch" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist" || /usr/libexec/PlistBuddy -c "Set :GitBranch $gitBranch" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist"
+            
+            # Add the git commit to the dSYM Info.plist
+            /usr/libexec/PlistBuddy -c "Add :GitCommit string $gitCommit" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist" || /usr/libexec/PlistBuddy -c "Set :GitCommit $gitCommit" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist"
             
             # Add the git tag to the dSYM Info.plist if available
             if [ -n "$gitTag" ]; then

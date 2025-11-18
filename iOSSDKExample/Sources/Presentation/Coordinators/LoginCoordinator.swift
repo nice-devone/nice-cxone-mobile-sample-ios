@@ -72,9 +72,8 @@ class LoginCoordinator: Coordinator {
 extension LoginCoordinator {
     
     func showSettings() {
-        let onColorChanged: () -> Void = {
-            #warning("Re-enable after 3.0.0 release")
-            // chatCoordinator?.chatStyle = ChatAppearance.getChatStyle()
+        let onColorChanged: () -> Void = { [weak chatCoordinator] in
+            chatCoordinator?.chatStyle = ChatAppearance.getChatStyle()
         }
         // swiftlint:disable:next force_unwrapping
         let controller = UIHostingController(rootView: resolver.resolve(SettingsView.self, argument: onColorChanged)!)

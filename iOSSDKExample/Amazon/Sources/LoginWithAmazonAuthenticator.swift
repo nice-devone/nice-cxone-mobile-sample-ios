@@ -22,7 +22,6 @@ class LoginWithAmazonAuthenticator: OAuthenticator {
 
     private let manager: AMZNAuthorizationManager
 
-    // periphery:ignore - may be used in the future
     let authenticatorName = "Amazon"
 
     // MARK: - Init
@@ -56,7 +55,6 @@ class LoginWithAmazonAuthenticator: OAuthenticator {
         }
     }
     
-    // periphery:ignore - Currently not used because we are not able to try the sign out properly (DE-42542)
     func signOut() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             manager.signOut { error in

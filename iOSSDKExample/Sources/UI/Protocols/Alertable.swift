@@ -67,8 +67,8 @@ final class AlertType: Identifiable {
     
     static func genericError(primaryAction: (() -> Void)?) -> AlertType {
         AlertType(
-            title: L10n.Common.oops,
-            message: L10n.Common.genericError,
+            title: L10n.Error.Generic.title,
+            message: L10n.Error.Generic.message,
             primary: .destructive(Text(L10n.Common.confirm), action: primaryAction),
             secondary: .cancel()
         )
@@ -76,7 +76,7 @@ final class AlertType: Identifiable {
     
     static func loginError(brandId: Int, channelId: String, primaryAction: @escaping () -> Void, secondaryAction: @escaping () -> Void) -> AlertType {
         AlertType(
-            title: L10n.Common.oops,
+            title: L10n.Error.Generic.title,
             message: L10n.Login.ConfigurationFetchFailed.message(brandId, channelId),
             primary: .default(Text(L10n.Login.Repeat.buttonTitle), action: primaryAction),
             secondary: .destructive(Text(L10n.Common.cancel), action: secondaryAction)
@@ -88,6 +88,14 @@ final class AlertType: Identifiable {
             title: L10n.Configuration.Default.MissingFields.title,
             message: L10n.Configuration.Default.MissingFields.message,
             primary: .cancel()
+        )
+    }
+    
+    static func sdkVersionNotSupportedError(primaryAction: @escaping () -> Void) -> AlertType {
+        AlertType(
+            title: L10n.Error.Generic.title,
+            message: L10n.Error.UnsupportedSdkVersion.message,
+            primary: .destructive(Text(L10n.Common.confirm), action: primaryAction)
         )
     }
 }

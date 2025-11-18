@@ -14,7 +14,6 @@
 //
 
 import CXoneChatSDK
-
 import SwiftUI
 import Swinject
 
@@ -62,11 +61,13 @@ struct ConfigurationView: View, Alertable {
         .alert(item: $viewModel.alertType, content: alertContent)
         .navigationBarTitle(L10n.Configuration.title)
         .navigationBarBackButtonHidden()
-        .navigationBarItems(
-            trailing: Button(action: viewModel.navigateToSettings) {
-                Asset.Images.Common.settings
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: viewModel.navigateToSettings) {
+                    Asset.Images.Common.settings
+                }
             }
-        )
+        }
     }
 }
 

@@ -67,9 +67,13 @@ class PaymentViewModel: AnalyticsReporter, ObservableObject {
         
         checkoutCart()
         
-        Task {
+        Task { [weak self] in
+            guard let self else {
+                return
+            }
+            
             do {
-                try await CXoneChat.shared.analytics.conversion(type: "purchase", value: totalAmount)
+                try await CXoneChat.shared.analytics.conversion(type: "purchase", value: self.totalAmount)
             } catch {
                 error.logError()
             }

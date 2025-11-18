@@ -26,74 +26,26 @@ struct LoginView: View, Alertable {
     
     var body: some View {
         LoadingView(isVisible: $viewModel.isLoading) {
-            VStack(alignment: .center, spacing: 16) {
-                VStack(spacing: 4) {
-                    Text(L10n.Login.Oauth.availableProvidersTitle)
-                        .fontWeight(.bold)
-                        .font(.headline)
-                        .foregroundColor(Color(.systemGray))
-                    
-                    if !viewModel.isOAuthEnabled {
-                        Text(L10n.Login.Oauth.Disabled.description)
-                            .font(.caption)
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                
-                Button(action: viewModel.invokeLoginWithAmazon) {
-                    Asset.Images.OAuth.loginWithAmazon.swiftUIImage
-                        .opacity(viewModel.isOAuthEnabled ? 1 : 0.3)
-                }
-                .disabled(!viewModel.isOAuthEnabled)
-                
-                guestLoginDivider
-                
-                VStack {
-                    ValidatedTextField(
-                        L10n.Login.Guest.UserDetails.firstNamePlaceholder, 
-                        text: $viewModel.firstName,
-                        label: L10n.Login.Guest.UserDetails.firstName
-                    )
-
-                    ValidatedTextField(
-                        L10n.Login.Guest.UserDetails.lastNamePlaceholder, 
-                        text: $viewModel.lastName,
-                        label: L10n.Login.Guest.UserDetails.lastName
-                    )
-                }
-                .padding(.horizontal, 12)
-                
-                Button(action: viewModel.onGuestLoginTapped) {
-                    Text(L10n.Login.Guest.buttonTitle)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: 210)
-                        .adjustForA11y()
-                        .foregroundColor(.white)
-                        .background(Color.primaryButtonColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-            }
-            .padding(.horizontal, 20)
+            content
         }
         .onAppear(perform: viewModel.onAppear)
         .alert(item: $viewModel.alertType, content: alertContent)
         .navigationBarTitle(L10n.Login.title)
         .navigationBarBackButtonHidden()
         .if(!viewModel.isLoading) { view in
-                view.toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button(action: viewModel.signOut) {
-                            Asset.Images.Common.disconnect
-                        }
-                    }
-                 
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: viewModel.navigateToSettings) {
-                            Asset.Images.Common.settings
-                        }
+            view.toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: viewModel.signOut) {
+                        Asset.Images.Common.disconnect
                     }
                 }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: viewModel.navigateToSettings) {
+                        Asset.Images.Common.settings
+                    }
+                }
+            }
         }
     }
 }
@@ -101,6 +53,58 @@ struct LoginView: View, Alertable {
 // MARK: - Subviews
 
 private extension LoginView {
+    
+    var content: some View {
+        VStack(alignment: .center, spacing: 16) {
+            VStack(spacing: 4) {
+                Text(L10n.Login.Oauth.availableProvidersTitle)
+                    .fontWeight(.bold)
+                    .font(.headline)
+                    .foregroundColor(Color(.systemGray))
+                
+                if !viewModel.isOAuthEnabled {
+                    Text(L10n.Login.Oauth.Disabled.description)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            
+            Button(action: viewModel.invokeLoginWithAmazon) {
+                Asset.Images.OAuth.loginWithAmazon.swiftUIImage
+                    .opacity(viewModel.isOAuthEnabled ? 1 : 0.3)
+            }
+            .disabled(!viewModel.isOAuthEnabled)
+            
+            guestLoginDivider
+            
+            VStack {
+                ValidatedTextField(
+                    L10n.Login.Guest.UserDetails.firstNamePlaceholder,
+                    text: $viewModel.firstName,
+                    label: L10n.Login.Guest.UserDetails.firstName
+                )
+
+                ValidatedTextField(
+                    L10n.Login.Guest.UserDetails.lastNamePlaceholder,
+                    text: $viewModel.lastName,
+                    label: L10n.Login.Guest.UserDetails.lastName
+                )
+            }
+            .padding(.horizontal, 12)
+            
+            Button(action: viewModel.onGuestLoginTapped) {
+                Text(L10n.Login.Guest.buttonTitle)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: 210)
+                    .adjustForA11y()
+                    .foregroundColor(.white)
+                    .background(Color.primaryButtonColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+        }
+        .padding(.horizontal, 20)
+    }
     
     var guestLoginDivider: some View {
         HStack {

@@ -107,7 +107,8 @@ struct PresentationAssembly: Assembly {
                     deeplinkOption: deeplinkOption,
                     // swiftlint:disable force_unwrapping
                     getProducts: resolver.resolve(GetProductsUseCase.self)!,
-                    getCart: resolver.resolve(GetCartUseCase.self)!
+                    getCart: resolver.resolve(GetCartUseCase.self)!,
+                    signOutWithAmazon: resolver.resolve(SignOutWithAmazonUseCase.self)!
                     // swiftlint:enable force_unwrapping
                 )
             )

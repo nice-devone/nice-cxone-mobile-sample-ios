@@ -27,6 +27,8 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
     
     private let getProducts: GetProductsUseCase
     private let getCart: GetCartUseCase
+    private let signOutWithAmazon: SignOutWithAmazonUseCase
+    
     private let coordinator: StoreCoordinator
     
     private var deeplinkOption: DeeplinkOption?
@@ -37,12 +39,14 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
         coordinator: StoreCoordinator,
         deeplinkOption: DeeplinkOption?,
         getProducts: GetProductsUseCase,
-        getCart: GetCartUseCase
+        getCart: GetCartUseCase,
+        signOutWithAmazon: SignOutWithAmazonUseCase
     ) {
         self.coordinator = coordinator
         self.deeplinkOption = deeplinkOption
         self.getProducts = getProducts
         self.getCart = getCart
+        self.signOutWithAmazon = signOutWithAmazon
         super.init(analyticsTitle: "products?smartphones", analyticsUrl: "/products/smartphones")
     }
     
@@ -77,15 +81,25 @@ extension StoreViewModel {
     func signOut() {
         Log.trace("Signing out")
         
-        CXoneChat.signOut()
-        LocalStorageManager.reset()
-        FileManager.default.eraseDocumentsFolder()
-        RemoteNotificationsManager.shared.unregister()
-        
-        // Reconfigure Logger
-        Log.configure(isWriteToFileEnabled: true)
-        
-        coordinator.popToConfiguration?()
+        Task { @MainActor [weak self] in
+            do {
+                try await self?.signOutWithAmazon()
+            } catch {
+                error.logError()
+                
+                self?.error = CommonError.failed(L10n.Error.Generic.message)
+            }
+            
+            CXoneChat.signOut()
+            LocalStorageManager.reset()
+            FileManager.default.eraseDocumentsFolder()
+            RemoteNotificationsManager.shared.unregister()
+            
+            // Reconfigure Logger
+            Log.configure(isWriteToFileEnabled: true)
+            
+            self?.coordinator.popToConfiguration?()
+        }
     }
     
     func showSettings() {
@@ -128,16 +142,20 @@ private extension StoreViewModel {
         
         isLoading = true
         
-        Task { @MainActor in
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+            
             do {
-                products = try await getProducts()
+                self.products = try await self.getProducts()
             } catch {
                 error.logError()
                 
-                self.error = CommonError.failed(L10n.Common.genericError)
+                self.error = CommonError.failed(L10n.Error.Generic.message)
             }
             
-            isLoading = false
+            self.isLoading = false
         }
     }
 }

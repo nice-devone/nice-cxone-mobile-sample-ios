@@ -24,7 +24,7 @@ struct SettingsView: View {
     // MARK: - Content
 
     var body: some View {
-        Form {
+        List {
             buildSectionView
             
             sdkInfoSectionView
@@ -164,6 +164,15 @@ private extension SettingsView {
                     .fontWeight(.bold)
             }
             
+            HStack {
+                Text(L10n.Settings.Build.commitHash)
+                
+                Spacer()
+                
+                Text(viewModel.appCommitHash)
+                    .fontWeight(.bold)
+            }
+            
             if let tag = viewModel.appBranchTag {
                 HStack {
                     Text(L10n.Settings.Build.branchTag)
@@ -207,78 +216,264 @@ private extension SettingsView {
     }
 
     var themeColorSectionView: some View {
-        Section(header: Text(L10n.Settings.Theme.title)) {
+        Section {
+            themeBackgroundSection
+            
+            themeContentSection
+            
+            themeBrandSection
+            
+            themeBorderSection
+            
+            themeStatusSection
+        } header: {
+            Text(L10n.Settings.Theme.title)
+        } footer: {
             Text(L10n.Settings.Theme.info)
-
+                .font(.footnote)
+        }
+    }
+    
+    var themeBackgroundSection: some View {
+        DisclosureGroup {
             SettingsThemeColorView(
-                color: ChatAppearance.primaryColor,
-                title: L10n.Settings.Theme.Primary.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
-
-            SettingsThemeColorView(
-                color: ChatAppearance.onPrimaryColor,
-                title: L10n.Settings.Theme.OnPrimary.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
-
-            SettingsThemeColorView(
-                color: ChatAppearance.backgroundColor,
-                title: L10n.Settings.Theme.Background.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
-
-            SettingsThemeColorView(
-                color: ChatAppearance.onBackgroundColor,
-                title: L10n.Settings.Theme.OnBackground.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
-
-            SettingsThemeColorView(
-                color: ChatAppearance.accentColor,
-                title: L10n.Settings.Theme.Accent.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
-
-            SettingsThemeColorView(
-                color: ChatAppearance.onAccentColor,
-                title: L10n.Settings.Theme.OnAccent.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
-
-            SettingsThemeColorView(
-                color: ChatAppearance.agentBackgroundColor,
-                title: L10n.Settings.Theme.AgentBackground.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
+                color: ChatAppearance.Background.default,
+                title: L10n.Settings.Theme.Background.Default.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
             
             SettingsThemeColorView(
-                color: ChatAppearance.agentTextColor,
-                title: L10n.Settings.Theme.AgentText.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
+                color: ChatAppearance.Background.inverse,
+                title: L10n.Settings.Theme.Background.Inverse.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            themeBackgroundSurfaceSection
+        } label: {
+            Text(L10n.Settings.Theme.Background.title)
+                .font(.body.weight(.medium))
+        }
+    }
+    
+    var themeBackgroundSurfaceSection: some View {
+        DisclosureGroup {
+            SettingsThemeColorView(
+                color: ChatAppearance.Background.Surface.default,
+                title: L10n.Settings.Theme.Background.Surface.Default.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
             
             SettingsThemeColorView(
-                color: ChatAppearance.customerBackgroundColor,
-                title: L10n.Settings.Theme.CustomerBackground.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
+                color: ChatAppearance.Background.Surface.variant,
+                title: L10n.Settings.Theme.Background.Surface.Variant.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
             
             SettingsThemeColorView(
-                color: ChatAppearance.customerTextColor,
-                title: L10n.Settings.Theme.CustomerText.placeholder
-            ) { fieldTitle, color in
-                viewModel.colorDidChange(color: color, for: fieldTitle)
-            }
+                color: ChatAppearance.Background.Surface.container,
+                title: L10n.Settings.Theme.Background.Surface.Container.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Background.Surface.subtle,
+                title: L10n.Settings.Theme.Background.Surface.Subtle.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Background.Surface.emphasis,
+                title: L10n.Settings.Theme.Background.Surface.Emphasis.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+        } label: {
+            Text(L10n.Settings.Theme.Background.Surface.title)
+                .font(.body.weight(.medium))
+        }
+    }
+    
+    @ViewBuilder
+    var themeContentSection: some View {
+        DisclosureGroup {
+            SettingsThemeColorView(
+                color: ChatAppearance.Content.primary,
+                title: L10n.Settings.Theme.Content.Primary.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Content.secondary,
+                title: L10n.Settings.Theme.Content.Secondary.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Content.tertiary,
+                title: L10n.Settings.Theme.Content.Tertiary.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Content.inverse,
+                title: L10n.Settings.Theme.Content.Inverse.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+        } label: {
+            Text(L10n.Settings.Theme.Content.title)
+                .font(.body.weight(.medium))
+        }
+    }
+    
+    var themeBrandSection: some View {
+        DisclosureGroup {
+            SettingsThemeColorView(
+                color: ChatAppearance.Brand.primary,
+                title: L10n.Settings.Theme.Brand.Primary.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Brand.onPrimary,
+                title: L10n.Settings.Theme.Brand.OnPrimary.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Brand.primaryContainer,
+                title: L10n.Settings.Theme.Brand.PrimaryContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Brand.onPrimaryContainer,
+                title: L10n.Settings.Theme.Brand.OnPrimaryContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Brand.secondary,
+                title: L10n.Settings.Theme.Brand.Secondary.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Brand.onSecondary,
+                title: L10n.Settings.Theme.Brand.OnSecondary.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Brand.secondaryContainer,
+                title: L10n.Settings.Theme.Brand.SecondaryContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Brand.onSecondaryContainer,
+                title: L10n.Settings.Theme.Brand.OnSecondaryContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+        } label: {
+            Text(L10n.Settings.Theme.Brand.title)
+                .font(.body.weight(.medium))
+        }
+    }
+    
+    var themeBorderSection: some View {
+        DisclosureGroup {
+            SettingsThemeColorView(
+                color: ChatAppearance.Border.default,
+                title: L10n.Settings.Theme.Border.Default.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Border.subtle,
+                title: L10n.Settings.Theme.Border.Subtle.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+        } label: {
+            Text(L10n.Settings.Theme.Border.title)
+                .font(.body.weight(.medium))
+        }
+    }
+    
+    var themeStatusSection: some View {
+        DisclosureGroup {
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.success,
+                title: L10n.Settings.Theme.Status.Success.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.onSuccess,
+                title: L10n.Settings.Theme.Status.OnSuccess.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.successContainer,
+                title: L10n.Settings.Theme.Status.SuccessContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.onSuccessContainer,
+                title: L10n.Settings.Theme.Status.OnSuccessContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.warning,
+                title: L10n.Settings.Theme.Status.Warning.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.onWarning,
+                title: L10n.Settings.Theme.Status.OnWarning.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.warningContainer,
+                title: L10n.Settings.Theme.Status.WarningContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.onWarningContainer,
+                title: L10n.Settings.Theme.Status.OnWarningContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.error,
+                title: L10n.Settings.Theme.Status.Error.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.onError,
+                title: L10n.Settings.Theme.Status.OnError.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.errorContainer,
+                title: L10n.Settings.Theme.Status.ErrorContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+            
+            SettingsThemeColorView(
+                color: ChatAppearance.Status.onErrorContainer,
+                title: L10n.Settings.Theme.Status.OnErrorContainer.placeholder,
+                didUpdateColor: viewModel.colorDidChange
+            )
+        } label: {
+            Text(L10n.Settings.Theme.Status.title)
+                .font(.body.weight(.medium))
         }
     }
 }

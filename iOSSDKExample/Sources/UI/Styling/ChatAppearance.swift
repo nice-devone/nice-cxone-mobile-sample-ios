@@ -19,69 +19,221 @@ import SwiftUI
 enum ChatAppearance {
     private typealias Theme = Asset.Colors.ChatDefaultTheme
     
-    static var primaryColor: Color {
-        .themedColor(
-            light: LocalStorageManager.primaryLightColor ?? Theme.primary.swiftUIColor,
-            dark: LocalStorageManager.primaryDarkColor ?? Theme.primaryDark.swiftUIColor
-        )
-    }
-    static var onPrimaryColor: Color {
-        .themedColor(
-            light: LocalStorageManager.onPrimaryLightColor ?? Theme.onPrimary.swiftUIColor,
-            dark: LocalStorageManager.onPrimaryDarkColor ?? Theme.onPrimaryDark.swiftUIColor
-        )
-    }
-    static var backgroundColor: Color {
-        .themedColor(
-            light: LocalStorageManager.backgroundLightColor ?? Theme.background.swiftUIColor,
-            dark: LocalStorageManager.backgroundDarkColor ?? Theme.backgroundDark.swiftUIColor
-        )
-    }
-    static var onBackgroundColor: Color {
-        .themedColor(
-            light: LocalStorageManager.onBackgroundLightColor ?? Theme.onBackground.swiftUIColor,
-            dark: LocalStorageManager.onBackgroundDarkColor ?? Theme.onBackgroundDark.swiftUIColor
-        )
-    }
-    static var accentColor: Color {
-        .themedColor(
-            light: LocalStorageManager.accentLightColor ?? Theme.accent.swiftUIColor,
-            dark: LocalStorageManager.accentDarkColor ?? Theme.accentDark.swiftUIColor
-        )
-    }
-    static var onAccentColor: Color {
-        .themedColor(
-            light: LocalStorageManager.onAccentLightColor ?? Theme.onAccent.swiftUIColor,
-            dark: LocalStorageManager.onAccentDarkColor ?? Theme.onAccentDark.swiftUIColor
-        )
-    }
-    static var agentBackgroundColor: Color {
-        .themedColor(
-            light: LocalStorageManager.agentBackgroundLightColor ?? Theme.agentBackground.swiftUIColor,
-            dark: LocalStorageManager.agentBackgroundDarkColor ?? Theme.agentBackgroundDark.swiftUIColor
-        )
-    }
-    
-    static var agentTextColor: Color {
-        .themedColor(
-            light: LocalStorageManager.agentTextLightColor ?? Theme.agentText.swiftUIColor,
-            dark: LocalStorageManager.agentTextDarkColor ?? Theme.agentTextDark.swiftUIColor
-        )
-    }
-    
-    static var customerBackgroundColor: Color {
-        .themedColor(
-            light: LocalStorageManager.customerBackgroundLightColor ?? Theme.customerBackground.swiftUIColor,
-            dark: LocalStorageManager.customerBackgroundDarkColor ?? Theme.customerBackgroundDark.swiftUIColor
-        )
+    enum Background {
+        static var `default`: Color {
+            .themedColor(
+                light: LocalStorageManager.backgroundDefaultLightColor ?? Theme.Background.defaultLight.swiftUIColor,
+                dark: LocalStorageManager.backgroundDefaultDarkColor ?? Theme.Background.defaultDark.swiftUIColor
+            )
+        }
+        
+        static var inverse: Color {
+            .themedColor(
+                light: LocalStorageManager.backgroundInverseLightColor ?? Theme.Background.inverseLight.swiftUIColor,
+                dark: LocalStorageManager.backgroundInverseDarkColor ?? Theme.Background.inverseDark.swiftUIColor
+            )
+        }
+        
+        enum Surface {
+            static var `default`: Color {
+                .themedColor(
+                    light: LocalStorageManager.backgroundSurfaceDefaultLightColor ?? Theme.Background.Surface.defaultLight.swiftUIColor,
+                    dark: LocalStorageManager.backgroundSurfaceDefaultDarkColor ?? Theme.Background.Surface.defaultDark.swiftUIColor
+                )
+            }
+            static var variant: Color {
+                .themedColor(
+                    light: LocalStorageManager.backgroundSurfaceVariantLightColor ?? Theme.Background.Surface.variantLight.swiftUIColor,
+                    dark: LocalStorageManager.backgroundSurfaceVariantDarkColor ?? Theme.Background.Surface.variantDark.swiftUIColor
+                )
+            }
+            static var container: Color {
+                .themedColor(
+                    light: LocalStorageManager.backgroundSurfaceContainerLightColor ?? Theme.Background.Surface.containerLight.swiftUIColor,
+                    dark: LocalStorageManager.backgroundSurfaceContainerDarkColor ?? Theme.Background.Surface.containerDark.swiftUIColor
+                )
+            }
+            static var subtle: Color {
+                .themedColor(
+                    light: LocalStorageManager.backgroundSurfaceSubtleLightColor ?? Theme.Background.Surface.subtleLight.swiftUIColor,
+                    dark: LocalStorageManager.backgroundSurfaceSubtleDarkColor ?? Theme.Background.Surface.subtleDark.swiftUIColor
+                )
+            }
+            static var emphasis: Color {
+                .themedColor(
+                    light: LocalStorageManager.backgroundSurfaceEmphasisLightColor ?? Theme.Background.Surface.emphasisLight.swiftUIColor,
+                    dark: LocalStorageManager.backgroundSurfaceEmphasisDarkColor ?? Theme.Background.Surface.emphasisDark.swiftUIColor
+                )
+            }
+        }
     }
     
-    static var customerTextColor: Color {
-        // This color need to be updated to use Color+Extensions
-        .themedColor(
-            light: LocalStorageManager.customerTextLightColor ?? Theme.customerText.swiftUIColor,
-            dark: LocalStorageManager.customerTextDarkColor ?? Theme.customerTextDark.swiftUIColor
-        )
+    enum Content {
+        static var primary: Color {
+            .themedColor(
+                light: LocalStorageManager.contentPrimaryLightColor ?? Theme.Content.primaryLight.swiftUIColor,
+                dark: LocalStorageManager.contentPrimaryDarkColor ?? Theme.Content.primaryDark.swiftUIColor
+            )
+        }
+        static var secondary: Color {
+            .themedColor(
+                light: LocalStorageManager.contentSecondaryLightColor ?? Theme.Content.secondaryLight.swiftUIColor,
+                dark: LocalStorageManager.contentSecondaryDarkColor ?? Theme.Content.secondaryDark.swiftUIColor
+            )
+        }
+        static var tertiary: Color {
+            .themedColor(
+                light: LocalStorageManager.contentTertiaryLightColor ?? Theme.Content.tertiaryLight.swiftUIColor,
+                dark: LocalStorageManager.contentTertiaryDarkColor ?? Theme.Content.tertiaryDark.swiftUIColor
+            )
+        }
+        static var inverse: Color {
+            .themedColor(
+                light: LocalStorageManager.contentInverseLightColor ?? Theme.Content.inverseLight.swiftUIColor,
+                dark: LocalStorageManager.contentInverseDarkColor ?? Theme.Content.inverseDark.swiftUIColor
+            )
+        }
+    }
+    
+    enum Brand {
+        static var primary: Color {
+            .themedColor(
+                light: LocalStorageManager.brandPrimaryLightColor ?? Theme.Brand.primaryLight.swiftUIColor,
+                dark: LocalStorageManager.brandPrimaryDarkColor ?? Theme.Brand.primaryDark.swiftUIColor
+            )
+        }
+        static var onPrimary: Color {
+            .themedColor(
+                light: LocalStorageManager.brandOnPrimaryLightColor ?? Theme.Brand.onPrimaryLight.swiftUIColor,
+                dark: LocalStorageManager.brandOnPrimaryDarkColor ?? Theme.Brand.onPrimaryDark.swiftUIColor
+            )
+        }
+        static var primaryContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.brandPrimaryContainerLightColor ?? Theme.Brand.primaryContainerLight.swiftUIColor,
+                dark: LocalStorageManager.brandPrimaryContainerDarkColor ?? Theme.Brand.primaryContainerDark.swiftUIColor
+            )
+        }
+        static var onPrimaryContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.brandOnPrimaryContainerLightColor ?? Theme.Brand.onPrimaryContainerLight.swiftUIColor,
+                dark: LocalStorageManager.brandOnPrimaryContainerDarkColor ?? Theme.Brand.onPrimaryContainerDark.swiftUIColor
+            )
+        }
+        static var secondary: Color {
+            .themedColor(
+                light: LocalStorageManager.brandSecondaryLightColor ?? Theme.Brand.secondaryLight.swiftUIColor,
+                dark: LocalStorageManager.brandSecondaryDarkColor ?? Theme.Brand.secondaryDark.swiftUIColor
+            )
+        }
+        static var onSecondary: Color {
+            .themedColor(
+                light: LocalStorageManager.brandOnSecondaryLightColor ?? Theme.Brand.onSecondaryLight.swiftUIColor,
+                dark: LocalStorageManager.brandOnSecondaryDarkColor ?? Theme.Brand.onSecondaryDark.swiftUIColor
+            )
+        }
+        static var secondaryContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.brandSecondaryContainerLightColor ?? Theme.Brand.secondaryContainerLight.swiftUIColor,
+                dark: LocalStorageManager.brandSecondaryContainerDarkColor ?? Theme.Brand.secondaryContainerDark.swiftUIColor
+            )
+        }
+        static var onSecondaryContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.brandOnSecondaryContainerLightColor ?? Theme.Brand.onSecondaryContainerLight.swiftUIColor,
+                dark: LocalStorageManager.brandOnSecondaryContainerDarkColor ?? Theme.Brand.onSecondaryContainerDark.swiftUIColor
+            )
+        }
+    }
+    
+    enum Border {
+        static var `default`: Color {
+            .themedColor(
+                light: LocalStorageManager.borderDefaultLightColor ?? Theme.Border.defaultLight.swiftUIColor,
+                dark: LocalStorageManager.borderDefaultDarkColor ?? Theme.Border.defaultDark.swiftUIColor
+            )
+        }
+        static var subtle: Color {
+            .themedColor(
+                light: LocalStorageManager.borderSubtleLightColor ?? Theme.Border.subtleLight.swiftUIColor,
+                dark: LocalStorageManager.borderSubtleDarkColor ?? Theme.Border.subtleDark.swiftUIColor
+            )
+        }
+    }
+    
+    enum Status {
+        static var success: Color {
+            .themedColor(
+                light: LocalStorageManager.statusSuccessLightColor ?? Theme.Status.successLight.swiftUIColor,
+                dark: LocalStorageManager.statusSuccessDarkColor ?? Theme.Status.successDark.swiftUIColor
+            )
+        }
+        static var onSuccess: Color {
+            .themedColor(
+                light: LocalStorageManager.statusOnSuccessLightColor ?? Theme.Status.onSuccessLight.swiftUIColor,
+                dark: LocalStorageManager.statusOnSuccessDarkColor ?? Theme.Status.onSuccessDark.swiftUIColor
+            )
+        }
+        static var successContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.statusSuccessContainerLightColor ?? Theme.Status.successContainerLight.swiftUIColor,
+                dark: LocalStorageManager.statusSuccessContainerDarkColor ?? Theme.Status.successContainerDark.swiftUIColor
+            )
+        }
+        static var onSuccessContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.statusOnSuccessContainerLightColor ?? Theme.Status.onSuccessContainerLight.swiftUIColor,
+                dark: LocalStorageManager.statusOnSuccessContainerDarkColor ?? Theme.Status.onSuccessContainerDark.swiftUIColor
+            )
+        }
+        static var warning: Color {
+            .themedColor(
+                light: LocalStorageManager.statusWarningLightColor ?? Theme.Status.warningLight.swiftUIColor,
+                dark: LocalStorageManager.statusWarningDarkColor ?? Theme.Status.warningDark.swiftUIColor
+            )
+        }
+        static var onWarning: Color {
+            .themedColor(
+                light: LocalStorageManager.statusOnWarningLightColor ?? Theme.Status.onWarningLight.swiftUIColor,
+                dark: LocalStorageManager.statusOnWarningDarkColor ?? Theme.Status.onWarningDark.swiftUIColor
+            )
+        }
+        static var warningContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.statusWarningContainerLightColor ?? Theme.Status.warningContainerLight.swiftUIColor,
+                dark: LocalStorageManager.statusWarningContainerDarkColor ?? Theme.Status.warningContainerDark.swiftUIColor
+            )
+        }
+        static var onWarningContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.statusOnWarningContainerLightColor ?? Theme.Status.onWarningContainerLight.swiftUIColor,
+                dark: LocalStorageManager.statusOnWarningContainerDarkColor ?? Theme.Status.onWarningContainerDark.swiftUIColor
+            )
+        }
+        static var error: Color {
+            .themedColor(
+                light: LocalStorageManager.statusErrorLightColor ?? Theme.Status.errorLight.swiftUIColor,
+                dark: LocalStorageManager.statusErrorDarkColor ?? Theme.Status.errorDark.swiftUIColor
+            )
+        }
+        static var onError: Color {
+            .themedColor(
+                light: LocalStorageManager.statusOnErrorLightColor ?? Theme.Status.onErrorLight.swiftUIColor,
+                dark: LocalStorageManager.statusOnErrorDarkColor ?? Theme.Status.onErrorDark.swiftUIColor
+            )
+        }
+        static var errorContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.statusErrorContainerLightColor ?? Theme.Status.errorContainerLight.swiftUIColor,
+                dark: LocalStorageManager.statusErrorContainerDarkColor ?? Theme.Status.errorContainerDark.swiftUIColor
+            )
+        }
+        static var onErrorContainer: Color {
+            .themedColor(
+                light: LocalStorageManager.statusOnErrorContainerLightColor ?? Theme.Status.onErrorContainerLight.swiftUIColor,
+                dark: LocalStorageManager.statusOnErrorContainerDarkColor ?? Theme.Status.onErrorContainerDark.swiftUIColor
+            )
+        }
     }
 }
 
@@ -89,31 +241,20 @@ enum ChatAppearance {
 
 extension ChatAppearance {
     
-    // periphery:ignore - will be used after the 3.0.0 release
     static func getChatStyle() -> ChatStyle {
-        let lightModeColors = CustomizableStyleColorsImpl(
-            primary: LocalStorageManager.primaryLightColor ?? Theme.primary.swiftUIColor,
-            onPrimary: LocalStorageManager.onPrimaryLightColor ?? Theme.onPrimary.swiftUIColor,
-            background: LocalStorageManager.backgroundLightColor ?? Theme.background.swiftUIColor,
-            onBackground: LocalStorageManager.onBackgroundLightColor ?? Theme.onBackground.swiftUIColor,
-            accent: LocalStorageManager.accentLightColor ?? Theme.accent.swiftUIColor,
-            onAccent: LocalStorageManager.onAccentLightColor ?? Theme.onAccent.swiftUIColor,
-            agentBackground: LocalStorageManager.agentBackgroundLightColor ?? Theme.agentBackground.swiftUIColor,
-            agentText: LocalStorageManager.agentTextLightColor ?? Theme.agentText.swiftUIColor,
-            customerBackground: LocalStorageManager.customerBackgroundLightColor ?? Theme.customerBackground.swiftUIColor,
-            customerText: LocalStorageManager.customerTextLightColor ?? Theme.customerText.swiftUIColor
+        let lightModeColors = StyleColorsImpl(
+            background: BackgroundStyleColorsImpl.lightColors,
+            content: ContentStyleColorsImpl.lightColors,
+            brand: BrandStyleColorsImpl.lightColors,
+            border: BorderStyleColorsImpl.lightColors,
+            status: StatusStyleColorsImpl.lightColors
         )
-        let darkModeColors = CustomizableStyleColorsImpl(
-            primary: LocalStorageManager.primaryDarkColor ?? Theme.primaryDark.swiftUIColor,
-            onPrimary: LocalStorageManager.onPrimaryDarkColor ?? Theme.onPrimaryDark.swiftUIColor,
-            background: LocalStorageManager.backgroundDarkColor ?? Theme.backgroundDark.swiftUIColor,
-            onBackground: LocalStorageManager.onBackgroundDarkColor ?? Theme.onBackgroundDark.swiftUIColor,
-            accent: LocalStorageManager.accentDarkColor ?? Theme.accentDark.swiftUIColor,
-            onAccent: LocalStorageManager.onAccentDarkColor ?? Theme.onAccentDark.swiftUIColor,
-            agentBackground: LocalStorageManager.agentBackgroundDarkColor ?? Theme.agentBackgroundDark.swiftUIColor,
-            agentText: LocalStorageManager.agentTextDarkColor ?? Theme.agentTextDark.swiftUIColor,
-            customerBackground: LocalStorageManager.customerBackgroundDarkColor ?? Theme.customerBackgroundDark.swiftUIColor,
-            customerText: LocalStorageManager.customerTextDarkColor ?? Theme.customerTextDark.swiftUIColor
+        let darkModeColors = StyleColorsImpl(
+            background: BackgroundStyleColorsImpl.darkColors,
+            content: ContentStyleColorsImpl.darkColors,
+            brand: BrandStyleColorsImpl.darkColors,
+            border: BorderStyleColorsImpl.darkColors,
+            status: StatusStyleColorsImpl.darkColors
         )
         
         return ChatStyle(colorsManager: StyleColorsManager(light: lightModeColors, dark: darkModeColors))

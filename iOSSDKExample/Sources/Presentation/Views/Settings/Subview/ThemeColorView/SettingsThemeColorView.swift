@@ -22,10 +22,10 @@ struct SettingsThemeColorView: View {
     @ObservedObject private var viewModel: SettingsThemeColorViewModel
     
     @FocusState private var isFocused
-
+    
     // MARK: - Content
 
-    init(color: Color, title: String, didUpdateColor: @escaping (String, Color?) -> Void) {
+    init(color: Color, title: String, didUpdateColor: @escaping (Color, String) -> Void) {
         self.viewModel = SettingsThemeColorViewModel(color: color, title: title, didUpdateColor: didUpdateColor)
     }
     
@@ -56,10 +56,14 @@ struct SettingsThemeColorView: View {
             }
 
             Spacer()
-
-            Color(hex: viewModel.colorCode)
-                .frame(width: 50, height: 25, alignment: .trailing)
-                .border(viewModel.colorCode.isEmpty ? .clear : .black)
+            
+            ColorPicker(
+                "",
+                selection: Binding<Color>(
+                    get: { Color(hex: viewModel.colorCode) ?? .clear },
+                    set: { viewModel.onCodeChanged($0.toHexString) }
+                )
+            )
         }
         .onChange(of: isFocused) { isFocused in
             guard !isFocused else {
@@ -80,12 +84,12 @@ struct SettingsThemeColorView: View {
     
     NavigationView {
         List {
-            SettingsThemeColorView(color: backgroundColor, title: "Background") { _, color in
-                backgroundColor = color ?? .clear
+            SettingsThemeColorView(color: backgroundColor, title: "Background") { color, _ in
+                backgroundColor = color
             }
             
-            SettingsThemeColorView(color: onBackgroundColor, title: "On Background Color") { _, color in
-                onBackgroundColor = color ?? .clear
+            SettingsThemeColorView(color: onBackgroundColor, title: "On Background Color") { color, _ in
+                onBackgroundColor = color
             }
         }
         .navigationTitle("Settings")

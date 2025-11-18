@@ -99,11 +99,6 @@ func email(_ text: String) -> String? {
     return !isValidFormat ? L10n.Common.invalidEmail : nil
 }
 
-// periphery:ignore - May be used in the future
-func any(_: String) -> String? {
-    nil
-}
-
 func allOf(_ validators: ((String) -> String?)...) -> (String) -> String? {
     { text in
         validators.reduce(nil) { error, validator in

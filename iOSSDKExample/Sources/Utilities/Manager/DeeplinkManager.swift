@@ -18,7 +18,8 @@ import Foundation
 
 enum DeeplinkOption {
     
-    /// com.incontact.mobileSDK.sample://threads?threadIdOnExternalPlatform=\(UUID)
+    /// `com.incontact.mobileSDK.sample://threads?threadIdOnExternalPlatform={threadIdOnExternalPlatform}`
+    ///     or `com.nice.cxonechat.sample://{channelId}/threads?idOnExternalPlatform={threadIdOnExternalPlatform}`
     case thread(UUID)
 }
 

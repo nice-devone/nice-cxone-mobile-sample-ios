@@ -68,8 +68,8 @@ struct StoreView: View {
             )
         }
         .navigationBarTitle(L10n.Store.title)
-        .navigationBarItems(
-            leading: HStack {
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarLeading) {
                 Button {
                     isPresentingDisconnectAlert = true
                 } label: {
@@ -81,9 +81,15 @@ struct StoreView: View {
                 } label: {
                     Asset.Images.Common.settings
                 }
-            },
-            trailing: cartNavigationItem
-        )
+            }
+            
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: viewModel.navigateToCart) {
+                    Asset.Images.Store.cart
+                }
+                .badge(viewModel.itemsInCart)
+            }
+        }
     }
 }
 
@@ -99,32 +105,6 @@ private extension StoreView {
                 Circle()
                     .fill(Color.accentColor)
             )
-    }
-    
-    var cartNavigationItem: some View {
-        Button(action: {
-            viewModel.navigateToCart()
-        }, label: {
-            ZStack {
-                Asset.Images.Store.cart
-                
-                if viewModel.itemsInCart > 0 {
-                    Text(viewModel.itemsInCart.description)
-                        .font(.footnote)
-                        .foregroundColor(.white)
-                        .padding(6)
-                        .background(
-                            Circle()
-                                .fill(Color.accentColor)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(Color(.systemBackground), lineWidth: 2)
-                        )
-                        .offset(x: 12, y: 12)
-                }
-            }
-        })
     }
     
     var storeContent: some View {
@@ -156,7 +136,8 @@ private extension StoreView {
                 coordinator: StoreCoordinator(navigationController: UINavigationController()),
                 deeplinkOption: nil,
                 getProducts: GetProductsUseCase(repository: MockProductsRepositoryImpl()),
-                getCart: GetCartUseCase(repository: MockCartRepositoryImpl())
+                getCart: GetCartUseCase(repository: MockCartRepositoryImpl()),
+                signOutWithAmazon: PreviewSignOutWithAmazonUseCase()
             )
         )
     }
