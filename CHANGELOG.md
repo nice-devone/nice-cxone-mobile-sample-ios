@@ -1,3 +1,11 @@
+<a name="3.1.1"></a>
+# [3.1.1] - 2025-11-18
+
+## Dependencies
+- Update CXoneChatSDK from 3.0.3 to 3.1.1
+- Update CXoneChatUI from 3.0.3 to 3.1.1
+
+
 <a name="3.1.0"></a>
 # [3.1.0] - 2025-11-18
 
