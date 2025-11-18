@@ -35,8 +35,8 @@ extension View {
     
     func alert(
         isPresented: Binding<Bool>,
-        title: String = L10n.Common.oops,
-        message: String = L10n.Common.genericError,
+        title: String = L10n.Error.Generic.title,
+        message: String = L10n.Error.Generic.message,
         dismissButton: Alert.Button = .cancel()
     ) -> some View {
         alert(isPresented: isPresented) {

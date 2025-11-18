@@ -53,9 +53,8 @@ class StoreCoordinator: Coordinator {
 extension StoreCoordinator {
     
     func showSettings() {
-        let onColorChanged: () -> Void = {
-            #warning("Re-enable after 3.0.0 release")
-            // chatCoordinator?.chatStyle = ChatAppearance.getChatStyle()
+        let onColorChanged: () -> Void = { [weak chatCoordinator] in
+            chatCoordinator?.chatStyle = ChatAppearance.getChatStyle()
         }
         
         let controller = UIHostingController(rootView: resolver.resolve(SettingsView.self, argument: onColorChanged)!)

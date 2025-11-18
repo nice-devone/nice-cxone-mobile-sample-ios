@@ -1,7 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "icLaunchLogo.png",
+      "filename" : "light.png",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "dark.png",
       "idiom" : "universal"
     }
   ],

@@ -109,29 +109,10 @@ private extension ProductDetailView {
     }
     
     var cartNavigationButton: some View {
-        Button {
-            viewModel.navigateToCart()
-        } label: {
-            ZStack {
-                Asset.Images.Store.cart
-                
-                if viewModel.itemsInCart > 0 {
-                    Text(viewModel.itemsInCart.description)
-                        .font(.footnote)
-                        .foregroundColor(.white)
-                        .padding(6)
-                        .background(
-                            Circle()
-                                .fill(Color.accentColor)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(Color(.systemBackground), lineWidth: 2)
-                        )
-                        .offset(x: 12, y: 12)
-                }
-            }
+        Button(action: viewModel.navigateToCart) {
+            Asset.Images.Store.cart
         }
+        .badge(viewModel.itemsInCart)
     }
     
     var addToCartButton: some View {

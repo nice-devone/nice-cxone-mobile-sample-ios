@@ -174,7 +174,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         RemoteNotificationsManager.shared.onRegistrationFinished?()
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
         let identifier = notification.request.identifier
         let userInfo = notification.request.content.userInfo
         
@@ -193,7 +197,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 Log.error("Unable to extract threadId from notification userInfo")
             }
         } else {
-            return []
+            completionHandler([])
+            return
         }
         
         Log.trace("Notification content: \(notification.request.content)")
@@ -202,10 +207,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         UIApplication.shared.applicationIconBadgeNumber += 1
         Log.trace("Updated badge count to: \(UIApplication.shared.applicationIconBadgeNumber)")
         
-        return [.list, .banner, .badge, .sound]
+        completionHandler([.list, .banner, .badge, .sound])
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
         let userInfo = response.notification.request.content.userInfo
         let identifier = response.notification.request.identifier
         
@@ -223,6 +232,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         } else {
             Log.trace("Could not handle notification - neither thread navigation nor deeplink handling succeeded")
         }
+
+        completionHandler()
     }
 }
 

@@ -23,9 +23,7 @@ class MyChatCoordinator: ChatCoordinator {
     // MARK: - Init
     
     init() {
-        #warning("Re-enable after 3.0.0 release")
-        // super.init(chatStyle: ChatAppearance.getChatStyle())
-        super.init()
+        super.init(chatStyle: ChatAppearance.getChatStyle())
     }
     
     // MARK: - Methods

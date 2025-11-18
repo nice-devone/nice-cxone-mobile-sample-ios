@@ -46,3 +46,6 @@ targetTemplates:
           - CFBundleURLName: "$(PRODUCT_BUNDLE_IDENTIFIER)"
             CFBundleURLSchemes:
               - "$(PRODUCT_BUNDLE_IDENTIFIER)"
+          - CFBundleURLName: "Android App Scheme"
+            CFBundleURLSchemes:
+              - "com.nice.cxonechat.sample"

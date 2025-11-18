@@ -126,21 +126,25 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
         
         isLoading = true
         
-        Task { @MainActor in
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+            
             do {
-                try await loginWithAmazon()
+                try await self.loginWithAmazon()
                 
-                navigateToStore()
+                self.navigateToStore()
             } catch {
                 error.logError()
                 
-                isLoading = false
+                self.isLoading = false
                 
-                alertType = .loginError(
-                    brandId: configuration.brandId,
-                    channelId: configuration.channelId,
-                    primaryAction: onRepeatButtonTapped,
-                    secondaryAction: popToConfiguration
+                self.alertType = .loginError(
+                    brandId: self.configuration.brandId,
+                    channelId: self.configuration.channelId,
+                    primaryAction: self.onRepeatButtonTapped,
+                    secondaryAction: self.popToConfiguration
                 )
             }
         }
@@ -162,44 +166,57 @@ private extension LoginViewModel {
     func prepareAndFetchConfiguration() {
         Log.trace("Checking OAuth login options")
         
-        Task { @MainActor in
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+            
             do {
-                if let env = configuration.environment {
-                    try await CXoneChat.shared.connection.prepare(environment: env, brandId: configuration.brandId, channelId: configuration.channelId)
+                if let env = self.configuration.environment {
+                    try await CXoneChat.shared.connection.prepare(
+                        environment: env,
+                        brandId: self.configuration.brandId,
+                        channelId: self.configuration.channelId
+                    )
                 } else {
                     try await CXoneChat.shared.connection.prepare(
-                        chatURL: configuration.chatUrl,
-                        socketURL: configuration.socketUrl,
-                        brandId: configuration.brandId,
-                        channelId: configuration.channelId
+                        chatURL: self.configuration.chatUrl,
+                        socketURL: self.configuration.socketUrl,
+                        loggerURL: self.configuration.loggerUrl,
+                        brandId: self.configuration.brandId,
+                        channelId: self.configuration.channelId
                     )
                 }
 
                 // Analytics need prepared CXone SDK, then it can report page view
-                reportViewPage()
+                self.reportViewPage()
 
-                let channelConfig = try await getChannelConfiguration(configuration: configuration)
+                let channelConfig = try await getChannelConfiguration(configuration: self.configuration)
                 
                 let isOAuthEnabled = channelConfig.isAuthorizationEnabled
                 let isRealDevice = !UIDevice.current.isPreview
                 let isCustomerIdentitySet = LocalStorageManager.firstName?.isEmpty == false && LocalStorageManager.lastName?.isEmpty == false
                 
                 if !isOAuthEnabled, isCustomerIdentitySet, isRealDevice {
-                    navigateToStore()
+                    self.navigateToStore()
                 } else {
                     self.isOAuthEnabled = isOAuthEnabled
                     
-                    isLoading = false
+                    self.isLoading = false
                 }
+            } catch CXoneChatError.sdkVersionNotSupported {
+                isLoading = false
+                
+                alertType = .sdkVersionNotSupportedError(primaryAction: popToConfiguration)
             } catch {
                 error.logError()
                 
-                isLoading = false
-                alertType = .loginError(
-                    brandId: configuration.brandId,
-                    channelId: configuration.channelId,
-                    primaryAction: onRepeatButtonTapped,
-                    secondaryAction: popToConfiguration
+                self.isLoading = false
+                self.alertType = .loginError(
+                    brandId: self.configuration.brandId,
+                    channelId: self.configuration.channelId,
+                    primaryAction: self.onRepeatButtonTapped,
+                    secondaryAction: self.popToConfiguration
                 )
             }
         }

@@ -66,9 +66,13 @@ private extension AnalyticsReporter {
             fatalError("Title or Uri has not been set correctly")
         }
         
-        Task {
+        Task { [weak self] in
+            guard let self else {
+                return
+            }
+            
             do {
-                try await CXoneChat.shared.analytics.viewPageEnded(title: analyticsTitle, url: analyticsUrl)
+                try await CXoneChat.shared.analytics.viewPageEnded(title: self.analyticsTitle, url: self.analyticsUrl)
             } catch {
                 error.logError()
             }
@@ -84,9 +88,13 @@ private extension AnalyticsReporter {
             fatalError("Title or Uri has not been set correctly")
         }
         
-        Task {
+        Task { [weak self] in
+            guard let self else {
+                return
+            }
+            
             do {
-                try await CXoneChat.shared.analytics.viewPage(title: analyticsTitle, url: analyticsUrl)
+                try await CXoneChat.shared.analytics.viewPage(title: self.analyticsTitle, url: self.analyticsUrl)
             } catch {
                 error.logError()
             }

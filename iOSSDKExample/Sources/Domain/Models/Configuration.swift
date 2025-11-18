@@ -27,6 +27,7 @@ struct Configuration: Hashable {
     var environmentName: String
     var chatUrl: String
     var socketUrl: String
+    var loggerUrl: String
     
     var environment: CXoneChatSDK.Environment? {
         switch self.chatUrl {
@@ -56,15 +57,17 @@ struct Configuration: Hashable {
         self.environmentName = environment.rawValue
         self.chatUrl = environment.chatURL
         self.socketUrl = environment.socketURL
+        self.loggerUrl = environment.loggerURL
     }
     
-    init(title: String, brandId: Int, channelId: String, environmentName: String, chatUrl: String, socketUrl: String) {
+    init(title: String, brandId: Int, channelId: String, environmentName: String, chatUrl: String, socketUrl: String, loggerUrl: String) {
         self.title = title
         self.brandId = brandId
         self.channelId = channelId
         self.environmentName = environmentName
         self.chatUrl = chatUrl
         self.socketUrl = socketUrl
+        self.loggerUrl = loggerUrl
     }
 }
 
@@ -83,6 +86,7 @@ extension Configuration: Codable {
         case chatUrl
         case name
         case socketUrl
+        case loggerUrl
     }
     
     static func decodeList(from data: Data) throws -> [Configuration] {
@@ -98,6 +102,7 @@ extension Configuration: Codable {
         self.title = try container.decode(String.self, forKey: .name)
         self.environmentName = try environmentContainer.decode(String.self, forKey: .name)
         self.socketUrl = try environmentContainer.decode(String.self, forKey: .socketUrl)
+        self.loggerUrl = try environmentContainer.decode(String.self, forKey: .loggerUrl)
         
         let chatUrl = try environmentContainer.decode(String.self, forKey: .chatUrl)
         self.chatUrl = chatUrl.last == "/" ? chatUrl.dropLast().description : chatUrl
@@ -113,6 +118,7 @@ extension Configuration: Codable {
         try environmentContainer.encode(environmentName, forKey: .name)
         try environmentContainer.encode(socketUrl, forKey: .socketUrl)
         try environmentContainer.encode(chatUrl, forKey: .chatUrl)
+        try environmentContainer.encode(loggerUrl, forKey: .loggerUrl)
     }
 }
 

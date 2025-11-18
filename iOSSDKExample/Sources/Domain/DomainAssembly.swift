@@ -26,6 +26,7 @@ struct DomainAssembly: Assembly {
         container.autoregister(GetCartUseCase.self, initializer: GetCartUseCase.init)
         container.autoregister(CheckoutCartUseCase.self, initializer: CheckoutCartUseCase.init)
         container.autoregister(LoginWithAmazonUseCase.self, initializer: LoginWithAmazonUseCase.init)
+        container.autoregister(SignOutWithAmazonUseCase.self, initializer: SignOutWithAmazonUseCase.init)
         container.autoregister(GetChannelConfigurationUseCase.self, initializer: GetChannelConfigurationUseCase.init)
     }
 }
@@ -42,6 +43,7 @@ struct PreviewDomainAssembly: Assembly {
         container.autoregister(GetCartUseCase.self, initializer: GetCartUseCase.init)
         container.autoregister(CheckoutCartUseCase.self, initializer: CheckoutCartUseCase.init)
         container.autoregister(LoginWithAmazonUseCase.self, initializer: PreviewLoginWithAmazonUseCase.init)
+        container.autoregister(SignOutWithAmazonUseCase.self, initializer: PreviewSignOutWithAmazonUseCase.init)
         container.autoregister(GetChannelConfigurationUseCase.self, initializer: GetChannelConfigurationUseCase.init)
     }
 }

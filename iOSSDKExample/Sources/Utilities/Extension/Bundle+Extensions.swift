@@ -35,6 +35,15 @@ extension Bundle {
         return branchName
     }
     
+    var commitHash: String {
+        guard let branchName = infoDictionary?["GitCommit"] as? String else {
+            Log.error(.unableToParse("commitHash", from: infoDictionary))
+            return "Unknown"
+        }
+        
+        return branchName
+    }
+    
     var branchTag: String? {
         infoDictionary?["GitTag"] as? String
     }

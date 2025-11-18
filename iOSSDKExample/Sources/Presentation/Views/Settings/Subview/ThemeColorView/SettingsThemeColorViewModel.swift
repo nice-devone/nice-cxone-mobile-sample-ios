@@ -22,11 +22,11 @@ class SettingsThemeColorViewModel: ObservableObject {
     @Published var colorCode: String
     
     let title: String
-    let didUpdateColor: (String, Color?) -> Void
+    let didUpdateColor: (Color, String) -> Void
     
     // MARK: - Init
     
-    init(color: Color, title: String, didUpdateColor: @escaping (String, Color?) -> Void) {
+    init(color: Color, title: String, didUpdateColor: @escaping (Color, String) -> Void) {
         self.didUpdateColor = didUpdateColor
         self.title = title
         self._colorCode = Published(initialValue: color == .clear ? "" : color.toHexString)
@@ -38,8 +38,15 @@ class SettingsThemeColorViewModel: ObservableObject {
 extension SettingsThemeColorViewModel {
     
     func onCodeChanged(_ colorCode: String) {
+        guard let color = Color(hex: colorCode) else {
+            Log.error("Unable to change color for `\(title)`: invalid color code: `\(colorCode)")
+            return
+        }
+        
         Log.trace("Color code changed for `\(title)` to `\(colorCode)`")
         
-        didUpdateColor(title, Color(hex: colorCode))
+        self.colorCode = colorCode
+        
+        didUpdateColor(color, title)
     }
 }

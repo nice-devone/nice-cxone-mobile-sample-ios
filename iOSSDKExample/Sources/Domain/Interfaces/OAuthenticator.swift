@@ -12,7 +12,7 @@
 // OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
-// periphery:ignore:all - Will be used when proper OAuth implementation is added (DE-42542)
+// periphery:ignore:all - False positive; LoginWithAmazonAuthenticator conforms to OAuthenticator.
 
 import Foundation
 

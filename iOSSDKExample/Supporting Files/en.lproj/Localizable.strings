@@ -8,13 +8,15 @@
 "common.invalid_number" = "Invalid number";
 "common.ok" = "OK";
 "common.add" = "Add";
-"common.oops" = "Oops!";
-"common.generic_error" = "Something went wrong. Try it again later or contact the CXone Mobile team.";
-"common.notification_unknown_thread_error" = "Received remote notification from unknown conversation.";
 "common.attention" = "Attention";
 "common.disconnect" = "Disconnect";
 "common.sign_out" = "Sign Out";
 "common.search" = "Search";
+
+// Error
+"error.generic.title" = "Oops!";
+"error.generic.message" = "Something went wrong. Try it again later or contact the CXone Mobile team.";
+"error.unsupported_sdk_version.message" = "The SDK version you are using is not supported. Please update to a supported version to continue.";
 
 // Configuration
 "configuration.title" = "Configuration";
@@ -60,19 +62,50 @@
 "settings.theme.no_color.placeholder" = "Enter Color";
 "settings.theme.no_color.error" = "Invalid color";
 "settings.theme.no_color.alertMessage" = "Color cannot be left blank. The UI will set the default color for the respective element(s).";
-"settings.theme.primary.placeholder" = "Chat Primary Color";
-"settings.theme.on_primary.placeholder" = "Chat On Primary Color";
-"settings.theme.background.placeholder" = "Chat Background Color";
-"settings.theme.on_background.placeholder" = "Chat On Background Color";
-"settings.theme.accent.placeholder" = "Chat Accent Color";
-"settings.theme.on_accent.placeholder" = "Chat On Accent Color";
-"settings.theme.agent_background.placeholder" = "Chat Agent Background Color";
-"settings.theme.agent_text.placeholder" = "Chat Agent Text Color";
-"settings.theme.customer_background.placeholder" = "Chat Customer Background Color";
-"settings.theme.customer_text.placeholder" = "Chat Customer Text Color";
+
+"settings.theme.background.title" = "Background";
+"settings.theme.background.default.placeholder" = "Background Default";
+"settings.theme.background.inverse.placeholder" = "Background Inverse";
+"settings.theme.background.surface.title" = "Surface";
+"settings.theme.background.surface.default.placeholder" = "Background Surface Default";
+"settings.theme.background.surface.variant.placeholder" = "Background Surface Variant";
+"settings.theme.background.surface.container.placeholder" = "Background Surface Container";
+"settings.theme.background.surface.subtle.placeholder" = "Background Surface Subtle";
+"settings.theme.background.surface.emphasis.placeholder" = "Background Surface Emphasis";
+"settings.theme.content.title" = "Content";
+"settings.theme.content.primary.placeholder" = "Content Primary";
+"settings.theme.content.secondary.placeholder" = "Content Secondary";
+"settings.theme.content.tertiary.placeholder" = "Content Tertiary";
+"settings.theme.content.inverse.placeholder" = "Content Inverse";
+"settings.theme.brand.title" = "Brand";
+"settings.theme.brand.primary.placeholder" = "Brand Primary";
+"settings.theme.brand.onPrimary.placeholder" = "Brand On Primary";
+"settings.theme.brand.primaryContainer.placeholder" = "Brand Primary Container";
+"settings.theme.brand.onPrimaryContainer.placeholder" = "Brand On Primary Container";
+"settings.theme.brand.secondary.placeholder" = "Brand Secondary";
+"settings.theme.brand.onSecondary.placeholder" = "Brand On Secondary";
+"settings.theme.brand.secondaryContainer.placeholder" = "Brand Secondary Container";
+"settings.theme.brand.onSecondaryContainer.placeholder" = "Brand On Secondary Container";
+"settings.theme.border.title" = "Border";
+"settings.theme.border.default.placeholder" = "Border Default";
+"settings.theme.border.subtle.placeholder" = "Border Subtle";
+"settings.theme.status.title" = "Status";
+"settings.theme.status.success.placeholder" = "Status Success";
+"settings.theme.status.on_success.placeholder" = "Status On Success";
+"settings.theme.status.success_container.placeholder" = "Status Success Container";
+"settings.theme.status.on_success_container.placeholder" = "Status On Success Container";
+"settings.theme.status.warning.placeholder" = "Status Warning";
+"settings.theme.status.on_warning.placeholder" = "Status On Warning";
+"settings.theme.status.warning_container.placeholder" = "Status Warning Container";
+"settings.theme.status.on_warning_container.placeholder" = "Status On Warning Container";
+"settings.theme.status.error.placeholder" = "Status Error";
+"settings.theme.status.on_error.placeholder" = "Status On Error";
+"settings.theme.status.error_container.placeholder" = "Status Error Container";
+"settings.theme.status.on_error_container.placeholder" = "Status On Error Container";
 "settings.build.title" = "Build";
 "settings.build.build_number" = "Build Number";
 "settings.build.branch_name" = "Branch Name";
+"settings.build.commit_hash" = "Commit Hash";
 "settings.build.branch_tag" = "Tag";
 
 // Login
@@ -135,3 +168,4 @@
 // Purchase Done
 "purchase_done.message" = "Your order has been paid.";
 "purchase_done.back_to_store" = "Back to Store";
+
