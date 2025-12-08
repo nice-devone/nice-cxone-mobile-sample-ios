@@ -17,5 +17,5 @@ settings:
   base:
     BUNDLE_PREFIX: com.incontact.mobileSDK
     DEVELOPMENT_TEAM: A9KL983VAD
-    MARKETING_VERSION: "3.0.3"
+    MARKETING_VERSION: "3.0.4"
     DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
