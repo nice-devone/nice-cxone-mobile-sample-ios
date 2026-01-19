@@ -6,6 +6,7 @@
 
 ## Dependencies
 - Update CXoneChatSDK from 3.1.2 to 3.1.3
+- Update CXoneChatUI from 3.1.2 to 3.1.3
 
 
 <a name="3.1.2"></a>
