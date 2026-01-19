@@ -18,8 +18,8 @@ import Foundation
 
 enum DeeplinkOption {
     
-    /// com.incontact.mobileSDK.sample://threads?threadIdOnExternalPlatform=\(UUID)
-    case thread(UUID)
+    /// com.incontact.mobileSDK.sample://threads?threadIdOnExternalPlatform=\(String)
+    case thread(String)
 }
 
 protocol DeeplinkHandler {
@@ -56,13 +56,11 @@ private extension ThreadsDeeplinkHandler {
     }
     
     static func handleThreadDetail(from url: URL) -> DeeplinkOption? {
-        guard let threadId = url.getQueryValue(for: "idOnExternalPlatform"),
-              let id = UUID(uuidString: threadId)
-        else {
+        guard let threadId = url.getQueryValue(for: "idOnExternalPlatform") else {
             return nil
         }
         
-        return .thread(id)
+        return .thread(threadId)
     }
 }
 

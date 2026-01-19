@@ -34,7 +34,7 @@ class MyChatCoordinator: ChatCoordinator {
     func start(with deepLinkOption: DeeplinkOption? = nil, in parentViewController: UIViewController) {
         Log.trace("Starting chat")
         
-        let threadToOpen: UUID?
+        let threadToOpen: String?
 
         if case .thread(let uuid) = deepLinkOption {
             threadToOpen = uuid

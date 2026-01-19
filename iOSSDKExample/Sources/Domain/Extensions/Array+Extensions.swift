@@ -18,12 +18,12 @@ import Foundation
 
 extension Array where Element == ChatThread {
     
-    func thread(by id: UUID) -> ChatThread? {
-        self.first { $0.id == id }
+    func thread(by id: String) -> ChatThread? {
+        self.first { $0.idString == id }
     }
     
-    func index(of id: UUID) -> Int? {
-        self.firstIndex { $0.id == id }
+    func index(of id: String) -> Int? {
+        self.firstIndex { $0.idString == id }
     }
 }
 

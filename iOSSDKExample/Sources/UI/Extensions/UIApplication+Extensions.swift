@@ -26,7 +26,7 @@ extension UIApplication {
     // MARK: - Properties
     
     var mainWindow: UIWindow? {
-        UIApplication.shared.windows.filter(\.isKeyWindow).first
+        UIApplication.shared.connectedScenes.flatMap { ($0 as? UIWindowScene)?.windows ?? [] }.first(where: \.isKeyWindow)
     }
     
     var rootViewController: UIViewController? {

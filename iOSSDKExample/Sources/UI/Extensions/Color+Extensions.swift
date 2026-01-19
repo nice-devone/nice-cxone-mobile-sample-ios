@@ -90,7 +90,7 @@ extension Color {
 
 // MARK: - Codable
 
-extension Color: Codable {
+extension Color: Swift.Decodable, Swift.Encodable {
     
     enum CodingKeys: String, CodingKey {
         case red, green, blue, alpha
