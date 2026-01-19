@@ -33,7 +33,7 @@ class MyChatCoordinator: ChatCoordinator {
         
         provideAdditionalCustomFieldsIfNeeded()
         
-        let threadToOpen: UUID?
+        let threadToOpen: String?
 
         if case .thread(let uuid) = deepLinkOption {
             threadToOpen = uuid

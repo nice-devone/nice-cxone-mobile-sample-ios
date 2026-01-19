@@ -39,7 +39,7 @@ class ConfigurationViewModel: ObservableObject {
         isDefaultConfigurationHidden ? customConfiguration : defaultConfiguration
     }
     
-    let customerIdExample = UUID().uuidString
+    let customerIdExample = UUID().uuidString.lowercased()
     
     var willEnterForegroundPublisher: NotificationCenter.Publisher? = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
     

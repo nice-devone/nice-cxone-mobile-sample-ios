@@ -255,9 +255,7 @@ private extension AppDelegate {
         
         Log.trace("Notification userInfo for thread navigation: \(userInfo)")
         
-        guard let threadIdString = userInfo["threadId"] as? String,
-              let threadId = UUID(uuidString: threadIdString)
-        else {
+        guard let threadId = userInfo["threadId"] as? String else {
             Log.error("Unable to extract threadId from notification userInfo: \(userInfo)")
             return false
         }

@@ -20,7 +20,7 @@ enum DeeplinkOption {
     
     /// `com.incontact.mobileSDK.sample://threads?threadIdOnExternalPlatform={threadIdOnExternalPlatform}`
     ///     or `com.nice.cxonechat.sample://{channelId}/threads?idOnExternalPlatform={threadIdOnExternalPlatform}`
-    case thread(UUID)
+    case thread(String)
 }
 
 class ThreadsDeeplinkHandler {
@@ -50,13 +50,11 @@ private extension ThreadsDeeplinkHandler {
     }
     
     static func handleThreadDetail(from url: URL) -> DeeplinkOption? {
-        guard let threadId = url.getQueryValue(for: "idOnExternalPlatform"),
-              let id = UUID(uuidString: threadId)
-        else {
+        guard let threadId = url.getQueryValue(for: "idOnExternalPlatform") else {
             return nil
         }
         
-        return .thread(id)
+        return .thread(threadId)
     }
 }
 
