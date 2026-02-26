@@ -262,4 +262,17 @@ struct LocalStorageManager {
         
         UserDefaults.standard.synchronize()
     }
+    
+    static func resetTheme() {
+        Log.trace("Resetting theme in local storage")
+        
+        let cases: [LocalStorageKey] = LocalStorageKey.Theme.allCases.map { .chatLightTheme($0) }
+            + LocalStorageKey.Theme.allCases.map { .chatDarkTheme($0) }
+        
+        cases.forEach { key in
+            UserDefaults.standard.removeObject(forKey: key.rawValue)
+        }
+        
+        UserDefaults.standard.synchronize()
+    }
 }

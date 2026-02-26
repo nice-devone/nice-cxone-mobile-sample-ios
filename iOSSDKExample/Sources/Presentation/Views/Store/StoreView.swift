@@ -19,7 +19,7 @@ struct StoreView: View {
     
     // MARK: - Properies
     
-    @ObservedObject private var viewModel: StoreViewModel
+    @ObservedObject var viewModel: StoreViewModel
     
     @State private var searchText = ""
     @State private var isPresentingDisconnectAlert = false
@@ -137,6 +137,7 @@ private extension StoreView {
                 deeplinkOption: nil,
                 getProducts: GetProductsUseCase(repository: MockProductsRepositoryImpl()),
                 getCart: GetCartUseCase(repository: MockCartRepositoryImpl()),
+                loginWithAmazon: LoginWithAmazonUseCase(),
                 signOutWithAmazon: PreviewSignOutWithAmazonUseCase()
             )
         )

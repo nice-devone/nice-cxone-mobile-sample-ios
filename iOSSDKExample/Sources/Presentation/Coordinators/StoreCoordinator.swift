@@ -41,7 +41,9 @@ class StoreCoordinator: Coordinator {
         isActive = true
         
         // swiftlint:disable:next force_unwrapping
-        let controller = UIHostingController(rootView: resolver.resolve(StoreView.self, argument: deeplinkOption)!)
+        let view = resolver.resolve(StoreView.self, argument: deeplinkOption)!
+        chatCoordinator.delegate = view.viewModel
+        let controller = UIHostingController(rootView: view)
         
         navigationController.setViewControllers([controller], animated: true)
     }

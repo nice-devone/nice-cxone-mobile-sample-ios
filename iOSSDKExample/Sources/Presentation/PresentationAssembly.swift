@@ -108,6 +108,7 @@ struct PresentationAssembly: Assembly {
                     // swiftlint:disable force_unwrapping
                     getProducts: resolver.resolve(GetProductsUseCase.self)!,
                     getCart: resolver.resolve(GetCartUseCase.self)!,
+                    loginWithAmazon: resolver.resolve(LoginWithAmazonUseCase.self)!,
                     signOutWithAmazon: resolver.resolve(SignOutWithAmazonUseCase.self)!
                     // swiftlint:enable force_unwrapping
                 )

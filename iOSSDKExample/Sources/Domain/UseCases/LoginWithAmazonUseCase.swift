@@ -18,30 +18,28 @@ import PKCE
 
 class LoginWithAmazonUseCase {
     
-    func callAsFunction() async throws {
-        if let entity = LocalStorageManager.oAuthEntity {
-            // Authorize silently with existing code verifier and challenge
-            CXoneChat.shared.customer.setCodeVerifier(entity.codeVerifier)
-            CXoneChat.shared.customer.setAuthorizationCode(entity.codeChallenge)
+    func callAsFunction(force: Bool) async throws {
+        guard force || LocalStorageManager.oAuthEntity == nil else {
+            // The identity has been set previously -> continue
+            return
+        }
+        // Authorize with UI prompt
+        guard let authenticator = OAuthenticatorsManager.authenticator else {
+            throw CommonError.failed("Unable to get OAuth authenticator.")
+        }
+        // Generate code verifier and challenge
+        let verifier = try generateCodeVerifier()
+        let challenge = try generateCodeChallenge(for: verifier)
+        
+        let (_, result) = try await authenticator.authorize(withChallenge: challenge)
+        
+        if let result {
+            LocalStorageManager.oAuthEntity = OAuthEntity(codeVerifier: verifier, codeChallenge: result.challengeResult)
+            
+            CXoneChat.shared.customer.setCodeVerifier(verifier)
+            CXoneChat.shared.customer.setAuthorizationCode(result.challengeResult)
         } else {
-            // Authorize with UI prompt
-            guard let authenticator = OAuthenticatorsManager.authenticator else {
-                throw CommonError.failed("Unable to get OAuth authenticator.")
-            }
-            // Generate code verifier and challenge
-            let verifier = try generateCodeVerifier()
-            let challenge = try generateCodeChallenge(for: verifier)
-            
-            let (_, result) = try await authenticator.authorize(withChallenge: challenge)
-            
-            if let result {
-                LocalStorageManager.oAuthEntity = OAuthEntity(codeVerifier: verifier, codeChallenge: result.challengeResult)
-                
-                CXoneChat.shared.customer.setCodeVerifier(verifier)
-                CXoneChat.shared.customer.setAuthorizationCode(result.challengeResult)
-            } else {
-                throw CommonError.unableToParse("result")
-            }
+            throw CommonError.unableToParse("result")
         }
     }
 }
@@ -50,7 +48,7 @@ class LoginWithAmazonUseCase {
 
 class PreviewLoginWithAmazonUseCase: LoginWithAmazonUseCase {
     
-    override func callAsFunction() async throws {
+    override func callAsFunction(force: Bool) async throws {
         await Task.sleep(seconds: 2)
     }
 }

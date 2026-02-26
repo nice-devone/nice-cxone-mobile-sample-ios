@@ -14,6 +14,7 @@
 //
 
 import CXoneChatSDK
+import CXoneChatUI
 import SwiftUI
 
 class StoreViewModel: AnalyticsReporter, ObservableObject {
@@ -27,6 +28,7 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
     
     private let getProducts: GetProductsUseCase
     private let getCart: GetCartUseCase
+    private let loginWithAmazon: LoginWithAmazonUseCase
     private let signOutWithAmazon: SignOutWithAmazonUseCase
     
     private let coordinator: StoreCoordinator
@@ -40,12 +42,14 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
         deeplinkOption: DeeplinkOption?,
         getProducts: GetProductsUseCase,
         getCart: GetCartUseCase,
+        loginWithAmazon: LoginWithAmazonUseCase,
         signOutWithAmazon: SignOutWithAmazonUseCase
     ) {
         self.coordinator = coordinator
         self.deeplinkOption = deeplinkOption
         self.getProducts = getProducts
         self.getCart = getCart
+        self.loginWithAmazon = loginWithAmazon
         self.signOutWithAmazon = signOutWithAmazon
         super.init(analyticsTitle: "products?smartphones", analyticsUrl: "/products/smartphones")
     }
@@ -124,6 +128,24 @@ extension StoreViewModel {
         Log.trace("Navigating to the product view")
         
         coordinator.showProductDetail(product)
+    }
+}
+
+// MARK: - ChatDelegate
+
+extension StoreViewModel: ChatDelegate {
+
+    @MainActor
+    func onConnectionTokenExpired() async {
+        LogManager.trace("Connection token expired, retrigger OAuth flow")
+        
+        do {
+            try await self.loginWithAmazon(force: true)
+        } catch {
+            error.logError()
+            
+            self.error = CommonError.failed(L10n.Error.Generic.message)
+        }
     }
 }
 

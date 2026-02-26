@@ -162,6 +162,15 @@ class SettingsViewModel: ObservableObject {
         additionalCustomerCustomFields.removeValue(forKey: field)
         LocalStorageManager.additionalCustomerCustomFields = additionalCustomerCustomFields
     }
+    
+    func resetThemeToDefault() {
+        Log.trace("Reset chat theme to default")
+            
+        LocalStorageManager.resetTheme()
+        colorDidChange = true
+        
+        objectWillChange.send()
+    }
 }
 
 // MARK: - Private methods
