@@ -1,0 +1,95 @@
+NOTICE
+
+CXone Mobile Sample for iOS
+Copyright (c) 2021-2026 NiCE. All rights reserved.
+https://github.com/nice-devone/nice-cxone-mobile-sample-ios
+
+This product includes software developed by NiCE and its contributors.
+
+================================================================================
+
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+
+This project incorporates components from the projects listed below. The original
+copyright notices and the licenses under which NiCE received such components are
+set forth below. NiCE reserves all rights not expressly granted herein, whether
+by implication, estoppel or otherwise.
+
+================================================================================
+
+1. Firebase iOS SDK
+    Copyright 2024 Google LLC
+    Licensed under the Apache License 2.0
+    https://github.com/firebase/firebase-ios-sdk
+
+2. swift-pkce
+    Copyright Tyler Hendrickson
+    Licensed under the MIT License
+    https://github.com/hendrickson-tyler/swift-pkce
+
+3. Swinject
+    Copyright (c) 2015-2018 Swinject Contributors
+    Licensed under the MIT License
+    https://github.com/Swinject/Swinject
+
+4. SwinjectAutoregistration
+    Copyright (c) 2016-2018 Swinject Contributors
+    Licensed under the MIT License
+    https://github.com/Swinject/SwinjectAutoregistration
+
+5. Login with Amazon iOS SDK
+    Copyright Amazon.com, Inc. or its affiliates
+    Licensed under the Amazon Software License
+    https://developer.amazon.com/docs/login-with-amazon/ios-docs.html
+    
+6. CXoneGuideUtility
+    Copyright 2021-2026 NiCE
+    Licensed under the NiCE Licese
+    https://github.com/nice-devone/nice-cxone-mobile-guide-utility-ios
+
+7. CXoneChatSDK
+    Copyright 2021-2026 NiCE
+    Licensed under the NiCE Licese
+    https://github.com/nice-devone/nice-cxone-mobile-sdk-ios
+
+================================================================================
+
+LICENSE SUMMARIES
+
+MIT License
+-----------
+The following components are licensed under the MIT License:
+- swift-pkce
+- Swinject
+- SwinjectAutoregistration
+
+The MIT License text can be found at: https://opensource.org/licenses/MIT
+
+Apache License 2.0
+------------------
+The following components are licensed under the Apache License 2.0:
+- Firebase iOS SDK
+
+The Apache License 2.0 text can be found at: https://www.apache.org/licenses/LICENSE-2.0
+
+Amazon Software License
+-----------------------
+The following components are licensed under the Amazon Software License:
+- Login with Amazon iOS SDK
+
+The Amazon Software License text can be found at: https://aws.amazon.com/asl/
+
+NiCE License
+------------
+The following components are licensed under the NiCE License:
+- CXoneGuideUtility
+- CXoneChatSDK
+
+The NiCE License text can be found at: https://github.com/nice-devone/nice-cxone-mobile-sdk-ios
+
+================================================================================
+
+Full license texts for all dependencies are available in their respective
+repositories linked above.
+
+For questions regarding this NOTICE file or licensing, please contact NiCE at https://www.nice.com/contact-us.

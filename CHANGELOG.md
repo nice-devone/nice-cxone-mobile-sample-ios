@@ -1,3 +1,11 @@
+<a name="3.2.0"></a>
+# [3.2.0] - 2026-02-26
+
+## Features
+- Add Reset to Defaults for theme section
+- Add Regression QA_EU1 and Manual STAGING_NA1 configurations
+
+
 <a name="3.1.3"></a>
 # [3.1.3] - 2026-01-19
 
@@ -385,7 +393,8 @@
     - failure
   - typing start/end
 
-[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.1.3...HEAD
+[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.2.0...HEAD
+[3.2.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.1.3...3.2.0
 [3.1.3]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.1.2...3.1.3
 [3.1.2]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.1.1...3.1.2
 [3.1.1]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.1.0...3.1.1

@@ -21,6 +21,8 @@ struct SettingsView: View {
 
     @ObservedObject var viewModel: SettingsViewModel
 
+    @State private var showResetToDefaultConfirmation = false
+    
     // MARK: - Content
 
     var body: some View {
@@ -227,10 +229,27 @@ private extension SettingsView {
             
             themeStatusSection
         } header: {
-            Text(L10n.Settings.Theme.title)
+            HStack {
+                Text(L10n.Settings.Theme.title)
+                
+                Spacer()
+                
+                Button(L10n.Settings.Theme.ResetToDefault.title) {
+                    showResetToDefaultConfirmation = true
+                }
+                .truncationMode(.middle)
+            }
         } footer: {
             Text(L10n.Settings.Theme.info)
                 .font(.footnote)
+        }
+        .alert(isPresented: $showResetToDefaultConfirmation) {
+            Alert(
+                title: Text(L10n.Settings.Theme.Alert.ResetToDefault.title),
+                message: Text(L10n.Settings.Theme.Alert.ResetToDefault.text),
+                primaryButton: .default(Text(L10n.Common.confirm), action: viewModel.resetThemeToDefault),
+                secondaryButton: .cancel()
+            )
         }
     }
     

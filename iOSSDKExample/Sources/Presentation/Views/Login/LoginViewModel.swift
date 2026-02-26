@@ -132,7 +132,7 @@ class LoginViewModel: AnalyticsReporter, ObservableObject {
             }
             
             do {
-                try await self.loginWithAmazon()
+                try await self.loginWithAmazon(force: false)
                 
                 self.navigateToStore()
             } catch {
@@ -192,16 +192,15 @@ private extension LoginViewModel {
                 self.reportViewPage()
 
                 let channelConfig = try await getChannelConfiguration(configuration: self.configuration)
+                self.isOAuthEnabled = channelConfig.isAuthorizationEnabled
                 
-                let isOAuthEnabled = channelConfig.isAuthorizationEnabled
-                let isRealDevice = !UIDevice.current.isPreview
-                let isCustomerIdentitySet = LocalStorageManager.firstName?.isEmpty == false && LocalStorageManager.lastName?.isEmpty == false
+                let isNotPreview = !UIDevice.current.isPreview
+                let isOAuthIdentitySet = LocalStorageManager.oAuthEntity != nil
+                let isGuestIdentitySet = LocalStorageManager.firstName?.isEmpty == false && LocalStorageManager.lastName?.isEmpty == false
                 
-                if !isOAuthEnabled, isCustomerIdentitySet, isRealDevice {
+                if isNotPreview, isGuestIdentitySet || isOAuthIdentitySet {
                     self.navigateToStore()
                 } else {
-                    self.isOAuthEnabled = isOAuthEnabled
-                    
                     self.isLoading = false
                 }
             } catch CXoneChatError.sdkVersionNotSupported {
