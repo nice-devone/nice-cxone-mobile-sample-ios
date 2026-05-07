@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021-2025. NICE Ltd. All rights reserved.
+// Copyright (c) 2021-2026. NICE Ltd. All rights reserved.
 //
 // Licensed under the NICE License;
 // you may not use this file except in compliance with the License.
@@ -8,7 +8,7 @@
 //    https://github.com/nice-devone/nice-cxone-mobile-sample-ios/blob/main/LICENSE
 //
 // TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE CXONE MOBILE SDK IS PROVIDED ON
-// AN “AS IS” BASIS. NICE HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS
+// AN "AS IS" BASIS. NICE HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS
 // OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
@@ -28,6 +28,7 @@ struct Configuration: Hashable {
     var chatUrl: String
     var socketUrl: String
     var loggerUrl: String
+    var tokenUrl: String
     
     var environment: CXoneChatSDK.Environment? {
         switch self.chatUrl {
@@ -58,9 +59,19 @@ struct Configuration: Hashable {
         self.chatUrl = environment.chatURL
         self.socketUrl = environment.socketURL
         self.loggerUrl = environment.loggerURL
+        self.tokenUrl = environment.tokenURL
     }
     
-    init(title: String, brandId: Int, channelId: String, environmentName: String, chatUrl: String, socketUrl: String, loggerUrl: String) {
+    init(
+        title: String,
+        brandId: Int,
+        channelId: String,
+        environmentName: String,
+        chatUrl: String,
+        socketUrl: String,
+        loggerUrl: String,
+        tokenUrl: String
+    ) {
         self.title = title
         self.brandId = brandId
         self.channelId = channelId
@@ -68,6 +79,7 @@ struct Configuration: Hashable {
         self.chatUrl = chatUrl
         self.socketUrl = socketUrl
         self.loggerUrl = loggerUrl
+        self.tokenUrl = tokenUrl
     }
 }
 
@@ -87,6 +99,7 @@ extension Configuration: Codable {
         case name
         case socketUrl
         case loggerUrl
+        case tokenUrl
     }
     
     static func decodeList(from data: Data) throws -> [Configuration] {
@@ -104,8 +117,13 @@ extension Configuration: Codable {
         self.socketUrl = try environmentContainer.decode(String.self, forKey: .socketUrl)
         self.loggerUrl = try environmentContainer.decode(String.self, forKey: .loggerUrl)
         
-        let chatUrl = try environmentContainer.decode(String.self, forKey: .chatUrl)
-        self.chatUrl = chatUrl.last == "/" ? chatUrl.dropLast().description : chatUrl
+        self.chatUrl = try environmentContainer
+            .decode(String.self, forKey: .chatUrl)
+            .stripTrailingSlash
+        
+        self.tokenUrl = try environmentContainer
+            .decode(String.self, forKey: .tokenUrl)
+            .stripTrailingSlash
     }
     
     func encode(to encoder: Encoder) throws {
@@ -119,10 +137,24 @@ extension Configuration: Codable {
         try environmentContainer.encode(socketUrl, forKey: .socketUrl)
         try environmentContainer.encode(chatUrl, forKey: .chatUrl)
         try environmentContainer.encode(loggerUrl, forKey: .loggerUrl)
+        try environmentContainer.encode(tokenUrl, forKey: .tokenUrl)
     }
 }
 
-// MARK: -
+// MARK: - Private helpers
+
+private extension String {
+    
+    var stripTrailingSlash: String {
+        guard self.last == "/" else {
+            return self
+        }
+        
+        return String(self.dropLast())
+    }
+}
+
+// MARK: - Helpers
 
 private struct ConfigurationList: Decodable {
     
