@@ -19,8 +19,8 @@ extension Color {
     
     // MARK: - Properties
     
-    static var backgroundColor: Color = Color(.systemBackground)
-    static var primaryButtonColor: Color = .accentColor
+    static let backgroundColor: Color = Color(.systemBackground)
+    static let primaryButtonColor: Color = .accentColor
     
     // MARK: - Init
     
@@ -59,6 +59,7 @@ extension Color {
     
     // MARK: - Static methods
     
+    @MainActor
     static func themedColor(light: Color, dark: Color) -> Color {
         UIApplication.isDarkModeActive ? dark : light
     }
@@ -120,6 +121,13 @@ extension Color: @retroactive Codable {
         try container.encode(colorComponents.alpha, forKey: .alpha)
     }
 }
+
+// MARK: - ColorAsset Sendable
+
+// ColorAsset instances are effectively immutable (read-only name + lazily loaded color),
+// so it is safe to declare @unchecked Sendable to suppress strict-concurrency warnings
+// that cannot be fixed in SwiftGen-generated code.
+extension ColorAsset: @unchecked Sendable {}
 
 // MARK: - Helpers
 

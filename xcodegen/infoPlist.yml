@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    https://github.com/BrandEmbassy/cxone-mobile-sdk-IOS/blob/master/LICENSE
+#    https://github.com/nice-devone/nice-cxone-mobile-sample-ios/blob/main/LICENSE
 #
 # TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE CXONE MOBILE SDK IS PROVIDED ON
 # AN "AS IS" BASIS. NICE HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS
@@ -49,3 +49,9 @@ targetTemplates:
           - CFBundleURLName: "Android App Scheme"
             CFBundleURLSchemes:
               - "com.nice.cxonechat.sample"
+          # Google OAuth redirect (AppAuth) — the scheme is the reversed client ID from
+          # GoogleService-Info.plist (scheme only, no ":/" or path). AppAuth derives the full
+          # redirect URI from it as reversedClientId:/
+          - CFBundleURLName: "Google OAuth"
+            CFBundleURLSchemes:
+              - "com.googleusercontent.apps.380097439409-h4kmchq0c9ajm2m5gqjrac198etj28ah"

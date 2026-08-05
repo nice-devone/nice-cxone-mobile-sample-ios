@@ -27,7 +27,7 @@ struct SearchBar: View {
         HStack(spacing: 16) {
             HStack {
                 Asset.Images.Store.search
-                    .foregroundColor(Color(.systemGray2))
+                    .foregroundStyle(Color(.systemGray2))
                 
                 TextField(L10n.Common.search, text: $text)
                     .autocorrectionDisabled()
@@ -36,7 +36,7 @@ struct SearchBar: View {
                 if !text.isEmpty {
                     Asset.Images.Common.clear
                         .imageScale(.medium)
-                        .foregroundColor(Color(.systemGray2))
+                        .foregroundStyle(Color(.systemGray2))
                         .onTapGesture {
                             withAnimation {
                                 self.text = ""

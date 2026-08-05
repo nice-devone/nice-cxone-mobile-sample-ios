@@ -26,27 +26,28 @@ class CartViewModel: AnalyticsReporter, ObservableObject {
     
     // MARK: - Properties
     
-    private let coordinator: StoreCoordinator
-    
+    private let router: AppRouter
+
     @Published var cart = [ProductOrderEntity]()
-    
+
     var totalAmount: Double {
         cart.reduce(0) { $0 + ($1.product.price * Double($1.quantity)) }
     }
-    
+
     // MARK: - Init
-    
+
     init(
-        coordinator: StoreCoordinator,
+        router: AppRouter,
         getCart: GetCartUseCase,
         addProductToCart: AddProductToCartUseCase,
-        removeProductFromCart: RemoveProductFromCartUseCase
+        removeProductFromCart: RemoveProductFromCartUseCase,
+        chatProvider: ChatProvider
     ) {
-        self.coordinator = coordinator
+        self.router = router
         self.getCart = getCart
         self.addProductToCart = addProductToCart
         self.removeProductFromCart = removeProductFromCart
-        super.init(analyticsTitle: "cart", analyticsUrl: "/cart")
+        super.init(chatProvider: chatProvider, analyticsTitle: "cart", analyticsUrl: "/cart")
     }
     
     // MARK: - Methods
@@ -60,7 +61,7 @@ class CartViewModel: AnalyticsReporter, ObservableObject {
     func navigateToPayment() {
         Log.trace("Navigatint to the payment")
         
-        coordinator.showPayment()
+        router.showPayment()
     }
     
     func addProduct(_ product: ProductEntity) {

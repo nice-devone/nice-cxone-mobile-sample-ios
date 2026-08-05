@@ -12,46 +12,51 @@
 // OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
-// periphery:ignore:all - False positive; LoginWithAmazonAuthenticator conforms to OAuthenticator.
 
 import Foundation
 
-/// an object capable of performing OAuth authentication
-protocol OAuthenticator {
-
-    // MARK: - Type Aliases
-
-    /// Invoked when an authentication request completes
-    ///
-    /// - parameters:
-    ///     - cancelled: true iff the request was cancelled
-    ///     - result: if the request was successful, will contain details of the success
-    typealias OAAuthenticationHandler = (cancelled: Bool, result: OAResult?)
+/// An object capable of performing OAuth authentication for the sample app.
+///
+/// The provider library (e.g. AppAuth) generates the PKCE parameters internally, so callers no
+/// longer pass a challenge in. The selected `OAuthFlow` determines which credentials the returned
+/// `OAResult` carries.
+protocol OAuthenticator: Sendable {
 
     // MARK: - Properties
 
-    /// user presentable name of authenticator
+    /// User-presentable name of the authenticator.
     var authenticatorName: String { get }
 
     // MARK: - Methods
 
-    /// attempt OAuth authentication using this authenticator
+    /// Attempt OAuth authentication for the given flow.
     ///
-    /// - Parameter withChallenge: Challenge string
-    /// - Returns: Routine to invoke as result of the request
-    func authorize(withChallenge: String) async throws -> OAAuthenticationHandler
+    /// - Parameter flow: The flow the user selected — determines which credentials are returned.
+    /// - Returns: The credentials for the selected flow.
+    /// - Throws: `OAError.cancelled` if the user cancelled, or any underlying provider error.
+    func authorize(flow: OAuthFlow) async throws -> OAResult
 
-    /// attempt to logout any cached user results
+    /// Silently obtain a fresh implicit-flow access token, refreshing it via the stored refresh token
+    /// without presenting UI. Used by the SDK's token delegate to renew an expiring connection token.
     ///
-    /// - parameters:
-    ///     - onCompletion: routine to invoke on completion of request
+    /// - Returns: The refreshed access token and its expiry.
+    /// - Throws: An error if no prior implicit sign-in exists or the refresh fails.
+    func refreshImplicitToken() async throws -> (token: String, expiresAt: Date)
+
+    /// Restore a previously persisted implicit-flow session (if any) so that
+    /// `refreshImplicitToken()` can renew its token without interactive sign-in.
+    ///
+    /// - Returns: `true` when a persisted session was restored or one is already active.
+    func restoreImplicitSession() async -> Bool
+
+    /// Attempt to log out any cached user results.
     func signOut() async throws
 
-    /// handle an open url request from the application, this may be required to complete
-    /// some varieties of OAuth
+    /// Handle an open-url request from the application; required to complete some OAuth redirects.
     ///
-    /// - parameters:
-    ///     - url: url being opened
-    ///     - sourceApplication: name of application originating request
+    /// - Parameters:
+    ///   - url: The URL being opened.
+    ///   - sourceApplication: Name of the application originating the request.
+    /// - Returns: `true` if the URL was consumed by an in-flight authorization flow.
     func handleOpen(url: URL, sourceApplication: String?) -> Bool
 }

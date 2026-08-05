@@ -44,12 +44,12 @@ struct CartItem: View {
                     Asset.Images.Store.Product.imagePlaceholder
                         .frame(width: 80, height: 80)
                         .background(Color.gray)
-                        .cornerRadius(6)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
                 .resizable()
                 .scaledToFit()
                 .frame(width: 100, height: 50)
-                .cornerRadius(6)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
             
             productDescription
             

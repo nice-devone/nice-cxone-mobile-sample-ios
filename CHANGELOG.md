@@ -2,6 +2,18 @@
 # [Unreleased]
 
 
+<a name="4.0.0"></a>
+# [4.0.0] - 2026-08-05
+
+
+## Breaking Changes
+- Increase minimum iOS deployment target to 16.0
+
+## Features
+- Migrate to pure SwiftUI: replace UIKit `UINavigationController` + Coordinator pattern with `NavigationStack(path:)` + `AppRouter` + `AppRoute` enum; replace Swinject DI with hand-rolled `AppDependencies` factory; remove `ChatHostingController` and UIKit `ChatAppearance` bridges
+- Adopt Swift strict-concurrency
+
+
 <a name="3.3.1"></a>
 # [3.3.1] - 2026-06-24
 
@@ -415,7 +427,8 @@
   - typing start/end
 
 
-[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.3.1...HEAD
+[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/4.0.0...HEAD
+[4.0.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.3.1...4.0.0
 [3.3.1]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.1.3...3.2.0

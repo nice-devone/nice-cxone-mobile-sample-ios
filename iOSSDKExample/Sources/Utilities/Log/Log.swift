@@ -18,29 +18,30 @@ import CXoneChatUI
 import CXoneGuideUtility
 import FirebaseCrashlytics
 import os
-import UIKit
 
 class Log: StaticLogger {
     
     // MARK: - StaticLogger implementation
 
-    nonisolated(unsafe) public static var instance: LogWriter? = PrintLogWriter()
+    private static let _instance = SafeAccessContainer<LogWriter?>(PrintLogWriter())
+    public static var instance: LogWriter? {
+        get { _instance.content }
+        set {
+            _instance.mutate { content in
+                content = newValue
+            }
+        }
+    }
     public static let category: String? = "Application"
 
     // MARK: - Properties
 
     static let logsFolderName = "CXoneChatSampleAppLogs"
-
-    private static var currentLogFileUrl: URL?
-    private static let formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "H:mm:ss.SS dd.MM.yyyy"
-
-        return formatter
-    }()
+    static let logFileName = "app.log"
 
     // MARK: - Methods
 
+    @MainActor
     class func configure(
         format: LogFormatter = .full,
         isPrintEnabled: Bool = true,
@@ -53,8 +54,8 @@ class Log: StaticLogger {
         if isPrintEnabled {
             loggers.append(PrintLogWriter())
         }
-        
-        if isWriteToFileEnabled, let url = getCurrentLogUrl() {
+
+        if isWriteToFileEnabled, let url = makeLogFileUrl() {
             loggers.append(FileLogWriter(path: url))
         }
 
@@ -78,35 +79,28 @@ class Log: StaticLogger {
         CXoneChatUI.LogManager.instance = instance
     }
 
-    class func getLogShareDialog() throws -> UIActivityViewController {
-        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            throw CommonError.unableToParse("Unable to get document directory")
+    /// URL of the single log file, or `nil` if it has not been created yet.
+    class var logFileUrl: URL? {
+        guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return nil
         }
-        
-        let logsUrl = documentDirectory.appendingPathComponent(logsFolderName, isDirectory: true)
-        let filePaths = try FileManager.default.contentsOfDirectory(at: logsUrl, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
-        
-        guard !filePaths.isEmpty else {
-            throw CommonError.failed("No log files available")
-        }
-        
-        return UIActivityViewController(activityItems: filePaths, applicationActivities: nil)
+
+        let url = documents
+            .appendingPathComponent(logsFolderName, isDirectory: true)
+            .appendingPathComponent(logFileName)
+
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
-    
-    class func removeLogs() throws {
-        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            throw CommonError.unableToParse("Unable to get document directory")
+
+    class func removeLogs() {
+        guard let logFileUrl else {
+            return
         }
-        
-        let logsUrl = documentDirectory.appendingPathComponent(logsFolderName, isDirectory: true)
-        let filePaths = try FileManager.default.contentsOfDirectory(at: logsUrl, includingPropertiesForKeys: nil, options: [])
-        
-        for filePath in filePaths {
-            do {
-                try FileManager.default.removeItem(at: filePath)
-            } catch {
-                error.logError()
-            }
+
+        do {
+            try FileManager.default.removeItem(at: logFileUrl)
+        } catch {
+            print(error.localizedDescription)
         }
     }
     
@@ -126,32 +120,21 @@ class Log: StaticLogger {
 
 private extension Log {
 
-    class func getCurrentLogUrl() -> URL? {
-        if let currentLogFileUrl, FileManager.default.fileExists(atPath: currentLogFileUrl.path) {
-            return currentLogFileUrl
-        }
-        
+    /// Creates the logs directory if needed and returns the log file URL.
+    class func makeLogFileUrl() -> URL? {
         guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            print("Unable to get document directory")
             return nil
         }
-        
+
         let logsUrl = documents.appendingPathComponent(logsFolderName, isDirectory: true)
-        
+
         do {
             try FileManager.default.createDirectory(at: logsUrl, withIntermediateDirectories: true, attributes: nil)
-            
-            return (formatter.copy() as? DateFormatter).map { copy in
-                copy.dateFormat = "dd.MM.yyyy"
-                let logFile = copy.string(from: Date()) + ".txt"
-                let logUrl = logsUrl.appendingPathComponent(logFile)
-                
-                self.currentLogFileUrl = logUrl
-                
-                return logUrl
-            }
+
+            return logsUrl.appendingPathComponent(logFileName)
         } catch {
             print(error.localizedDescription)
+
             return nil
         }
     }

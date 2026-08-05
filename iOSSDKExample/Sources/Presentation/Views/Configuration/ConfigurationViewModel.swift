@@ -15,14 +15,15 @@
 
 import CXoneChatSDK
 import SwiftUI
-import Swinject
 
-class ConfigurationViewModel: ObservableObject {
-    
+@MainActor
+final class ConfigurationViewModel: AlertableViewModel {
+
     // MARK: - Properties
-    
-    private let coordinator: LoginCoordinator
-    
+
+    private let router: AppRouter
+    private let chatProvider: ChatProvider
+
     @Published private(set) var configurations = [iOSSDKExample.Configuration]()
     @Published var customerId = ""
     @Published var brandId = ""
@@ -40,96 +41,93 @@ class ConfigurationViewModel: ObservableObject {
     )
     @Published var isDefaultConfigurationHidden = false
     @Published var alertType: AlertType?
-    
+
     private var defaultConfiguration: Configuration {
         Configuration(brandId: Int(brandId) ?? 0, channelId: channelId, environment: environment)
     }
     private var currentConfiguration: Configuration {
         isDefaultConfigurationHidden ? customConfiguration : defaultConfiguration
     }
-    
+
     let customerIdExample = UUID().uuidString.lowercased()
-    
+
     var willEnterForegroundPublisher: NotificationCenter.Publisher? = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
-    
+
     // MARK: - Init
-    
-    init(coordinator: LoginCoordinator) {
-        self.coordinator = coordinator
-        
+
+    init(router: AppRouter, chatProvider: ChatProvider) {
+        self.router = router
+        self.chatProvider = chatProvider
+
         self.willEnterForegroundPublisher = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
     }
-    
+
     // MARK: - Methods
-    
+
     func onAppear() {
         Log.trace("Configuration view appeared")
-        
-        coordinator.navigationController.navigationBar.defaultAppearance()
-        UIAlertController.defaultAppearance()
-        UISegmentedControl.defaultAppearance()
-        
+
         willEnterForegroundPublisher = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
-        
+
         loadConfigurations()
     }
-    
+
     func onConfirmButtonTapped() {
         Log.trace("User pressed confirm button")
-        
+
         guard isConfigurationValid() else {
             Log.warning(.failed("BrandId or channelId is not valid."))
-            
-            alertType = .configMissingFieldsError()
+
+            alertType = .configMissingFieldsError
             return
         }
-        
+
         do {
             if !customerId.isEmpty {
-                try CXoneChat.shared.customer.set(customer: CustomerIdentity(id: customerId, firstName: nil, lastName: nil))
+                try chatProvider.customer.set(customer: CustomerIdentity(id: customerId, firstName: nil, lastName: nil))
             }
-            
+
             navigateToLogin()
         } catch {
             error.logError()
-            
-            alertType = .genericError(primaryAction: nil)
+
+            alertType = .genericError
         }
     }
-    
+
     func navigateToSettings() {
         Log.trace("Navigating to the settings")
-        
-        coordinator.showSettings()
+
+        router.showSettings()
     }
-    
+
     func navigateToLogin() {
         Log.trace("Navigating to the login")
-        
+
         willEnterForegroundPublisher = nil
-        
-        coordinator.showLogin(configuration: currentConfiguration)
+
+        router.showLogin(currentConfiguration)
     }
 }
 
 // MARK: - Private methods
 
 private extension ConfigurationViewModel {
-    
+
     func loadConfigurations() {
         Log.trace("Loading custom channel configurations")
-        
+
         guard let filePath = Bundle.main.path(forResource: "environment", ofType: "json") else {
             Log.error(.failed("Could not get file with configurations."))
             return
         }
-        
+
         do {
             guard let data = try String(contentsOfFile: filePath).data(using: .utf8) else {
                 Log.error(.failed("Could not get data from file."))
                 return
             }
-            
+
             configurations = try Configuration.decodeList(from: data)
 
             if let configuration = configurations.first {
@@ -139,20 +137,20 @@ private extension ConfigurationViewModel {
             Log.error(.error(error))
         }
     }
-    
+
     func isConfigurationValid() -> Bool {
         let isValid: Bool
-        
+
         if isDefaultConfigurationHidden {
             isValid = true
         } else {
             isValid = defaultConfiguration.brandId != 0 && !defaultConfiguration.channelId.isEmpty
         }
-        
+
         if isValid {
             LocalStorageManager.configuration = currentConfiguration
         }
-        
+
         return isValid
     }
 }

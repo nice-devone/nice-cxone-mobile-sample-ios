@@ -18,6 +18,7 @@ import CXoneChatUI
 extension BorderStyleColorsImpl {
     private typealias Theme = Asset.Colors.ChatDefaultTheme
     
+    @MainActor
     static var lightColors: BorderStyleColorsImpl {
         BorderStyleColorsImpl(
             default: LocalStorageManager.borderDefaultLightColor ?? Theme.Border.defaultLight.swiftUIColor,
@@ -25,6 +26,7 @@ extension BorderStyleColorsImpl {
         )
     }
     
+    @MainActor
     static var darkColors: BorderStyleColorsImpl {
         BorderStyleColorsImpl(
             default: LocalStorageManager.borderDefaultDarkColor ?? Theme.Border.defaultDark.swiftUIColor,

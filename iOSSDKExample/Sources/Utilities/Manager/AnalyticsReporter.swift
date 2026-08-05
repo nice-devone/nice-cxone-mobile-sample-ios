@@ -16,37 +16,42 @@
 import CXoneChatSDK
 import UIKit
 
+@MainActor
 class AnalyticsReporter {
-    
+
     // MARK: - Properties
-    
+
+    let chatProvider: ChatProvider
+
     private let analyticsTitle: String
     private let analyticsUrl: String
-    
+
     // MARK: - Lifecycle
-    
-    init(analyticsTitle: String, analyticsUrl: String) {
+
+    init(chatProvider: ChatProvider, analyticsTitle: String, analyticsUrl: String) {
+        self.chatProvider = chatProvider
         self.analyticsTitle = analyticsTitle
         self.analyticsUrl = analyticsUrl
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(onViewDidAppear), name: UIApplication.willEnterForegroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
-    
+
     deinit {
         onDisappear()
     }
-    
+
     // MARK: - Methods
-    
+
     func onAppear() {
         onViewDidAppear()
     }
-    
-    func onDisappear() {
+
+    // nonisolated: called from deinit (which is nonisolated). NotificationCenter.removeObserver is thread-safe.
+    nonisolated func onDisappear() {
         NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
-	}
+    }
 
     func reportViewPage() {
         onViewDidAppear()
@@ -56,45 +61,45 @@ class AnalyticsReporter {
 // MARK: - Private methods
 
 private extension AnalyticsReporter {
-    
+
     @objc
     func didEnterBackground() {
         Log.trace("View did enter background")
-        
+
         guard !analyticsTitle.isEmpty, !analyticsUrl.isEmpty else {
             Log.error(.failed("Title or Uri has not been set correctly"))
             fatalError("Title or Uri has not been set correctly")
         }
-        
+
         Task { [weak self] in
             guard let self else {
                 return
             }
-            
+
             do {
-                try await CXoneChat.shared.analytics.viewPageEnded(title: self.analyticsTitle, url: self.analyticsUrl)
+                try await self.chatProvider.analytics.viewPageEnded(title: self.analyticsTitle, url: self.analyticsUrl)
             } catch {
                 error.logError()
             }
         }
     }
-    
+
     @objc
     func onViewDidAppear() {
         Log.trace("View did appear")
-        
+
         guard !analyticsTitle.isEmpty, !analyticsUrl.isEmpty else {
             Log.error(.failed("Title or Uri has not been set correctly"))
             fatalError("Title or Uri has not been set correctly")
         }
-        
+
         Task { [weak self] in
             guard let self else {
                 return
             }
-            
+
             do {
-                try await CXoneChat.shared.analytics.viewPage(title: self.analyticsTitle, url: self.analyticsUrl)
+                try await self.chatProvider.analytics.viewPage(title: self.analyticsTitle, url: self.analyticsUrl)
             } catch {
                 error.logError()
             }

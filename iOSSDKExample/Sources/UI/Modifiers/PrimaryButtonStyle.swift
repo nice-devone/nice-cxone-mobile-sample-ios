@@ -38,7 +38,7 @@ struct PrimaryButtonStyle: ButtonStyle {
         configuration.label
             .adjustForA11y()
             .padding(.horizontal, Self.horizontalPadding)
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
             .background(configuration.isPressed ? Color.primaryButtonColor.opacity(Self.pressedOpacity) : Color.primaryButtonColor)
             .clipShape(RoundedRectangle(cornerRadius: Self.backgroundCornerRadius))
     }

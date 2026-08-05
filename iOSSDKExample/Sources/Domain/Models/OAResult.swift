@@ -15,9 +15,23 @@
 
 import Foundation
 
-/// details of a successful OAuth request
-struct OAResult {
+/// The credentials produced by a successful OAuth authentication, keyed by the flow that was used.
+///
+/// Each case carries exactly the values the SDK needs for that flow, so the call site knows which
+/// `CustomerProvider` setters to invoke without any optional unwrapping.
+enum OAResult {
 
-    /// challenge result code
-    let challengeResult: String
+    // MARK: - Cases
+
+    /// Implicit flow result — the app obtained a finished access token (JWT) and its expiry from the provider.
+    ///
+    /// Pass these to `customer.setConnectionToken(_:expiresAt:)` before `connection.connect()`.
+    case implicit(connectionToken: String, expiresAt: Date)
+
+    /// Explicit (PKCE) flow result — the app obtained an authorization code and the code verifier
+    /// used to generate the challenge; the CXone backend finishes the token exchange.
+    ///
+    /// Pass these to `customer.setAuthorizationCode(_:)` and `customer.setCodeVerifier(_:)` before
+    /// `connection.connect()`.
+    case explicit(authorizationCode: String, codeVerifier: String)
 }

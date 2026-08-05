@@ -16,15 +16,13 @@
 import UIKit
 import UserNotifications
 
+@MainActor
 public class RemoteNotificationsManager: NSObject {
     
     // MARK: - Properties
     
     public static let shared = RemoteNotificationsManager()
     
-    public var onRegistrationFinished: (() -> Void)?
-    
-    // periphery:ignore - false positive because it is used in a `registerIfNeeded` method that is also false positive
     private lazy var notificationCenter: UNUserNotificationCenter = .current()
     
     // MARK: - Init
@@ -37,47 +35,37 @@ public class RemoteNotificationsManager: NSObject {
     
     public func unregister() {
         Log.trace("Unregistering for remote notifications")
-        
-        Task { @MainActor in
-            UIApplication.shared.unregisterForRemoteNotifications()
-        }
+
+        UIApplication.shared.unregisterForRemoteNotifications()
     }
-    
-    // periphery:ignore - false positive because it is used only when running on a real device and not on a simulator
-    public func registerIfNeeded() {
+
+    public func registerIfNeeded() async throws {
         guard !UIApplication.shared.isRegisteredForRemoteNotifications else {
             Log.trace("Skip registering for remote notifications: already registered")
             return
         }
-        
+
         Log.trace("The app is not registered for remote notifications: attempt to register with a prompt for user permissions")
+
+        let settings = await notificationCenter.notificationSettings()
         
-        notificationCenter.getNotificationSettings { [weak self] settings in
-            if settings.authorizationStatus == .notDetermined {
-                self?.notificationCenter.requestAuthorization(options: [.alert, .badge, .sound]) { (success, error) in
-                    error?.logError()
-                    
-                    guard success else {
-                        Log.error("requestAuthorization failed")
-                        
-                        self?.onRegistrationFinished?()
-                        
-                        return
-                    }
-                    
-                    Task { @MainActor in
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
-                }
-            } else if settings.authorizationStatus == .denied {
-                Log.warning(.failed("Notification permission was previously denied, go to settings & privacy to re-enable"))
-                
-                self?.onRegistrationFinished?()
-            } else if settings.authorizationStatus == .authorized {
-                Task { @MainActor in
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
+        if settings.authorizationStatus == .notDetermined {
+            Log.trace("Notification permission was not determined, requesting")
+            
+            guard try await self.notificationCenter.requestAuthorization(options: [.alert, .badge, .sound]) else {
+                Log.error("requestAuthorization failed")
+                return
             }
+            
+            Log.trace("Notification permission was granted")
+            
+            UIApplication.shared.registerForRemoteNotifications()
+        } else if settings.authorizationStatus == .denied {
+            Log.warning(.failed("Notification permission was previously denied, go to settings & privacy to re-enable"))
+        } else if settings.authorizationStatus == .authorized {
+            Log.trace("Notification permission was previously granted")
+            
+            UIApplication.shared.registerForRemoteNotifications()
         }
     }
 }

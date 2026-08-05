@@ -13,21 +13,24 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
+import CXoneGuideUtility
 import Foundation
 
 enum OAuthenticatorsManager {
 
     // MARK: - Properties
 
-    static private(set) var authenticators = [OAuthenticator]()
+    private static let _authenticators = SafeAccessContainer<[OAuthenticator]>([])
 
     static var authenticator: OAuthenticator? {
-        authenticators.first
+        _authenticators.content.first
     }
 
     // MARK: - Methods
 
     static func register(authenticator: OAuthenticator) {
-        authenticators.append(authenticator)
+        _authenticators.mutate {
+            $0.append(authenticator)
+        }
     }
 }

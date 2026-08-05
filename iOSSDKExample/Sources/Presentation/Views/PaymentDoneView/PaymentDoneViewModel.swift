@@ -20,13 +20,13 @@ class PaymentDoneViewModel: AnalyticsReporter, ObservableObject {
     
     // MARK: - Properties
     
-    private let coordinator: StoreCoordinator
-    
+    private let router: AppRouter
+
     // MARK: - Init
-    
-    init(coordinator: StoreCoordinator) {
-        self.coordinator = coordinator
-        super.init(analyticsTitle: "confirmation", analyticsUrl: "/confirmation")
+
+    init(router: AppRouter, chatProvider: ChatProvider) {
+        self.router = router
+        super.init(chatProvider: chatProvider, analyticsTitle: "confirmation", analyticsUrl: "/confirmation")
     }
     
     // MARK: - Methods
@@ -34,6 +34,6 @@ class PaymentDoneViewModel: AnalyticsReporter, ObservableObject {
     func popToStore() {
         Log.trace("Navigating to the store")
         
-        coordinator.popTo(UIHostingController<StoreView>.self)
+        router.returnToStore()
     }
 }

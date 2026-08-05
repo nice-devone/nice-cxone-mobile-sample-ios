@@ -22,8 +22,6 @@ include:
     relativePaths: false
   - path: xcodegen/packages.yml
     relativePaths: false
-  - path: xcodegen/amazon.yml
-    relativePaths: false
   - local.yml
 
 options:
@@ -40,7 +38,7 @@ targetTemplates:
   Common:
     type: application
     platform: iOS
-    deploymentTarget: "15.0"
+    deploymentTarget: "16.0"
     settings:
       base:
         PRODUCT_NAME: iOSSDKExample
@@ -52,9 +50,7 @@ targetTemplates:
       - package: CXoneChatSDK
       - package: CXoneChatUI
       - package: CXoneGuideUtility
-      - package: PKCE
-      - package: Swinject
-      - package: SwinjectAutoregistration
+      - package: AppAuth
       - package: Firebase
         product: FirebaseCrashlytics
     postCompileScripts:
@@ -194,7 +190,7 @@ targetTemplates:
 
 targets:
   iOSSDKExample:
-    templates: [Common, Entitled, Info, Amazon]
+    templates: [Common, Entitled, Info]
 
 
 schemes:

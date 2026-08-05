@@ -16,8 +16,8 @@
 import CXoneChatSDK
 import Foundation
 
-enum DeeplinkOption {
-    
+enum DeeplinkOption: Hashable {
+
     /// `com.incontact.mobileSDK.sample://threads?threadIdOnExternalPlatform={threadIdOnExternalPlatform}`
     ///     or `com.nice.cxonechat.sample://{channelId}/threads?idOnExternalPlatform={threadIdOnExternalPlatform}`
     case thread(String)

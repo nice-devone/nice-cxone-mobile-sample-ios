@@ -15,22 +15,33 @@
 
 import CXoneChatSDK
 
-class GetChannelConfigurationUseCase {
+@MainActor
+final class GetChannelConfigurationUseCase {
+
+    // MARK: - Properties
+    
+    private let chatProvider: ChatProvider
+
+    init(chatProvider: ChatProvider) {
+        self.chatProvider = chatProvider
+    }
+
+    // MARK: - Methods
     
     func callAsFunction(configuration: Configuration) async throws -> ChannelConfiguration {
-        guard CXoneChat.shared.state == .initial else {
+        guard chatProvider.state == .initial else {
             // Chat has been prepared, return the current configuration
-            return CXoneChat.shared.connection.channelConfiguration
+            return chatProvider.connection.channelConfiguration
         }
-        
+
         if let environment = configuration.environment {
-            return try await CXoneChat.shared.connection.getChannelConfiguration(
+            return try await chatProvider.connection.getChannelConfiguration(
                 environment: environment,
                 brandId: configuration.brandId,
                 channelId: configuration.channelId
             )
         } else {
-            return try await CXoneChat.shared.connection.getChannelConfiguration(
+            return try await chatProvider.connection.getChannelConfiguration(
                 chatURL: configuration.chatUrl,
                 brandId: configuration.brandId,
                 channelId: configuration.channelId

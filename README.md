@@ -2,14 +2,14 @@
 
 # CXone Mobile SDK Sample App
 
-CXone Mobile SDK lets you integrate CXone into your enterprise iOS mobile phone application with operation system iOS 14 and later.
+CXone Mobile SDK lets you integrate CXone into your enterprise iOS mobile phone application with operating system iOS 16 and later.
 
 The following sample code will help configure and customize application Digital First Omnichannel chat integration experience.
 
 
 ## Requirements
 
-- iOS 15.0+
+- iOS 16.0+
 - Swift 5+
 
 

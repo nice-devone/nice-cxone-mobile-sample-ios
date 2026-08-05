@@ -17,6 +17,7 @@ import CXoneChatSDK
 import CXoneChatUI
 import SwiftUI
 
+@MainActor
 class StoreViewModel: AnalyticsReporter, ObservableObject {
     
     // MARK: - Properties
@@ -25,54 +26,46 @@ class StoreViewModel: AnalyticsReporter, ObservableObject {
     @Published var itemsInCart = 0
     @Published var isLoading = true
     @Published var error: Error?
-    
+
     private let getProducts: GetProductsUseCase
     private let getCart: GetCartUseCase
-    private let loginWithAmazon: LoginWithAmazonUseCase
-    private let signOutWithAmazon: SignOutWithAmazonUseCase
-    
-    private let coordinator: StoreCoordinator
-    
+
+    private let router: AppRouter
+    private let chatPresenter: ChatPresenter
+
     private var deeplinkOption: DeeplinkOption?
-    
+
     // MARK: - Init
-    
+
     init(
-        coordinator: StoreCoordinator,
+        router: AppRouter,
+        chatPresenter: ChatPresenter,
+        chatProvider: ChatProvider,
         deeplinkOption: DeeplinkOption?,
         getProducts: GetProductsUseCase,
-        getCart: GetCartUseCase,
-        loginWithAmazon: LoginWithAmazonUseCase,
-        signOutWithAmazon: SignOutWithAmazonUseCase
+        getCart: GetCartUseCase
     ) {
-        self.coordinator = coordinator
+        self.router = router
+        self.chatPresenter = chatPresenter
         self.deeplinkOption = deeplinkOption
         self.getProducts = getProducts
         self.getCart = getCart
-        self.loginWithAmazon = loginWithAmazon
-        self.signOutWithAmazon = signOutWithAmazon
-        super.init(analyticsTitle: "products?smartphones", analyticsUrl: "/products/smartphones")
+        super.init(chatProvider: chatProvider, analyticsTitle: "products?smartphones", analyticsUrl: "/products/smartphones")
     }
-    
+
     // MARK: - Methods
-    
+
     override func onAppear() {
         super.onAppear()
-        
+
         loadCart()
         loadProducts()
-        
-        if let deeplinkOption = AppDelegate.instance.deeplinkOption {
-            Log.trace("Opening chat from from cold start deeplink option: \(deeplinkOption)")
-            
-            AppDelegate.instance.deeplinkOption = nil
-            
-            openChat(with: deeplinkOption)
-        } else if let deeplinkOption {
-            Log.trace("Opening chat from from deeplink option: \(deeplinkOption)")
-            
+
+        if let deeplinkOption {
+            Log.trace("Opening chat from deeplink option: \(deeplinkOption)")
+
             self.deeplinkOption = nil
-            
+
             openChat(with: deeplinkOption)
         }
     }
@@ -84,68 +77,46 @@ extension StoreViewModel {
     
     func signOut() {
         Log.trace("Signing out")
-        
-        Task { @MainActor [weak self] in
-            do {
-                try await self?.signOutWithAmazon()
-            } catch {
-                error.logError()
-                
-                self?.error = CommonError.failed(L10n.Error.Generic.message)
-            }
-            
-            CXoneChat.signOut()
-            LocalStorageManager.reset()
-            FileManager.default.eraseDocumentsFolder()
-            RemoteNotificationsManager.shared.unregister()
-            
-            // Reconfigure Logger
-            Log.configure(isWriteToFileEnabled: true)
-            
-            self?.coordinator.popToConfiguration?()
+
+        Task {
+            // Drop the provider session, including the auth state persisted in the Keychain.
+            try? await OAuthenticatorsManager.authenticator?.signOut()
         }
+
+        chatProvider.customer.setTokenDelegateListener(nil)
+        chatProvider.signOut()
+        LocalStorageManager.reset()
+        FileManager.default.eraseDocumentsFolder()
+        RemoteNotificationsManager.shared.unregister()
+
+        // Reconfigure Logger
+        Log.configure(isWriteToFileEnabled: true)
+
+        router.showConfiguration()
     }
-    
+
     func showSettings() {
         Log.trace("Navigating to the settings view")
-        
-        coordinator.showSettings()
+
+        router.showSettings()
     }
-    
+
     func openChat(with deeplinkOption: DeeplinkOption? = nil) {
         Log.trace("Opening chat")
-        
-        coordinator.openChat(modally: LocalStorageManager.chatPresentationStyle != .fullScreen, deeplinkOption: deeplinkOption)
+
+        chatPresenter.open(deeplinkOption: deeplinkOption)
     }
-    
+
     func navigateToCart() {
         Log.trace("Navigating to the cart view")
-        
-        coordinator.showCart()
+
+        router.showCart()
     }
-    
+
     func navigateToProduct(_ product: ProductEntity) {
         Log.trace("Navigating to the product view")
-        
-        coordinator.showProductDetail(product)
-    }
-}
 
-// MARK: - ChatDelegate
-
-extension StoreViewModel: ChatDelegate {
-
-    @MainActor
-    func onConnectionTokenExpired() async {
-        LogManager.trace("Connection token expired, retrigger OAuth flow")
-        
-        do {
-            try await self.loginWithAmazon(force: true)
-        } catch {
-            error.logError()
-            
-            self.error = CommonError.failed(L10n.Error.Generic.message)
-        }
+        router.showProductDetail(product)
     }
 }
 

@@ -51,7 +51,7 @@ struct SettingsThemeColorView: View {
                 if viewModel.colorCode.isEmpty {
                     Text(L10n.Settings.Theme.NoColor.error)
                         .font(.caption2)
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                 }
             }
 
@@ -65,11 +65,11 @@ struct SettingsThemeColorView: View {
                 )
             )
         }
-        .onChange(of: isFocused) { isFocused in
+        .onValueChange(of: isFocused) { isFocused in
             guard !isFocused else {
                 return
             }
-            
+
             viewModel.onCodeChanged(viewModel.colorCode)
         }
     }
@@ -82,7 +82,7 @@ struct SettingsThemeColorView: View {
     @Previewable @State var backgroundColor = Color.red
     @Previewable @State var onBackgroundColor = Color.clear
     
-    NavigationView {
+    NavigationStack {
         List {
             SettingsThemeColorView(color: backgroundColor, title: "Background") { color, _ in
                 backgroundColor = color

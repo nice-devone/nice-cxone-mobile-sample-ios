@@ -56,7 +56,7 @@ struct ValidatedTextField: View {
             if let label {
                 Text(label)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
 
             VStack(alignment: .leading) {
@@ -71,11 +71,11 @@ struct ValidatedTextField: View {
                 if let error {
                     Text(error)
                         .font(.caption)
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                 } else if let hint {
                     Text(hint)
                         .font(.footnote)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
             }
         }

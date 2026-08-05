@@ -76,7 +76,7 @@ Dependencies/
 
 # xcodegen generated, don't record
 iOSSDKExample.xcodeproj/
-generated/
+/generated/
 local.yml
 
 # fastlane

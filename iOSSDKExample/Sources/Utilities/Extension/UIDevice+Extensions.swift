@@ -22,14 +22,14 @@ extension UIDevice {
             .compactMap { $0 as? UIWindowScene }
             .flatMap(\.windows)
             .first(where: \.isKeyWindow)
-        
+
         guard let safeAreaBottom = keyWindow?.safeAreaInsets.bottom else {
             return false
         }
-        
+
         return safeAreaBottom <= 0
     }
-    
+
     var isPreview: Bool {
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     }

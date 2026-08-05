@@ -13,6 +13,7 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
+import CXoneChatSDK
 import SwiftUI
 
 struct CartView: View {
@@ -48,37 +49,24 @@ struct CartView: View {
                 }
             }
         }
-        .edgesIgnoringSafeArea(.bottom)
+        .ignoresSafeArea(edges: .bottom)
         .onAppear(perform: viewModel.onAppear)
-        .navigationBarTitle(L10n.Cart.title)
+        .navigationTitle(L10n.Cart.title)
     }
 }
 
 // MARK: - Preview
 
-// swiftlint:disable force_unwrapping
-struct CartView_Previews: PreviewProvider {
-    
-    private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
-    private static var appModule = PreviewAppModule(coordinator: coordinator) {
-        didSet {
-            coordinator.assembler = appModule.assembler
-        }
-    }
-    
-    static var previews: some View {
-        Group {
-            NavigationView {
-                appModule.resolver.resolve(CartView.self)!
-            }
-            .previewDisplayName("Light Mode")
-            
-            NavigationView {
-                appModule.resolver.resolve(CartView.self)!
-            }
-            .preferredColorScheme(.dark)
-            .previewDisplayName("Dark Mode")
-        }
+#Preview {
+    let chatProvider = MockChatProvider()
+
+    NavigationStack {
+        CartView(viewModel: CartViewModel(
+            router: AppRouter(chatPresenter: ChatPresenter(chatProvider: chatProvider)),
+            getCart: GetCartUseCase(repository: MockCartRepositoryImpl()),
+            addProductToCart: AddProductToCartUseCase(repository: MockCartRepositoryImpl()),
+            removeProductFromCart: RemoveProductFromCartUseCase(repository: MockCartRepositoryImpl()),
+            chatProvider: chatProvider
+        ))
     }
 }
-// swiftlint:enable force_unwrapping
