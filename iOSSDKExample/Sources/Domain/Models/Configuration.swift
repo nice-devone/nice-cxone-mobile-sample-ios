@@ -116,6 +116,7 @@ extension Configuration: Codable {
         self.environmentName = try environmentContainer.decode(String.self, forKey: .name)
         self.socketUrl = try environmentContainer.decode(String.self, forKey: .socketUrl)
         self.loggerUrl = try environmentContainer.decode(String.self, forKey: .loggerUrl)
+        self.tokenUrl = try environmentContainer.decode(String.self, forKey: .tokenUrl)
         
         self.chatUrl = try environmentContainer
             .decode(String.self, forKey: .chatUrl)

@@ -21,7 +21,9 @@ struct SettingsView: View {
 
     @ObservedObject var viewModel: SettingsViewModel
 
-    @State private var showResetToDefaultConfirmation = false
+    @State private var showRemoveLogsAlert = false
+    @State private var showResetToDefaultAlert = false
+    @State private var logsPreviewUrl: URL?
     
     // MARK: - Builder
 
@@ -38,8 +40,12 @@ struct SettingsView: View {
             themeColorSectionView
         }
         .onDisappear(perform: viewModel.onDisappear)
-        .alert(isPresented: $viewModel.showInvalidColorError, title: L10n.Common.attention, message: L10n.Settings.Theme.NoColor.alertMessage)
-        .navigationBarTitle(L10n.Settings.title)
+        .alert(L10n.Common.attention, isPresented: $viewModel.showInvalidColorError) {
+            Button(L10n.Common.confirm)
+        } message: {
+            Text(L10n.Settings.Theme.NoColor.alertMessage)
+        }
+        .navigationTitle(L10n.Settings.title)
     }
 }
 
@@ -57,10 +63,55 @@ private extension SettingsView {
                 Text(viewModel.sdkVersion)
                     .fontWeight(.bold)
             }
-            
-            HStack(alignment: .bottom, spacing: 2) {
-                Text(L10n.Settings.Sdk.RestoreCustomerName.currentName)
+
+            if let configuration = LocalStorageManager.configuration {
+                let environment = configuration.environment?.rawValue ?? configuration.environmentName
                 
+                if configuration.title != environment {
+                    HStack {
+                        Text(L10n.Settings.Sdk.channelName)
+                        
+                        Spacer()
+
+                        Text(configuration.title)
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
+
+                HStack {
+                    Text(L10n.Settings.Sdk.environment)
+
+                    Spacer()
+                    
+                    Text(environment)
+                        .fontWeight(.bold)
+                }
+
+                HStack {
+                    Text(L10n.Settings.Sdk.brandId)
+                    
+                    Spacer()
+                    
+                    Text(configuration.brandId.description)
+                        .fontWeight(.bold)
+                }
+
+                HStack {
+                    Text(L10n.Settings.Sdk.channelId)
+                    
+                    Spacer()
+                    
+                    Text(configuration.channelId)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .fontWeight(.bold)
+                }
+            }
+
+            HStack(alignment: .bottom, spacing: 2) {
+                Text(L10n.Settings.Sdk.currentCustomer)
+
                 Spacer()
                 
                 Text(String(format: "%@ %@", viewModel.firstName ?? "", viewModel.lastName ?? ""))
@@ -84,7 +135,7 @@ private extension SettingsView {
                 Text(L10n.Settings.Ui.ChatPresentationStyle.optionModal).tag(ChatPresentationStyle.modal)
                 Text(L10n.Settings.Ui.ChatPresentationStyle.optionFullscreen).tag(ChatPresentationStyle.fullScreen)
             }
-            .onChange(of: viewModel.chatPresentationStyle, perform: viewModel.chatPresentationStyleChanged)
+            .onValueChange(of: viewModel.chatPresentationStyle, perform: viewModel.chatPresentationStyleChanged)
             
             Group {
                 additionalContactCustomFields
@@ -189,29 +240,35 @@ private extension SettingsView {
     }
 
     var logsSectionView: some View {
-        Section(header: Text(L10n.Settings.Logs.title)) {
+        let logUrl = Log.logFileUrl
+
+        return Section(header: Text(L10n.Settings.Logs.title)) {
             HStack {
-                Text(L10n.Settings.Logs.Share.label)
+                Text(L10n.Settings.Logs.Open.label)
 
                 Spacer()
 
-                Button(L10n.Settings.Logs.Share.button) {
-                    viewModel.shouldShareLogs.toggle()
+                Button(L10n.Settings.Logs.Open.button) {
+                    logsPreviewUrl = logUrl
                 }
-                .sheet(isPresented: $viewModel.shouldShareLogs) {
-                    SettingsShareLogsDialogView()
-                }
+                .quickLookPreview($logsPreviewUrl)
+                .disabled(logUrl == nil)
             }
+
             HStack {
                 Text(L10n.Settings.Logs.Remove.label)
 
                 Spacer()
 
                 Button(L10n.Settings.Logs.Remove.button) {
-                    viewModel.showRemoveLogsAlert = true
+                    showRemoveLogsAlert = true
                 }
-                .alert(isPresented: $viewModel.showRemoveLogsAlert) {
-                    Alert(title: Text(L10n.Settings.Logs.Remove.label), message: Text(viewModel.removeLogs()))
+                .alert(L10n.Settings.Logs.Remove.label, isPresented: $showRemoveLogsAlert) {
+                    Button(L10n.Common.confirm, role: .destructive, action: viewModel.removeLogs)
+
+                    Button(L10n.Common.cancel, role: .cancel)
+                } message: {
+                    Text(L10n.Settings.Logs.Remove.message)
                 }
             }
         }
@@ -235,7 +292,7 @@ private extension SettingsView {
                 Spacer()
                 
                 Button(L10n.Settings.Theme.ResetToDefault.title) {
-                    showResetToDefaultConfirmation = true
+                    showResetToDefaultAlert = true
                 }
                 .truncationMode(.middle)
             }
@@ -243,13 +300,12 @@ private extension SettingsView {
             Text(L10n.Settings.Theme.info)
                 .font(.footnote)
         }
-        .alert(isPresented: $showResetToDefaultConfirmation) {
-            Alert(
-                title: Text(L10n.Settings.Theme.Alert.ResetToDefault.title),
-                message: Text(L10n.Settings.Theme.Alert.ResetToDefault.text),
-                primaryButton: .default(Text(L10n.Common.confirm), action: viewModel.resetThemeToDefault),
-                secondaryButton: .cancel()
-            )
+        .alert(L10n.Settings.Theme.Alert.ResetToDefault.title, isPresented: $showResetToDefaultAlert) {
+            Button(L10n.Common.confirm, action: viewModel.resetThemeToDefault)
+            
+            Button(L10n.Common.cancel, role: .cancel)
+        } message: {
+            Text(L10n.Settings.Theme.Alert.ResetToDefault.text)
         }
     }
     
@@ -500,7 +556,7 @@ private extension SettingsView {
 // MARK: - Preview
 
 #Preview {
-    NavigationView {
+    NavigationStack {
         SettingsView(viewModel: SettingsViewModel { })
     }
 }

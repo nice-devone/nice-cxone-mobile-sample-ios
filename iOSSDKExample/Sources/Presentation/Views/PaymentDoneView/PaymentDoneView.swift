@@ -13,6 +13,7 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
+import CXoneChatSDK
 import SwiftUI
 
 struct PaymentDoneView: View {
@@ -28,7 +29,7 @@ struct PaymentDoneView: View {
             Asset.Images.Common.success
                 .resizable()
                 .frame(width: 100, height: 100)
-                .foregroundColor(.green)
+                .foregroundStyle(.green)
                 .padding(.bottom, 24)
             
             Text(L10n.PurchaseDone.message)
@@ -50,25 +51,8 @@ struct PaymentDoneView: View {
 
 // MARK: - Preview
 
-struct PaymentDoneView_Previews: PreviewProvider {
-    
-    private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
-    private static var appModule = PreviewAppModule(coordinator: coordinator) {
-        didSet {
-            coordinator.assembler = appModule.assembler
-        }
-    }
-    
-    static var previews: some View {
-        Group {
-            // swiftlint:disable force_unwrapping
-            appModule.resolver.resolve(PaymentDoneView.self)!
-                .previewDisplayName("Light Mode")
-            
-            appModule.resolver.resolve(PaymentDoneView.self)!
-                .preferredColorScheme(.dark)
-                .previewDisplayName("Dark Mode")
-            // swiftlint:enable force_unwrapping
-        }
-    }
+#Preview {
+    let chatProvider = MockChatProvider()
+
+    PaymentDoneView(viewModel: PaymentDoneViewModel(router: AppRouter(chatPresenter: ChatPresenter(chatProvider: chatProvider)), chatProvider: chatProvider))
 }

@@ -15,7 +15,7 @@
 
 import Foundation
 
-class GetProductsUseCase {
+final class GetProductsUseCase: Sendable {
     
     // MARK: - Properties
     

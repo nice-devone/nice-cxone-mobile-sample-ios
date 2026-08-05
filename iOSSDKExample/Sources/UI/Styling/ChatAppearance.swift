@@ -19,6 +19,7 @@ import SwiftUI
 enum ChatAppearance {
     private typealias Theme = Asset.Colors.ChatDefaultTheme
     
+    @MainActor
     enum Background {
         static var `default`: Color {
             .themedColor(
@@ -34,6 +35,7 @@ enum ChatAppearance {
             )
         }
         
+        @MainActor
         enum Surface {
             static var `default`: Color {
                 .themedColor(
@@ -68,6 +70,7 @@ enum ChatAppearance {
         }
     }
     
+    @MainActor
     enum Content {
         static var primary: Color {
             .themedColor(
@@ -95,6 +98,7 @@ enum ChatAppearance {
         }
     }
     
+    @MainActor
     enum Brand {
         static var primary: Color {
             .themedColor(
@@ -146,6 +150,7 @@ enum ChatAppearance {
         }
     }
     
+    @MainActor
     enum Border {
         static var `default`: Color {
             .themedColor(
@@ -161,6 +166,7 @@ enum ChatAppearance {
         }
     }
     
+    @MainActor
     enum Status {
         static var success: Color {
             .themedColor(
@@ -241,6 +247,7 @@ enum ChatAppearance {
 
 extension ChatAppearance {
     
+    @MainActor
     static func getChatStyle() -> ChatStyle {
         let lightModeColors = StyleColorsImpl(
             background: BackgroundStyleColorsImpl.lightColors,

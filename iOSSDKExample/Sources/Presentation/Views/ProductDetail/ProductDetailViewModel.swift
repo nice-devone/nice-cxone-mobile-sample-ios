@@ -15,7 +15,6 @@
 
 import CXoneChatSDK
 import SwiftUI
-import Swinject
 
 class ProductDetailViewModel: AnalyticsReporter, ObservableObject {
     
@@ -26,20 +25,20 @@ class ProductDetailViewModel: AnalyticsReporter, ObservableObject {
     
     // MARK: - Properties
     
-    private let coordinator: StoreCoordinator
-    
+    private let router: AppRouter
+
     @Published var product: ProductEntity
     @Published var productQuantityInCart = 0
     @Published var itemsInCart = 0
-    
+
     // MARK: - Init
-    
-    init(coordinator: StoreCoordinator, product: ProductEntity, getCart: GetCartUseCase, addProductToCart: AddProductToCartUseCase) {
-        self.coordinator = coordinator
+
+    init(router: AppRouter, chatProvider: ChatProvider, product: ProductEntity, getCart: GetCartUseCase, addProductToCart: AddProductToCartUseCase) {
+        self.router = router
         self.product = product
         self.getCart = getCart
         self.addProductToCart = addProductToCart
-        super.init(analyticsTitle: "product?\(product.id)", analyticsUrl: "/product/\(product.id)")
+        super.init(chatProvider: chatProvider, analyticsTitle: "product?\(product.id)", analyticsUrl: "/product/\(product.id)")
     }
     
     // MARK: - Methods
@@ -53,7 +52,7 @@ class ProductDetailViewModel: AnalyticsReporter, ObservableObject {
     func navigateToCart() {
         Log.trace("Navigating to the cart view")
         
-        coordinator.showCart()
+        router.showCart()
     }
     
     func addToCart() {

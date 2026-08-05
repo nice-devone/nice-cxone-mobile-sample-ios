@@ -13,6 +13,7 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
+import CXoneChatSDK
 import SwiftUI
 
 struct ProductDetailView: View {
@@ -31,7 +32,7 @@ struct ProductDetailView: View {
                 HStack {
                     Text(viewModel.product.brand)
                         .fontWeight(.bold)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                     
                     Spacer()
                     
@@ -73,10 +74,14 @@ struct ProductDetailView: View {
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .padding(.top, -24)
             .shadow(color: .black.opacity(0.1), radius: 4, y: -4)
-            .edgesIgnoringSafeArea(.bottom)
+            .ignoresSafeArea(edges: .bottom)
         }
         .onAppear(perform: viewModel.onAppear)
-        .navigationBarItems(trailing: cartNavigationButton)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                cartNavigationButton
+            }
+        }
     }
 }
 
@@ -88,11 +93,11 @@ private extension ProductDetailView {
     var scrollableDescriptionView: some View {
         Text(L10n.ProductDetail.description)
             .fontWeight(.bold)
-            .foregroundColor(.gray)
+            .foregroundStyle(.gray)
             .padding(.top, 14)
         
         ZStack(alignment: .bottom) {
-            let textHeight = viewModel.product.description.height(withConstrainedWidth: UIScreen.main.bounds.width, font: .body)
+            let textHeight = viewModel.product.description.height(withConstrainedWidth: UIScreen.currentBounds.width, font: .body)
             
             ScrollView(
                 textHeight > 100 ? .vertical : [],
@@ -136,7 +141,7 @@ private extension ProductDetailView {
                 Text(viewModel.productQuantityInCart.description)
                     .fontWeight(.bold)
                     .padding(12)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .background(
                         Circle()
                             .fill(Color.accentColor)
@@ -155,64 +160,30 @@ private extension ProductDetailView {
 // MARK: - Preview
 
 // swiftlint:disable force_unwrapping
-struct ProductDetailView_Previews: PreviewProvider {
-    
-    private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
-    private static var appModule = PreviewAppModule(coordinator: coordinator) {
-        didSet {
-            coordinator.assembler = appModule.assembler
-        }
-    }
-    
-    static var previews: some View {
-        Group {
-            NavigationView {
-                ProductDetailView(
-                    viewModel: ProductDetailViewModel(
-                        coordinator: coordinator.storeCoordinator,
-                        product: ProductEntity(
-                            id: 1,
-                            title: "iPhone 9",
-                            description: "An apple mobile which is nothing like apple",
-                            price: 549,
-                            rating: 4.56,
-                            brand: "Apple",
-                            thumbnailUrl: URL(string: "https://i.dummyjson.com/data/products/1/thumbnail.jpg")!,
-                            imagesUrls: [
-                                URL(string: "https://i.dummyjson.com/data/products/1/1.jpg")!
-                            ]
-                        ),
-                        getCart: appModule.resolver.resolve(GetCartUseCase.self)!,
-                        addProductToCart: appModule.resolver.resolve(AddProductToCartUseCase.self)!
-                    )
-                )
-            }
-            .previewDisplayName("Light Mode")
-            
-            NavigationView {
-                ProductDetailView(
-                    viewModel: ProductDetailViewModel(
-                        coordinator: coordinator.storeCoordinator,
-                        product: ProductEntity(
-                            id: 1,
-                            title: "iPhone 9",
-                            description: "An apple mobile which is nothing like apple",
-                            price: 549,
-                            rating: 4.56,
-                            brand: "Apple",
-                            thumbnailUrl: URL(string: "https://i.dummyjson.com/data/products/1/thumbnail.jpg")!,
-                            imagesUrls: [
-                                URL(string: "https://i.dummyjson.com/data/products/1/1.jpg")!
-                            ]
-                        ),
-                        getCart: appModule.resolver.resolve(GetCartUseCase.self)!,
-                        addProductToCart: appModule.resolver.resolve(AddProductToCartUseCase.self)!
-                    )
-                )
-            }
-            .preferredColorScheme(.dark)
-            .previewDisplayName("Dark Mode")
-        }
+#Preview {
+    let chatProvider = MockChatProvider()
+
+    NavigationStack {
+        ProductDetailView(
+            viewModel: ProductDetailViewModel(
+                router: AppRouter(chatPresenter: ChatPresenter(chatProvider: chatProvider)),
+                chatProvider: chatProvider,
+                product: ProductEntity(
+                    id: 1,
+                    title: "iPhone 9",
+                    description: "An apple mobile which is nothing like apple",
+                    price: 549,
+                    rating: 4.56,
+                    brand: "Apple",
+                    thumbnailUrl: URL(string: "https://i.dummyjson.com/data/products/1/thumbnail.jpg")!,
+                    imagesUrls: [
+                        URL(string: "https://i.dummyjson.com/data/products/1/1.jpg")!
+                    ]
+                ),
+                getCart: GetCartUseCase(repository: MockCartRepositoryImpl()),
+                addProductToCart: AddProductToCartUseCase(repository: MockCartRepositoryImpl())
+            )
+        )
     }
 }
 // swiftlint:enable force_unwrapping

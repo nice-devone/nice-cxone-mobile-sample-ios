@@ -15,7 +15,6 @@
 
 import CXoneChatSDK
 import SwiftUI
-import Swinject
 
 class PaymentViewModel: AnalyticsReporter, ObservableObject {
     
@@ -24,8 +23,8 @@ class PaymentViewModel: AnalyticsReporter, ObservableObject {
     private let getCart: GetCartUseCase
     private let checkoutCart: CheckoutCartUseCase
     
-    private let coordinator: StoreCoordinator
-    
+    private let router: AppRouter
+
     @Published var isLoading = false
 
     var validUntil: String {
@@ -46,11 +45,11 @@ class PaymentViewModel: AnalyticsReporter, ObservableObject {
     
     // MARK: - Init
     
-    init(coordinator: StoreCoordinator, getCart: GetCartUseCase, checkoutCart: CheckoutCartUseCase) {
-        self.coordinator = coordinator
+    init(router: AppRouter, chatProvider: ChatProvider, getCart: GetCartUseCase, checkoutCart: CheckoutCartUseCase) {
+        self.router = router
         self.getCart = getCart
         self.checkoutCart = checkoutCart
-        super.init(analyticsTitle: "payment", analyticsUrl: "/payment")
+        super.init(chatProvider: chatProvider, analyticsTitle: "payment", analyticsUrl: "/payment")
     }
     
     // MARK: - Methods
@@ -71,7 +70,7 @@ class PaymentViewModel: AnalyticsReporter, ObservableObject {
             }
             
             do {
-                try await CXoneChat.shared.analytics.conversion(type: "purchase", value: self.totalAmount)
+                try await self.chatProvider.analytics.conversion(type: "purchase", value: self.totalAmount)
             } catch {
                 error.logError()
             }
@@ -79,6 +78,6 @@ class PaymentViewModel: AnalyticsReporter, ObservableObject {
         
         Log.trace("Navigating to payment done view")
         
-        coordinator.showPaymentDone()
+        router.showPaymentDone()
     }
 }

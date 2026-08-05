@@ -25,7 +25,7 @@ enum LocalStorageKey {
     case chatPresentationStyle
     case additionalCustomerCustomFields
     case additionalContactCustomFields
-    case oAuthEntity
+    case oAuthFlow
     case chatLightTheme(Theme)
     case chatDarkTheme(Theme)
     
@@ -146,8 +146,8 @@ enum LocalStorageKey {
             "additionalCustomerCustomFields"
         case .additionalContactCustomFields:
             "additionalContactCustomFields"
-        case .oAuthEntity:
-            "oAuthEntity"
+        case .oAuthFlow:
+            "oAuthFlow"
         case .chatLightTheme(let theme):
             "chatLightTheme.\(theme.rawValue)"
         case .chatDarkTheme(let theme):
@@ -161,7 +161,7 @@ enum LocalStorageKey {
 extension LocalStorageKey: CaseIterable {
     
     static var allCases: [LocalStorageKey] {
-        [.configuration, .firstName, .lastName, .chatPresentationStyle, .additionalCustomerCustomFields, .additionalContactCustomFields, .oAuthEntity]
+        [.configuration, .firstName, .lastName, .chatPresentationStyle, .additionalCustomerCustomFields, .additionalContactCustomFields, .oAuthFlow]
             + Theme.allCases.map { .chatLightTheme($0) }
             + Theme.allCases.map { .chatDarkTheme($0) }
     }

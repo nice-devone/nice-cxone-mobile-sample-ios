@@ -15,9 +15,7 @@
 
 import SwiftUI
 
-class ProductEntity: Identifiable, Decodable {
-    
-    // MARK: - Properties
+struct ProductEntity: Identifiable, Sendable {
     
     let id: Int
     
@@ -34,21 +32,11 @@ class ProductEntity: Identifiable, Decodable {
     let thumbnailUrl: URL
     
     let imagesUrls: [URL]
-    
-    // MARK: - Init
-    
-    init(id: Int, title: String, description: String, price: Double, rating: Double, brand: String, thumbnailUrl: URL, imagesUrls: [URL]) {
-        self.id = id
-        self.title = title
-        self.description = description
-        self.price = price
-        self.rating = rating
-        self.brand = brand
-        self.thumbnailUrl = thumbnailUrl
-        self.imagesUrls = imagesUrls
-    }
-    
-    // MARK: - Decodable
+}
+
+// MARK: - Decodable
+
+extension ProductEntity: Decodable {
     
     enum CodingKeys: CodingKey {
         case id
@@ -61,7 +49,7 @@ class ProductEntity: Identifiable, Decodable {
         case images
     }
     
-    required init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.id = try container.decode(Int.self, forKey: .id)
@@ -75,11 +63,15 @@ class ProductEntity: Identifiable, Decodable {
     }
 }
 
-// MARK: - Equatable
-    
-extension ProductEntity: Equatable {
-    
+// MARK: - Hashable
+
+extension ProductEntity: Hashable {
+
     static func == (lhs: ProductEntity, rhs: ProductEntity) -> Bool {
         lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }

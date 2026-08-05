@@ -13,6 +13,7 @@
 // FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 //
 
+import CXoneChatSDK
 import SwiftUI
 
 struct PaymentView: View {
@@ -28,7 +29,7 @@ struct PaymentView: View {
             VStack(alignment: .leading) {
                 Text(L10n.Payment.cardNumberTitle)
                     .font(.headline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .padding(.top, 24)
                 
                 HStack(spacing: 16) {
@@ -39,7 +40,7 @@ struct PaymentView: View {
                     
                     Text("**** **** **** 4759")
                         .fontWeight(.bold)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                     
                     Spacer()
                 }
@@ -49,22 +50,22 @@ struct PaymentView: View {
                     VStack(alignment: .leading) {
                         Text(L10n.Payment.validUntilTitle)
                             .font(.headline)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         
                         Text(viewModel.validUntil)
                             .fontWeight(.bold)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .grayRoundedRectangleWithPadding(vertical: 10, horizontal: 0)
                     }
                     
                     VStack(alignment: .leading) {
                         Text(L10n.Payment.ccvTitle)
                             .font(.headline)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         
                         Text("***")
                             .fontWeight(.bold)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .grayRoundedRectangleWithPadding(vertical: 10, horizontal: 0)
                     }
                 }
@@ -72,11 +73,11 @@ struct PaymentView: View {
                 VStack(alignment: .leading) {
                     Text(L10n.Payment.cardHolderNameTitle)
                         .font(.headline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                     
                     Text("John Doe")
                         .fontWeight(.bold)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .grayRoundedRectangleWithPadding(vertical: 10, horizontal: 0)
                 }
                 
@@ -88,7 +89,7 @@ struct PaymentView: View {
                     Text(L10n.Payment.totalAmountTitle)
                         .font(.headline)
                         .fontWeight(.bold)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                     
                     HStack(alignment: .top, spacing: 2) {
                         Text("$")
@@ -118,7 +119,7 @@ struct PaymentView: View {
         }
         .transition(.opacity)
         .onAppear(perform: viewModel.onAppear)
-        .navigationBarTitle(viewModel.isLoading ? "" : L10n.Payment.title)
+        .navigationTitle(viewModel.isLoading ? "" : L10n.Payment.title)
     }
 }
 
@@ -140,29 +141,15 @@ private extension View {
 
 // MARK: - Preview
 
-struct PaymentView_Previews: PreviewProvider {
-    
-    private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
-    private static var appModule = PreviewAppModule(coordinator: coordinator) {
-        didSet {
-            coordinator.assembler = appModule.assembler
-        }
-    }
-    
-    static var previews: some View {
-        // swiftlint:disable force_unwrapping
-        Group {
-            NavigationView {
-                appModule.resolver.resolve(PaymentView.self)!
-            }
-            .previewDisplayName("Light Mode")
-            
-            NavigationView {
-                appModule.resolver.resolve(PaymentView.self)!
-            }
-            .preferredColorScheme(.dark)
-            .previewDisplayName("Dark Mode")
-        }
-        // swiftlint:enable force_unwrapping
+#Preview {
+    let chatProvider = MockChatProvider()
+
+    NavigationStack {
+        PaymentView(viewModel: PaymentViewModel(
+            router: AppRouter(chatPresenter: ChatPresenter(chatProvider: chatProvider)),
+            chatProvider: chatProvider,
+            getCart: GetCartUseCase(repository: MockCartRepositoryImpl()),
+            checkoutCart: CheckoutCartUseCase(repository: MockCartRepositoryImpl())
+        ))
     }
 }

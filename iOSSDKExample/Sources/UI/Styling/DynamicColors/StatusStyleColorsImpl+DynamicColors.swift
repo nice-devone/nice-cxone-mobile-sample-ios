@@ -18,6 +18,7 @@ import CXoneChatUI
 extension StatusStyleColorsImpl {
     private typealias Theme = Asset.Colors.ChatDefaultTheme
     
+    @MainActor
     static var lightColors: StatusStyleColorsImpl {
         StatusStyleColorsImpl(
             success: LocalStorageManager.statusSuccessLightColor ?? Theme.Status.successLight.swiftUIColor,
@@ -35,6 +36,7 @@ extension StatusStyleColorsImpl {
         )
     }
     
+    @MainActor
     static var darkColors: StatusStyleColorsImpl {
         StatusStyleColorsImpl(
             success: LocalStorageManager.statusSuccessDarkColor ?? Theme.Status.successDark.swiftUIColor,

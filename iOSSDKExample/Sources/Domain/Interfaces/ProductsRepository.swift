@@ -15,7 +15,7 @@
 
 import Foundation
 
-protocol ProductsRepository {
+protocol ProductsRepository: Sendable {
     
     func get() async throws -> [ProductEntity]
 }

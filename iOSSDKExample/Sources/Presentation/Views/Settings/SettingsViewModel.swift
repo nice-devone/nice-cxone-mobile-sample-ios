@@ -18,6 +18,7 @@ import CXoneChatUI
 import SwiftUI
 import UIKit
 
+@MainActor
 class SettingsViewModel: ObservableObject {
     private typealias Theme = Asset.Colors.ChatDefaultTheme
     
@@ -25,8 +26,6 @@ class SettingsViewModel: ObservableObject {
     
     @Published var firstName = LocalStorageManager.firstName
     @Published var lastName = LocalStorageManager.lastName
-    @Published var shouldShareLogs = false
-    @Published var showRemoveLogsAlert = false
     @Published var showInvalidColorError = false
     @Published var chatPresentationStyle = LocalStorageManager.chatPresentationStyle ?? .modal
     @Published var isAdditionalContactFieldVisible = false
@@ -59,20 +58,15 @@ class SettingsViewModel: ObservableObject {
         
         if colorDidChange {
             onColorChanged()
+            colorDidChange = false
         }
     }
-    
-    func removeLogs() -> String {
+
+    func removeLogs() {
         Log.trace("Removing application logs")
-        
-        do {
-            try Log.removeLogs()
-            
-            return L10n.Settings.Logs.Remove.Message.success
-        } catch {
-            error.logError()
-            
-            return L10n.Settings.Logs.Remove.Message.failure
+
+        Task.detached {
+            Log.removeLogs()
         }
     }
     

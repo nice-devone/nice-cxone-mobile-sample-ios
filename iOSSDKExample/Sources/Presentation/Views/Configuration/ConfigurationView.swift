@@ -15,9 +15,8 @@
 
 import CXoneChatSDK
 import SwiftUI
-import Swinject
 
-struct ConfigurationView: View, Alertable {
+struct ConfigurationView: View {
 
     // MARK: - Properties
 
@@ -58,8 +57,8 @@ struct ConfigurationView: View, Alertable {
         .background(Color.backgroundColor)
         .padding(.horizontal, 24)
         .onAppear(perform: viewModel.onAppear)
-        .alert(item: $viewModel.alertType, content: alertContent)
-        .navigationBarTitle(L10n.Configuration.title)
+        .alertable(isPresented: viewModel.showAlert, presenting: viewModel.alertType)
+        .navigationTitle(L10n.Configuration.title)
         .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -162,34 +161,17 @@ private extension ConfigurationView {
             hint: L10n.Configuration.UserDetails.customerIdDescription
         )
         .font(.footnote)
+        .padding(.top, 10)
     }
 }
 
 // MARK: - Preview
 
-// swiftlint:disable force_unwrapping
-struct ConfigurationView_Previews: PreviewProvider {
+#Preview {
+    let chatProvider = MockChatProvider()
+    let chatPresenter = ChatPresenter(chatProvider: chatProvider)
 
-    private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
-    private static var appModule = PreviewAppModule(coordinator: coordinator) {
-        didSet {
-            coordinator.assembler = appModule.assembler
-        }
-    }
-
-    static var previews: some View {
-        Group {
-            NavigationView {
-                appModule.resolver.resolve(ConfigurationView.self)!
-            }
-            .previewDisplayName("Light Mode")
-
-            NavigationView {
-                appModule.resolver.resolve(ConfigurationView.self)!
-            }
-            .preferredColorScheme(.dark)
-            .previewDisplayName("Dark Mode")
-        }
+    NavigationStack {
+        ConfigurationView(viewModel: ConfigurationViewModel(router: AppRouter(chatPresenter: chatPresenter), chatProvider: chatProvider))
     }
 }
-// swiftlint:enable force_unwrapping

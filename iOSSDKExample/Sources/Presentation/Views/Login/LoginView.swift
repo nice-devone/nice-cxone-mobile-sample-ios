@@ -16,7 +16,7 @@
 import CXoneChatSDK
 import SwiftUI
 
-struct LoginView: View, Alertable {
+struct LoginView: View {
     
     // MARK: - Properties
     
@@ -29,8 +29,11 @@ struct LoginView: View, Alertable {
             content
         }
         .onAppear(perform: viewModel.onAppear)
-        .alert(item: $viewModel.alertType, content: alertContent)
-        .navigationBarTitle(L10n.Login.title)
+        .alertable(isPresented: viewModel.showAlert, presenting: viewModel.alertType)
+        .sheet(isPresented: $viewModel.isFlowSelectionPresented) {
+            OAuthFlowSelectionView(onConfirm: viewModel.signInWithGoogle)
+        }
+        .navigationTitle(L10n.Login.title)
         .navigationBarBackButtonHidden()
         .if(!viewModel.isLoading) { view in
             view.toolbar {
@@ -56,29 +59,30 @@ private extension LoginView {
     
     var content: some View {
         VStack(alignment: .center, spacing: 16) {
-            VStack(spacing: 4) {
+            if viewModel.isOAuthEnabled {
                 Text(L10n.Login.Oauth.availableProvidersTitle)
                     .fontWeight(.bold)
                     .font(.headline)
-                    .foregroundColor(Color(.systemGray))
+                    .foregroundStyle(Color(.systemGray))
                 
-                if !viewModel.isOAuthEnabled {
-                    Text(L10n.Login.Oauth.Disabled.description)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
+                Button(action: viewModel.onGoogleLoginTapped) {
+                    HStack {
+                        Asset.Images.logoGoogleG
+                            .swiftUIImage
+                            .accessibilityHidden(true)
+
+                        Text(L10n.Login.Oauth.buttonTitle)
+                    }
                 }
-            }
-            
-            Button(action: viewModel.invokeLoginWithAmazon) {
-                Asset.Images.OAuth.loginWithAmazon.swiftUIImage
-                    .opacity(viewModel.isOAuthEnabled ? 1 : 0.3)
-            }
-            .disabled(!viewModel.isOAuthEnabled)
-            
-            guestLoginDivider
-            
-            VStack {
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+                .adjustForA11y()
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.black)
+                )
+            } else {
                 ValidatedTextField(
                     L10n.Login.Guest.UserDetails.firstNamePlaceholder,
                     text: $viewModel.firstName,
@@ -90,77 +94,38 @@ private extension LoginView {
                     text: $viewModel.lastName,
                     label: L10n.Login.Guest.UserDetails.lastName
                 )
-            }
-            .padding(.horizontal, 12)
-            
-            Button(action: viewModel.onGuestLoginTapped) {
-                Text(L10n.Login.Guest.buttonTitle)
+                
+                Button(L10n.Login.Guest.buttonTitle, action: viewModel.onGuestLoginTapped)
                     .fontWeight(.bold)
-                    .frame(maxWidth: 210)
+                    .foregroundStyle(.white)
                     .adjustForA11y()
-                    .foregroundColor(.white)
-                    .background(Color.primaryButtonColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.primaryButtonColor)
+                    )
             }
         }
         .padding(.horizontal, 20)
-    }
-    
-    var guestLoginDivider: some View {
-        HStack {
-            VStack {
-                Divider()
-                    .background(Color(.systemGray2))
-            }
-            
-            Text(L10n.Login.Guest.dividerTitle)
-                .font(.headline)
-                .foregroundColor(Color(.systemGray2))
-            
-            VStack {
-                Divider()
-                    .background(Color(.systemGray2))
-            }
-        }
     }
 }
 
 // MARK: - Preview
 
-struct LoginView_Previews: PreviewProvider {
-    
-    private static let coordinator = LoginCoordinator(navigationController: UINavigationController())
-    private static var appModule = PreviewAppModule(coordinator: coordinator) {
-        didSet {
-            coordinator.assembler = appModule.assembler
-        }
-    }
-    // swiftlint:disable force_unwrapping
-    private static let viewModel = LoginViewModel(
-        coordinator: coordinator,
-        configuration: Configuration(
-            brandId: 1386,
-            channelId: "chat_51eafb4e-8829-4efe-b58c-3bc9febf18c4",
-            environment: .NA1
-        ),
-        deeplinkOption: nil,
-        loginWithAmazon: appModule.resolver.resolve(LoginWithAmazonUseCase.self)!,
-        getChannelConfiguration: appModule.resolver.resolve(GetChannelConfigurationUseCase.self)!
-    )
-    // swiftlint:enable force_unwrapping
-    
-    static var previews: some View {
-        Group {
-            NavigationView {
-                LoginView(viewModel: viewModel)
-            }
-            .previewDisplayName("Light Mode")
-            
-            NavigationView {
-                LoginView(viewModel: viewModel)
-            }
-            .preferredColorScheme(.dark)
-            .previewDisplayName("Dark Mode")
-        }
+#Preview {
+    let chatProvider = MockChatProvider()
+
+    NavigationStack {
+        LoginView(viewModel: LoginViewModel(
+            router: AppRouter(chatPresenter: ChatPresenter(chatProvider: chatProvider)),
+            chatProvider: chatProvider,
+            configuration: Configuration(
+                brandId: 1386,
+                channelId: "chat_51eafb4e-8829-4efe-b58c-3bc9febf18c4",
+                environment: .NA1
+            ),
+            getChannelConfiguration: GetChannelConfigurationUseCase(chatProvider: chatProvider),
+            googleSignIn: PreviewGoogleSignInUseCase(chatProvider: chatProvider)
+        ))
     }
 }

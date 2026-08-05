@@ -15,48 +15,57 @@
 
 import Foundation
 
-class ProductsRepositoryImpl: ProductsRepository {
-    
+// Actor + single-flight Task: concurrent callers share the in-flight fetch
+// instead of each launching an independent request and overwriting the cache.
+actor ProductsRepositoryImpl: ProductsRepository {
+
     // MARK: - Properties
-    
+
     private let session: URLSession
     private let baseUrl: URL
-    
-    private var products = [ProductEntity]()
-    
+    private var fetchTask: Task<[ProductEntity], Error>?
+
     // MARK: - Init
-    
+
     init?(session: URLSession) {
         guard let url = URL(string: "https://dummyjson.com/products") else {
             return nil
         }
-        
+
         self.baseUrl = url
         self.session = session
     }
-    
+
     // MARK: - Methods
-    
+
     func get() async throws -> [ProductEntity] {
-        guard products.isEmpty else {
-            return products
+        if let fetchTask {
+            return try await fetchTask.value
         }
-        
-        let (data, _) = try await session.data(from: baseUrl.appendingPathComponent("category/smartphones"))
-        products = try JSONDecoder().decode(ProductResponseDTO.self, from: data).products
-        
-        return products
+
+        let task = Task {
+            let (data, _) = try await session.data(from: baseUrl.appendingPathComponent("category/smartphones"))
+            return try JSONDecoder().decode(ProductResponseDTO.self, from: data).products
+        }
+        fetchTask = task
+
+        do {
+            return try await task.value
+        } catch {
+            fetchTask = nil
+            throw error
+        }
     }
 }
 
 // MARK: - Preview Mock
 
 // swiftlint:disable force_unwrapping
-class MockProductsRepositoryImpl: ProductsRepository {
-    
+final class MockProductsRepositoryImpl: ProductsRepository {
+
     // MARK: - Properties
     
-    private var products = [
+    private let products = [
         ProductEntity(
             id: 1,
             title: "iPhone 9",
@@ -83,9 +92,9 @@ class MockProductsRepositoryImpl: ProductsRepository {
         )
     ]
 // swiftlint:enable force_unwrapping
-    
+
     // MARK: - Methods
-    
+
     func get() async throws -> [ProductEntity] {
         products
     }

@@ -15,6 +15,7 @@
 
 import SwiftUI
 
+@MainActor
 class SettingsThemeColorViewModel: ObservableObject {
     
     // MARK: - Properties

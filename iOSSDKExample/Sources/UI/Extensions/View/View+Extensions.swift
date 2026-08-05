@@ -33,17 +33,6 @@ extension View {
         background(WillDisappearHandler(onWillDisappear: perform))
     }
     
-    func alert(
-        isPresented: Binding<Bool>,
-        title: String = L10n.Error.Generic.title,
-        message: String = L10n.Error.Generic.message,
-        dismissButton: Alert.Button = .cancel()
-    ) -> some View {
-        alert(isPresented: isPresented) {
-            Alert(title: Text(title), message: Text(message), dismissButton: dismissButton)
-        }
-    }
-    
     /// Applies the given transform if the given condition evaluates to `true`.
     /// - Parameters:
     ///   - condition: The condition to evaluate.
@@ -55,6 +44,20 @@ extension View {
             content(self)
         } else {
             self
+        }
+    }
+
+    /// Wraps `onChange(of:perform:)` to use the iOS 17 two-parameter form when available and
+    /// fall back to the iOS 14 single-parameter form on iOS 16. The iOS 14 form is deprecated
+    /// in iOS 17, so call sites should prefer this helper as long as iOS 16 is supported.
+    @ViewBuilder
+    func onValueChange<V: Equatable>(of value: V, perform action: @escaping (V) -> Void) -> some View {
+        if #available(iOS 17, *) {
+            self.onChange(of: value) { _, newValue in
+                action(newValue)
+            }
+        } else {
+            self.onChange(of: value, perform: action)
         }
     }
 }

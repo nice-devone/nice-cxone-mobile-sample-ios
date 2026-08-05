@@ -18,6 +18,7 @@ import CXoneChatUI
 extension BackgroundStyleColorsImpl {
     private typealias Theme = Asset.Colors.ChatDefaultTheme
     
+    @MainActor
     static var lightColors: BackgroundStyleColorsImpl {
         BackgroundStyleColorsImpl(
             default: LocalStorageManager.backgroundDefaultLightColor ?? Theme.Background.defaultLight.swiftUIColor,
@@ -26,6 +27,7 @@ extension BackgroundStyleColorsImpl {
         )
     }
     
+    @MainActor
     static var darkColors: BackgroundStyleColorsImpl {
         BackgroundStyleColorsImpl(
             default: LocalStorageManager.backgroundDefaultDarkColor ?? Theme.Background.defaultDark.swiftUIColor,

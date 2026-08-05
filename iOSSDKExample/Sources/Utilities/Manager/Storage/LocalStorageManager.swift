@@ -16,6 +16,7 @@
 import CXoneChatUI
 import SwiftUI
 
+@MainActor
 struct LocalStorageManager {
     
     // MARK: - Properties
@@ -38,8 +39,8 @@ struct LocalStorageManager {
     @Storage(key: .additionalContactCustomFields)
     static var additionalContactCustomFields: [String: String]?
     
-    @Storage(key: .oAuthEntity)
-    static var oAuthEntity: OAuthEntity?
+    @Storage(key: .oAuthFlow)
+    static var oAuthFlow: OAuthFlow?
     
     // MARK: - Properties - Theme/Background
     

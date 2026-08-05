@@ -133,7 +133,7 @@ private struct CarouselPageIndicator: View {
                             width: index == currentIndex ? 12 : 8,
                             height: index == currentIndex ? 12 : 8
                         )
-                        .foregroundColor(index == currentIndex ? .blue : Color(.systemGray4))
+                        .foregroundStyle(index == currentIndex ? .blue : Color(.systemGray4))
                 }
             }
             .padding(.vertical, 4)

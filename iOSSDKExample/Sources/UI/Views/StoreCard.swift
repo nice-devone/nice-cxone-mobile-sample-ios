@@ -44,7 +44,7 @@ struct StoreCard: View {
             
             VStack {
                 Text(title)
-                    .foregroundColor(Color(.systemGray))
+                    .foregroundStyle(Color(.systemGray))
                     .font(.caption)
                     .fontWeight(.bold)
                 
@@ -52,12 +52,12 @@ struct StoreCard: View {
                     Text("$")
                         .font(.footnote)
                         .fontWeight(.bold)
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .foregroundStyle(colorScheme == .dark ? .white : .black)
                     
                     Text(String(format: "%0.2f", price))
                         .font(.headline)
                         .fontWeight(.heavy)
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .foregroundStyle(colorScheme == .dark ? .white : .black)
                 }
             }
             .padding([.horizontal, .bottom], 4)

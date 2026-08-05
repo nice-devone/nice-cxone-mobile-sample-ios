@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    https://github.com/BrandEmbassy/cxone-mobile-sdk-IOS/blob/master/LICENSE
+#    https://github.com/nice-devone/nice-cxone-mobile-sample-ios/blob/main/LICENSE
 #
 # TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE CXONE MOBILE SDK IS PROVIDED ON
 # AN "AS IS" BASIS. NICE HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS
@@ -17,5 +17,6 @@ settings:
   base:
     BUNDLE_PREFIX: com.incontact.mobileSDK
     DEVELOPMENT_TEAM: A9KL983VAD
-    MARKETING_VERSION: "3.3.1"
+    MARKETING_VERSION: "4.0.0"
     DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+    SWIFT_VERSION: "6.0"

@@ -92,7 +92,7 @@ private extension Text {
         self
             .font(.headline)
             .fontWeight(.bold)
-            .foregroundColor(foregroundColor)
+            .foregroundStyle(foregroundColor)
     }
 }
 
@@ -106,7 +106,7 @@ struct CartSummaryView_Previews: PreviewProvider {
                 
                 CartSummaryView(totalAmount: .constant(2500)) { }
             }
-            .edgesIgnoringSafeArea(.bottom)
+            .ignoresSafeArea(edges: .bottom)
             .previewDisplayName("Light Mode")
             
             VStack {
@@ -114,7 +114,7 @@ struct CartSummaryView_Previews: PreviewProvider {
                 
                 CartSummaryView(totalAmount: .constant(2500)) { }
             }
-            .edgesIgnoringSafeArea(.bottom)
+            .ignoresSafeArea(edges: .bottom)
             .preferredColorScheme(.dark)
             .previewDisplayName("Dark Mode")
         }
