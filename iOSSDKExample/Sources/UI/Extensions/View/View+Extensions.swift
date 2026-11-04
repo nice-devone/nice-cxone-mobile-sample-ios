@@ -21,6 +21,15 @@ extension View {
         modifier(AdjustForA11yModifier())
     }
     
+    /// Rounded gray card pinned to the bottom of the screen, padded above the home indicator.
+    @MainActor
+    func bottomCardStyle() -> some View {
+        padding([.top, .leading, .trailing], 16)
+            .padding(.bottom, UIDevice.hasHomeButton ? 16 : 32)
+            .background(Color(.systemGray6))
+            .cornerRadius(20, corners: [.topLeft, .topRight])
+    }
+    
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))
     }
@@ -47,6 +56,16 @@ extension View {
         }
     }
 
+    /// Applies a transform to the view when an optional value is non-`nil`, passing the unwrapped value to the closure.
+    @ViewBuilder
+    func ifLet<Content: View, T>(_ conditional: T?, @ViewBuilder _ content: (Self, _ value: T) -> Content) -> some View {
+        if let conditional {
+            content(self, conditional)
+        } else {
+            self
+        }
+    }
+
     /// Wraps `onChange(of:perform:)` to use the iOS 17 two-parameter form when available and
     /// fall back to the iOS 14 single-parameter form on iOS 16. The iOS 14 form is deprecated
     /// in iOS 17, so call sites should prefer this helper as long as iOS 16 is supported.
@@ -58,58 +77,6 @@ extension View {
             }
         } else {
             self.onChange(of: value, perform: action)
-        }
-    }
-}
-
-// MARK: - Helpers
-
-private struct AdjustForA11yModifier: ViewModifier {
-    
-    func body(content: Content) -> some View {
-        content
-            .frame(minWidth: 44, minHeight: 44)
-    }
-}
-
-private struct RoundedCorner: Shape {
-    
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        
-        return Path(path.cgPath)
-    }
-}
-
-private struct WillDisappearHandler: UIViewControllerRepresentable {
-
-    let onWillDisappear: () -> Void
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        ViewWillDisappearViewController(onWillDisappear: onWillDisappear)
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) { }
-
-    private class ViewWillDisappearViewController: UIViewController {
-        let onWillDisappear: () -> Void
-
-        init(onWillDisappear: @escaping () -> Void) {
-            self.onWillDisappear = onWillDisappear
-            super.init(nibName: nil, bundle: nil)
-        }
-
-        @available(*, unavailable)
-        required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-
-        override func viewWillDisappear(_ animated: Bool) {
-            super.viewWillDisappear(animated)
-            onWillDisappear()
         }
     }
 }

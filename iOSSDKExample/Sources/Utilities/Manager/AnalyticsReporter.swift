@@ -62,14 +62,19 @@ class AnalyticsReporter {
 
 private extension AnalyticsReporter {
 
-    @objc
-    func didEnterBackground() {
-        Log.trace("View did enter background")
-
+    /// Checked at call time, not in `init`, so the failure surfaces where the page is reported.
+    func validateAnalyticsConfiguration() {
         guard !analyticsTitle.isEmpty, !analyticsUrl.isEmpty else {
             Log.error(.failed("Title or Uri has not been set correctly"))
             fatalError("Title or Uri has not been set correctly")
         }
+    }
+
+    @objc
+    func didEnterBackground() {
+        Log.trace("View did enter background")
+
+        validateAnalyticsConfiguration()
 
         Task { [weak self] in
             guard let self else {
@@ -88,10 +93,7 @@ private extension AnalyticsReporter {
     func onViewDidAppear() {
         Log.trace("View did appear")
 
-        guard !analyticsTitle.isEmpty, !analyticsUrl.isEmpty else {
-            Log.error(.failed("Title or Uri has not been set correctly"))
-            fatalError("Title or Uri has not been set correctly")
-        }
+        validateAnalyticsConfiguration()
 
         Task { [weak self] in
             guard let self else {

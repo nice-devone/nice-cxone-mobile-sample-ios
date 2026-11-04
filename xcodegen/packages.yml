@@ -22,10 +22,10 @@ packages:
     from: 12.0.0
   CXoneChatSDK:
     url: https://github.com/nice-devone/nice-cxone-mobile-sdk-ios
-    from: 4.0.0
+    from: 4.1.0
   CXoneChatUI:
     url: https://github.com/nice-devone/nice-cxone-mobile-ui-ios
-    from: 4.0.0
+    from: 4.1.0
   CXoneGuideUtility:
     url: https://github.com/nice-devone/nice-cxone-mobile-guide-utility-ios
-    from: 4.0.0
+    from: 4.1.0

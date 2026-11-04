@@ -51,7 +51,6 @@ class CartRepositoryImpl: CartRepository {
 
 // MARK: - Preview Mock
 
-// swiftlint:disable force_unwrapping
 class MockCartRepositoryImpl: CartRepository {
     
     // MARK: - Properties
@@ -88,7 +87,6 @@ class MockCartRepositoryImpl: CartRepository {
             quantity: 1
         )
     ]
-// swiftlint:enable force_unwrapping
     
     // MARK: - Methods
     

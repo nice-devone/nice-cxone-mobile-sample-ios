@@ -86,16 +86,21 @@ private extension LoginView {
                 ValidatedTextField(
                     L10n.Login.Guest.UserDetails.firstNamePlaceholder,
                     text: $viewModel.firstName,
-                    label: L10n.Login.Guest.UserDetails.firstName
+                    label: L10n.Login.Guest.UserDetails.firstName,
+                    accessibilityIdentifier: A11y.Login.Guest.FirstName.TextField.identifier
                 )
 
                 ValidatedTextField(
                     L10n.Login.Guest.UserDetails.lastNamePlaceholder,
                     text: $viewModel.lastName,
-                    label: L10n.Login.Guest.UserDetails.lastName
+                    label: L10n.Login.Guest.UserDetails.lastName,
+                    accessibilityIdentifier: A11y.Login.Guest.LastName.TextField.identifier
                 )
                 
                 Button(L10n.Login.Guest.buttonTitle, action: viewModel.onGuestLoginTapped)
+                    .accessibilityIdentifier(A11y.Login.Guest.ButtonContinue.identifier)
+                    .accessibilityLabel(A11y.Login.Guest.ButtonContinue.label)
+                    .accessibilityHint(A11y.Login.Guest.ButtonContinue.hint)
                     .fontWeight(.bold)
                     .foregroundStyle(.white)
                     .adjustForA11y()

@@ -73,7 +73,6 @@ struct StoreCard: View {
 // MARK: - Preview
 
 struct StoreCard_Previews: PreviewProvider {
-    // swiftlint:disable force_unwrapping
     @State private static var products = [
         ProductEntity(
             id: 1,
@@ -100,7 +99,6 @@ struct StoreCard_Previews: PreviewProvider {
             ]
         )
     ]
-    // swiftlint:enable force_unwrapping
     
     static var previews: some View {
         Group {

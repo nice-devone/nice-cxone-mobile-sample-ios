@@ -87,20 +87,8 @@ class LoginViewModel: AnalyticsReporter, AlertableViewModel {
     func popToConfiguration() {
         Log.trace("Navigating to the configuration")
 
-        Task {
-            // Drop the provider session, including the auth state persisted in the Keychain.
-            try? await OAuthenticatorsManager.authenticator?.signOut()
-        }
+        ChatSessionReset.perform(chatProvider: chatProvider)
 
-        chatProvider.customer.setTokenDelegateListener(nil)
-        chatProvider.signOut()
-        LocalStorageManager.reset()
-        FileManager.default.eraseDocumentsFolder()
-        RemoteNotificationsManager.shared.unregister()
-        
-        // Reconfigure Logger
-        Log.configure(isWriteToFileEnabled: true)
-        
         router.showConfiguration()
     }
     
@@ -166,6 +154,26 @@ private extension LoginViewModel {
         router.showStore()
     }
     
+    /// Prepares the provider for the configured channel, as a built-in environment or a custom URL set.
+    func prepareConnection() async throws {
+        if let environment = configuration.environment {
+            try await chatProvider.connection.prepare(
+                environment: environment,
+                brandId: configuration.brandId,
+                channelId: configuration.channelId
+            )
+        } else {
+            try await chatProvider.connection.prepare(
+                chatURL: configuration.chatUrl,
+                socketURL: configuration.socketUrl,
+                loggerURL: configuration.loggerUrl,
+                brandId: configuration.brandId,
+                channelId: configuration.channelId,
+                tokenURL: configuration.tokenUrl
+            )
+        }
+    }
+
     func prepareAndFetchConfiguration() {
         Log.trace("Checking OAuth login options")
         
@@ -175,22 +183,7 @@ private extension LoginViewModel {
             }
             
             do {
-                if let env = self.configuration.environment {
-                    try await self.chatProvider.connection.prepare(
-                        environment: env,
-                        brandId: self.configuration.brandId,
-                        channelId: self.configuration.channelId
-                    )
-                } else {
-                    try await self.chatProvider.connection.prepare(
-                        chatURL: self.configuration.chatUrl,
-                        socketURL: self.configuration.socketUrl,
-                        loggerURL: self.configuration.loggerUrl,
-                        brandId: self.configuration.brandId,
-                        channelId: self.configuration.channelId,
-                        tokenURL: self.configuration.tokenUrl
-                    )
-                }
+                try await self.prepareConnection()
 
                 // Analytics need prepared CXone SDK, then it can report page view
                 self.reportViewPage()

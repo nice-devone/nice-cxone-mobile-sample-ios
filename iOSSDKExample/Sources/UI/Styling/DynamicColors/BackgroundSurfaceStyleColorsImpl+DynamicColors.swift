@@ -16,27 +16,26 @@
 import CXoneChatUI
 
 extension BackgroundSurfaceStyleColorsImpl {
-    private typealias Theme = Asset.Colors.ChatDefaultTheme
     
     @MainActor
     static var lightColors: BackgroundSurfaceStyleColorsImpl {
         BackgroundSurfaceStyleColorsImpl(
-            default: LocalStorageManager.backgroundSurfaceDefaultLightColor ?? Theme.Background.Surface.defaultLight.swiftUIColor,
-            variant: LocalStorageManager.backgroundSurfaceVariantLightColor ?? Theme.Background.Surface.variantLight.swiftUIColor,
-            container: LocalStorageManager.backgroundSurfaceContainerLightColor ?? Theme.Background.Surface.containerLight.swiftUIColor,
-            subtle: LocalStorageManager.backgroundSurfaceSubtleLightColor ?? Theme.Background.Surface.subtleLight.swiftUIColor,
-            emphasis: LocalStorageManager.backgroundSurfaceEmphasisLightColor ?? Theme.Background.Surface.emphasisLight.swiftUIColor
+            default: ChatThemeColors.color(for: .background(.surface(.default)), isDark: false),
+            variant: ChatThemeColors.color(for: .background(.surface(.variant)), isDark: false),
+            container: ChatThemeColors.color(for: .background(.surface(.container)), isDark: false),
+            subtle: ChatThemeColors.color(for: .background(.surface(.subtle)), isDark: false),
+            emphasis: ChatThemeColors.color(for: .background(.surface(.emphasis)), isDark: false)
         )
     }
     
     @MainActor
     static var darkColors: BackgroundSurfaceStyleColorsImpl {
         BackgroundSurfaceStyleColorsImpl(
-            default: LocalStorageManager.backgroundSurfaceDefaultDarkColor ?? Theme.Background.Surface.defaultDark.swiftUIColor,
-            variant: LocalStorageManager.backgroundSurfaceVariantDarkColor ?? Theme.Background.Surface.variantDark.swiftUIColor,
-            container: LocalStorageManager.backgroundSurfaceContainerDarkColor ?? Theme.Background.Surface.containerDark.swiftUIColor,
-            subtle: LocalStorageManager.backgroundSurfaceSubtleDarkColor ?? Theme.Background.Surface.subtleDark.swiftUIColor,
-            emphasis: LocalStorageManager.backgroundSurfaceEmphasisDarkColor ?? Theme.Background.Surface.emphasisDark.swiftUIColor
+            default: ChatThemeColors.color(for: .background(.surface(.default)), isDark: true),
+            variant: ChatThemeColors.color(for: .background(.surface(.variant)), isDark: true),
+            container: ChatThemeColors.color(for: .background(.surface(.container)), isDark: true),
+            subtle: ChatThemeColors.color(for: .background(.surface(.subtle)), isDark: true),
+            emphasis: ChatThemeColors.color(for: .background(.surface(.emphasis)), isDark: true)
         )
     }
 }

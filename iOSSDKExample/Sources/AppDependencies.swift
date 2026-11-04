@@ -34,6 +34,7 @@ class AppDependencies: ObservableObject {
     private let checkoutCart: CheckoutCartUseCase
     private let getChannelConfiguration: GetChannelConfigurationUseCase
     private let googleSignIn: GoogleSignInUseCase
+    private let applyPredefinedConfigurationUseCase: ApplyPredefinedConfigurationUseCase
 
     private var configurationViewModel: ConfigurationViewModel?
     private var loginViewModel: LoginViewModel?
@@ -61,6 +62,11 @@ class AppDependencies: ObservableObject {
         self.checkoutCart = CheckoutCartUseCase(repository: cartRepository)
         self.getChannelConfiguration = GetChannelConfigurationUseCase(chatProvider: chatProvider)
         self.googleSignIn = GoogleSignInUseCase(chatProvider: chatProvider)
+        self.applyPredefinedConfigurationUseCase = ApplyPredefinedConfigurationUseCase(
+            chatProvider: chatProvider,
+            router: router,
+            onSessionReset: chatPresenter.onChatStyleChanged
+        )
 
         // Invalidate cached view models on root transitions so a fresh instance is built
         // on next entry. Each VM is rebuilt on any transition *out of* its own root and
@@ -92,6 +98,12 @@ class AppDependencies: ObservableObject {
     }
     
     // MARK: - Methods
+
+    /// Apply a channel configuration supplied through the launch environment, skipping `ConfigurationView`.
+    @MainActor
+    func applyPredefinedConfiguration(_ predefined: PredefinedConfiguration) {
+        applyPredefinedConfigurationUseCase(predefined)
+    }
 
     @MainActor
     func getConfigurationViewModel() -> ConfigurationViewModel {

@@ -32,6 +32,7 @@ final class MockChatProvider: ChatProvider {
 
     // MARK: - Static
 
+    // periphery:ignore - required by the SDK's `ChatProvider` protocol; this preview stub never calls it
     static var logWriter: LogWriter?
 
     // MARK: - Properties
@@ -88,6 +89,7 @@ private final class MockConnectionProvider: ConnectionProvider, @unchecked Senda
 
     func disconnect() {}
 
+    // periphery:ignore - required by the SDK's `ConnectionProvider` protocol; this preview stub never calls it
     func executeTrigger(_ triggerId: String) async throws {}
 }
 
@@ -95,10 +97,12 @@ private final class MockConnectionProvider: ConnectionProvider, @unchecked Senda
 
 private final class MockCustomerProvider: CustomerProvider, @unchecked Sendable {
 
+    // periphery:ignore - required by the SDK's `CustomerProvider` protocol; this preview stub never calls it
     func get() -> CustomerIdentity? { nil }
 
     func set(customer: CustomerIdentity?) throws {}
 
+    // periphery:ignore - required by the SDK's `CustomerProvider` protocol; this preview stub never calls it
     func setDeviceToken(_ token: String) {}
 
     func setDeviceToken(_ tokenData: Data) {}
@@ -118,6 +122,7 @@ private final class MockCustomerProvider: CustomerProvider, @unchecked Sendable 
 
 private final class MockCustomerCustomFieldsProvider: CustomerCustomFieldsProvider, @unchecked Sendable {
 
+    // periphery:ignore - required by the SDK's `CustomerCustomFieldsProvider` protocol; this preview stub never calls it
     func get() -> [String: String] { [:] }
 
     func set(_ customFields: [String: String]) async throws {}
@@ -147,6 +152,7 @@ private final class MockChatThreadListProvider: ChatThreadListProvider, @uncheck
         fatalError("MockChatProvider.threads.provider(for: threadId) is not implemented — extend this stub if your preview reaches it.")
     }
 
+    // periphery:ignore - required by the SDK's `ChatThreadListProvider` protocol; this preview stub never calls it
     func provider(for thread: ChatThread) throws -> any ChatThreadProvider {
         fatalError("MockChatProvider.threads.provider(for: thread) is not implemented — extend this stub if your preview reaches it.")
     }
@@ -163,6 +169,7 @@ private final class MockContactCustomFieldsProvider: ContactCustomFieldsProvider
 
 private final class MockAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
 
+    // periphery:ignore - required by the SDK's `AnalyticsProvider` protocol; this preview stub never calls it
     let visitorId: String? = nil
 
     func viewPage(title: String, url: String) async throws {}

@@ -17,16 +17,39 @@ import UIKit
 
 extension UIWindowScene {
 
-    /// Foreground-active window scene, with a fallback to the first connected window scene to handle
-    /// pre-activation lifecycle and single-scene apps.
+    /// The window scene to read screen geometry from or present into.
+    ///
+    /// Prefers, in order: the foreground-active scene, the scene hosting the key window, and the first
+    /// connected window scene — the last two cover the pre-activation lifecycle and single-scene apps.
     @MainActor
     static var activeWindowScene: UIWindowScene? {
         let scenes = UIApplication.shared.connectedScenes.compactMap { scene in
             scene as? UIWindowScene
         }
 
-        return scenes.first { scene in
+        let foregroundActiveScene = scenes.first { scene in
             scene.activationState == .foregroundActive
-        } ?? scenes.first
+        }
+        let keyWindowScene = scenes.first { scene in
+            scene.windows.contains(where: \.isKeyWindow)
+        }
+
+        if let foregroundActiveScene {
+            return foregroundActiveScene
+        } else if let keyWindowScene {
+            return keyWindowScene
+        } else {
+            return scenes.first
+        }
+    }
+
+    /// Key window of the ``activeWindowScene``, with a fallback to its first window.
+    @MainActor
+    static var activeKeyWindow: UIWindow? {
+        let windows = activeWindowScene?.windows
+
+        return windows?.first { window in
+            window.isKeyWindow
+        } ?? windows?.first
     }
 }

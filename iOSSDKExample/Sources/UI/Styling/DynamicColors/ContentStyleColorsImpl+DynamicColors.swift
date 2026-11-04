@@ -16,25 +16,24 @@
 import CXoneChatUI
 
 extension ContentStyleColorsImpl {
-    private typealias Theme = Asset.Colors.ChatDefaultTheme
     
     @MainActor
     static var lightColors: ContentStyleColorsImpl {
         ContentStyleColorsImpl(
-            primary: LocalStorageManager.contentPrimaryLightColor ?? Theme.Content.primaryLight.swiftUIColor,
-            secondary: LocalStorageManager.contentSecondaryLightColor ?? Theme.Content.secondaryLight.swiftUIColor,
-            tertiary: LocalStorageManager.contentTertiaryLightColor ?? Theme.Content.tertiaryLight.swiftUIColor,
-            inverse: LocalStorageManager.contentInverseLightColor ?? Theme.Content.inverseLight.swiftUIColor
+            primary: ChatThemeColors.color(for: .content(.primary), isDark: false),
+            secondary: ChatThemeColors.color(for: .content(.secondary), isDark: false),
+            tertiary: ChatThemeColors.color(for: .content(.tertiary), isDark: false),
+            inverse: ChatThemeColors.color(for: .content(.inverse), isDark: false)
         )
     }
     
     @MainActor
     static var darkColors: ContentStyleColorsImpl {
         ContentStyleColorsImpl(
-            primary: LocalStorageManager.contentPrimaryDarkColor ?? Theme.Content.primaryDark.swiftUIColor,
-            secondary: LocalStorageManager.contentSecondaryDarkColor ?? Theme.Content.secondaryDark.swiftUIColor,
-            tertiary: LocalStorageManager.contentTertiaryDarkColor ?? Theme.Content.tertiaryDark.swiftUIColor,
-            inverse: LocalStorageManager.contentInverseDarkColor ?? Theme.Content.inverseDark.swiftUIColor
+            primary: ChatThemeColors.color(for: .content(.primary), isDark: true),
+            secondary: ChatThemeColors.color(for: .content(.secondary), isDark: true),
+            tertiary: ChatThemeColors.color(for: .content(.tertiary), isDark: true),
+            inverse: ChatThemeColors.color(for: .content(.inverse), isDark: true)
         )
     }
 }

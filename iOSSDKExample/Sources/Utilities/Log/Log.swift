@@ -24,7 +24,7 @@ class Log: StaticLogger {
     // MARK: - StaticLogger implementation
 
     private static let _instance = SafeAccessContainer<LogWriter?>(PrintLogWriter())
-    public static var instance: LogWriter? {
+    static var instance: LogWriter? {
         get { _instance.content }
         set {
             _instance.mutate { content in
@@ -32,7 +32,7 @@ class Log: StaticLogger {
             }
         }
     }
-    public static let category: String? = "Application"
+    static let category: String? = "Application"
 
     // MARK: - Properties
 
@@ -54,6 +54,9 @@ class Log: StaticLogger {
         if isPrintEnabled {
             loggers.append(PrintLogWriter())
         }
+
+        // Unconditional, so a legacy log is removed even when file logging is off or its folder cannot be created.
+        removeLegacyDocumentsLogs()
 
         if isWriteToFileEnabled, let url = makeLogFileUrl() {
             loggers.append(FileLogWriter(path: url))
@@ -81,13 +84,9 @@ class Log: StaticLogger {
 
     /// URL of the single log file, or `nil` if it has not been created yet.
     class var logFileUrl: URL? {
-        guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        guard let url = logsFolderUrl?.appendingPathComponent(logFileName) else {
             return nil
         }
-
-        let url = documents
-            .appendingPathComponent(logsFolderName, isDirectory: true)
-            .appendingPathComponent(logFileName)
 
         return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
@@ -106,7 +105,6 @@ class Log: StaticLogger {
     
     // MARK: - Logging
     
-    // periphery:ignore - May be used in the future
     class func error(_ error: CommonError, file: StaticString = #file, line: UInt = #line) {
         Self.error(error.localizedDescription, file: file, line: line)
     }
@@ -120,13 +118,33 @@ class Log: StaticLogger {
 
 private extension Log {
 
-    /// Creates the logs directory if needed and returns the log file URL.
-    class func makeLogFileUrl() -> URL? {
-        guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            return nil
+    class var logsFolderUrl: URL? {
+        // Application Support, not Documents: Documents is exposed through file sharing, and the log records notification payloads.
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appendingPathComponent(logsFolderName, isDirectory: true)
+    }
+
+    /// Deletes logs written by earlier builds into Documents, which is now exposed through file sharing.
+    class func removeLegacyDocumentsLogs() {
+        guard let legacyUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
+            .appendingPathComponent(logsFolderName, isDirectory: true),
+            FileManager.default.fileExists(atPath: legacyUrl.path)
+        else {
+            return
         }
 
-        let logsUrl = documents.appendingPathComponent(logsFolderName, isDirectory: true)
+        do {
+            try FileManager.default.removeItem(at: legacyUrl)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+
+    /// Creates the logs directory if needed and returns the log file URL.
+    class func makeLogFileUrl() -> URL? {
+        guard let logsUrl = logsFolderUrl else {
+            return nil
+        }
 
         do {
             try FileManager.default.createDirectory(at: logsUrl, withIntermediateDirectories: true, attributes: nil)

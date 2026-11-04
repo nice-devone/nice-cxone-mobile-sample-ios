@@ -74,6 +74,6 @@ private extension ProductDetailViewModel {
         let cart = getCart()
         
         productQuantityInCart = cart.first { $0.product == product }?.quantity ?? 0
-        itemsInCart = cart.reduce(0) { $0 + $1.quantity }
+        itemsInCart = cart.itemCount
     }
 }

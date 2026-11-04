@@ -23,6 +23,13 @@ public class RemoteNotificationsManager: NSObject {
     
     public static let shared = RemoteNotificationsManager()
     
+    /// The launch environment variable that suppresses the notification permission prompt.
+    ///
+    /// Exists for UI-test automation on simulators: on iOS 26 the system prompt is invisible to WebDriverAgent, so
+    /// it cannot be dismissed and blocks every interaction beneath it. Appium passes it the same way as the
+    /// predefined channel configuration — see `sample/docs/cs-predefined-configuration.md`.
+    nonisolated static let skipPromptEnvironmentVariableName = "CXONE_SKIP_NOTIFICATION_PROMPT"
+    
     private lazy var notificationCenter: UNUserNotificationCenter = .current()
     
     // MARK: - Init
@@ -32,6 +39,22 @@ public class RemoteNotificationsManager: NSObject {
     }
     
     // MARK: - Methods
+    
+    /// Whether the launch environment asks to skip the notification permission prompt.
+    ///
+    /// The environment is injected (defaulting to the process environment) so the parsing can be unit-tested,
+    /// the same way as ``LaunchConfigurationReader/read(environment:)``.
+    ///
+    /// - Parameter environment: The launch environment to inspect.
+    /// - Returns: `true` when ``skipPromptEnvironmentVariableName`` is set to `1` or `true` (case-insensitive,
+    ///   surrounding whitespace ignored).
+    nonisolated static func isPromptSkipped(in environment: [String: String] = ProcessInfo.processInfo.environment) -> Bool {
+        let value = environment[skipPromptEnvironmentVariableName]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        
+        return value == "1" || value == "true"
+    }
     
     public func unregister() {
         Log.trace("Unregistering for remote notifications")
@@ -50,6 +73,11 @@ public class RemoteNotificationsManager: NSObject {
         let settings = await notificationCenter.notificationSettings()
         
         if settings.authorizationStatus == .notDetermined {
+            guard !Self.isPromptSkipped() else {
+                Log.trace("Skip requesting notification permission: '\(Self.skipPromptEnvironmentVariableName)' is set")
+                return
+            }
+            
             Log.trace("Notification permission was not determined, requesting")
             
             guard try await self.notificationCenter.requestAuthorization(options: [.alert, .badge, .sound]) else {

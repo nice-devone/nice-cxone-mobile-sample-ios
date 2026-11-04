@@ -41,6 +41,14 @@ class ChatPresenter: ObservableObject, ChatPresenting {
     /// instance. Do not mutate from outside `open(...)`.
     @Published var presentationStyle: ChatPresentationStyle = .modal
 
+    var isPresentedModally: Bool {
+        isPresented && presentationStyle != .fullScreen
+    }
+
+    var isPresentedFullScreen: Bool {
+        isPresented && presentationStyle == .fullScreen
+    }
+
     var deeplinkOption: DeeplinkOption?
 
     // MARK: - Init

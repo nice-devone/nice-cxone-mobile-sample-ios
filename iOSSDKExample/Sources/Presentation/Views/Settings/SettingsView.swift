@@ -309,19 +309,20 @@ private extension SettingsView {
         }
     }
     
+    func themeColorView(_ token: LocalStorageKey.Theme, title: String) -> some View {
+        SettingsThemeColorView(
+            color: ChatThemeColors.color(for: token),
+            title: title
+        ) { color, title in
+            viewModel.colorDidChange(color, for: token, title: title)
+        }
+    }
+    
     var themeBackgroundSection: some View {
         DisclosureGroup {
-            SettingsThemeColorView(
-                color: ChatAppearance.Background.default,
-                title: L10n.Settings.Theme.Background.Default.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.background(.default), title: L10n.Settings.Theme.Background.Default.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Background.inverse,
-                title: L10n.Settings.Theme.Background.Inverse.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.background(.inverse), title: L10n.Settings.Theme.Background.Inverse.placeholder)
             
             themeBackgroundSurfaceSection
         } label: {
@@ -332,35 +333,15 @@ private extension SettingsView {
     
     var themeBackgroundSurfaceSection: some View {
         DisclosureGroup {
-            SettingsThemeColorView(
-                color: ChatAppearance.Background.Surface.default,
-                title: L10n.Settings.Theme.Background.Surface.Default.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.background(.surface(.default)), title: L10n.Settings.Theme.Background.Surface.Default.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Background.Surface.variant,
-                title: L10n.Settings.Theme.Background.Surface.Variant.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.background(.surface(.variant)), title: L10n.Settings.Theme.Background.Surface.Variant.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Background.Surface.container,
-                title: L10n.Settings.Theme.Background.Surface.Container.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.background(.surface(.container)), title: L10n.Settings.Theme.Background.Surface.Container.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Background.Surface.subtle,
-                title: L10n.Settings.Theme.Background.Surface.Subtle.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.background(.surface(.subtle)), title: L10n.Settings.Theme.Background.Surface.Subtle.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Background.Surface.emphasis,
-                title: L10n.Settings.Theme.Background.Surface.Emphasis.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.background(.surface(.emphasis)), title: L10n.Settings.Theme.Background.Surface.Emphasis.placeholder)
         } label: {
             Text(L10n.Settings.Theme.Background.Surface.title)
                 .font(.body.weight(.medium))
@@ -370,29 +351,13 @@ private extension SettingsView {
     @ViewBuilder
     var themeContentSection: some View {
         DisclosureGroup {
-            SettingsThemeColorView(
-                color: ChatAppearance.Content.primary,
-                title: L10n.Settings.Theme.Content.Primary.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.content(.primary), title: L10n.Settings.Theme.Content.Primary.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Content.secondary,
-                title: L10n.Settings.Theme.Content.Secondary.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.content(.secondary), title: L10n.Settings.Theme.Content.Secondary.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Content.tertiary,
-                title: L10n.Settings.Theme.Content.Tertiary.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.content(.tertiary), title: L10n.Settings.Theme.Content.Tertiary.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Content.inverse,
-                title: L10n.Settings.Theme.Content.Inverse.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.content(.inverse), title: L10n.Settings.Theme.Content.Inverse.placeholder)
         } label: {
             Text(L10n.Settings.Theme.Content.title)
                 .font(.body.weight(.medium))
@@ -401,53 +366,21 @@ private extension SettingsView {
     
     var themeBrandSection: some View {
         DisclosureGroup {
-            SettingsThemeColorView(
-                color: ChatAppearance.Brand.primary,
-                title: L10n.Settings.Theme.Brand.Primary.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.brand(.primary), title: L10n.Settings.Theme.Brand.Primary.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Brand.onPrimary,
-                title: L10n.Settings.Theme.Brand.OnPrimary.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.brand(.onPrimary), title: L10n.Settings.Theme.Brand.OnPrimary.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Brand.primaryContainer,
-                title: L10n.Settings.Theme.Brand.PrimaryContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.brand(.primaryContainer), title: L10n.Settings.Theme.Brand.PrimaryContainer.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Brand.onPrimaryContainer,
-                title: L10n.Settings.Theme.Brand.OnPrimaryContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.brand(.onPrimaryContainer), title: L10n.Settings.Theme.Brand.OnPrimaryContainer.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Brand.secondary,
-                title: L10n.Settings.Theme.Brand.Secondary.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.brand(.secondary), title: L10n.Settings.Theme.Brand.Secondary.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Brand.onSecondary,
-                title: L10n.Settings.Theme.Brand.OnSecondary.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.brand(.onSecondary), title: L10n.Settings.Theme.Brand.OnSecondary.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Brand.secondaryContainer,
-                title: L10n.Settings.Theme.Brand.SecondaryContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.brand(.secondaryContainer), title: L10n.Settings.Theme.Brand.SecondaryContainer.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Brand.onSecondaryContainer,
-                title: L10n.Settings.Theme.Brand.OnSecondaryContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.brand(.onSecondaryContainer), title: L10n.Settings.Theme.Brand.OnSecondaryContainer.placeholder)
         } label: {
             Text(L10n.Settings.Theme.Brand.title)
                 .font(.body.weight(.medium))
@@ -456,17 +389,9 @@ private extension SettingsView {
     
     var themeBorderSection: some View {
         DisclosureGroup {
-            SettingsThemeColorView(
-                color: ChatAppearance.Border.default,
-                title: L10n.Settings.Theme.Border.Default.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.border(.default), title: L10n.Settings.Theme.Border.Default.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Border.subtle,
-                title: L10n.Settings.Theme.Border.Subtle.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.border(.subtle), title: L10n.Settings.Theme.Border.Subtle.placeholder)
         } label: {
             Text(L10n.Settings.Theme.Border.title)
                 .font(.body.weight(.medium))
@@ -475,77 +400,29 @@ private extension SettingsView {
     
     var themeStatusSection: some View {
         DisclosureGroup {
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.success,
-                title: L10n.Settings.Theme.Status.Success.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.success), title: L10n.Settings.Theme.Status.Success.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.onSuccess,
-                title: L10n.Settings.Theme.Status.OnSuccess.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.onSuccess), title: L10n.Settings.Theme.Status.OnSuccess.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.successContainer,
-                title: L10n.Settings.Theme.Status.SuccessContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.successContainer), title: L10n.Settings.Theme.Status.SuccessContainer.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.onSuccessContainer,
-                title: L10n.Settings.Theme.Status.OnSuccessContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.onSuccessContainer), title: L10n.Settings.Theme.Status.OnSuccessContainer.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.warning,
-                title: L10n.Settings.Theme.Status.Warning.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.warning), title: L10n.Settings.Theme.Status.Warning.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.onWarning,
-                title: L10n.Settings.Theme.Status.OnWarning.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.onWarning), title: L10n.Settings.Theme.Status.OnWarning.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.warningContainer,
-                title: L10n.Settings.Theme.Status.WarningContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.warningContainer), title: L10n.Settings.Theme.Status.WarningContainer.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.onWarningContainer,
-                title: L10n.Settings.Theme.Status.OnWarningContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.onWarningContainer), title: L10n.Settings.Theme.Status.OnWarningContainer.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.error,
-                title: L10n.Settings.Theme.Status.Error.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.error), title: L10n.Settings.Theme.Status.Error.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.onError,
-                title: L10n.Settings.Theme.Status.OnError.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.onError), title: L10n.Settings.Theme.Status.OnError.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.errorContainer,
-                title: L10n.Settings.Theme.Status.ErrorContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.errorContainer), title: L10n.Settings.Theme.Status.ErrorContainer.placeholder)
             
-            SettingsThemeColorView(
-                color: ChatAppearance.Status.onErrorContainer,
-                title: L10n.Settings.Theme.Status.OnErrorContainer.placeholder,
-                didUpdateColor: viewModel.colorDidChange
-            )
+            themeColorView(.status(.onErrorContainer), title: L10n.Settings.Theme.Status.OnErrorContainer.placeholder)
         } label: {
             Text(L10n.Settings.Theme.Status.title)
                 .font(.body.weight(.medium))

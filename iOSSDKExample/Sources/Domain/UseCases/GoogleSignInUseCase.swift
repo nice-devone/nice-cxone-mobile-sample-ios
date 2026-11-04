@@ -61,11 +61,17 @@ class GoogleSignInUseCase {
 
     /// Re-establishes a returning user's OAuth session after an app relaunch.
     ///
-    /// A persisted ``OAuthFlow`` alone is not a usable credential — the connection token, the
-    /// token-delegate listener, and the provider's auth state all live only in memory. For the
-    /// implicit flow this restores the persisted auth state, silently refreshes the token, hands
-    /// it to the SDK, and re-registers the token delegate. Explicit-flow credentials (authorization
-    /// code + verifier) are one-shot and cannot be restored, so the user has to sign in again.
+    /// A persisted ``OAuthFlow`` alone is not a usable credential for the implicit flow — the
+    /// connection token, the token-delegate listener, and the provider's auth state all live only
+    /// in memory, so this restores the persisted auth state, silently refreshes the token, hands
+    /// it to the SDK, and re-registers the token delegate.
+    ///
+    /// The explicit flow's authorization code and code verifier are one-shot and cannot be
+    /// replayed either, but there is nothing to restore on this side: the SDK itself persists the
+    /// resulting refresh token in the Keychain, so `connect()` can recover via a refresh grant with
+    /// no Google-side action at all. Only if that refresh token is also dead does `connect()`
+    /// report `CXoneChatError.invalidRefreshToken`, which is the point where interactive sign-in
+    /// actually becomes necessary — not here.
     ///
     /// - Returns: `true` when the session was restored and the SDK can connect; `false` when
     ///   interactive sign-in is required (the persisted flow is cleared in that case).
@@ -73,33 +79,40 @@ class GoogleSignInUseCase {
         guard let flow = LocalStorageManager.oAuthFlow else {
             return false
         }
-        guard flow == .implicit, let authenticator = OAuthenticatorsManager.authenticator else {
-            LocalStorageManager.oAuthFlow = nil
 
-            return false
-        }
-        guard await authenticator.restoreImplicitSession() else {
-            LocalStorageManager.oAuthFlow = nil
-
-            return false
-        }
-
-        do {
-            let refreshed = try await authenticator.refreshImplicitToken()
-
-            chatProvider.customer.setConnectionToken(refreshed.token, expiresAt: refreshed.expiresAt)
-
-            registerTokenDelegateListener(with: authenticator)
-
-            Log.trace("Restored the Google OAuth session for a returning user")
-
+        switch flow {
+        case .explicit:
             return true
-        } catch {
-            error.logError()
 
-            LocalStorageManager.oAuthFlow = nil
+        case .implicit:
+            guard let authenticator = OAuthenticatorsManager.authenticator else {
+                LocalStorageManager.oAuthFlow = nil
 
-            return false
+                return false
+            }
+            guard await authenticator.restoreImplicitSession() else {
+                LocalStorageManager.oAuthFlow = nil
+
+                return false
+            }
+
+            do {
+                let refreshed = try await authenticator.refreshImplicitToken()
+
+                chatProvider.customer.setConnectionToken(refreshed.token, expiresAt: refreshed.expiresAt)
+
+                registerTokenDelegateListener(with: authenticator)
+
+                Log.trace("Restored the Google OAuth session for a returning user")
+
+                return true
+            } catch {
+                error.logError()
+
+                LocalStorageManager.oAuthFlow = nil
+
+                return false
+            }
         }
     }
 }

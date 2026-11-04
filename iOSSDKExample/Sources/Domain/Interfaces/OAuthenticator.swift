@@ -22,11 +22,6 @@ import Foundation
 /// `OAResult` carries.
 protocol OAuthenticator: Sendable {
 
-    // MARK: - Properties
-
-    /// User-presentable name of the authenticator.
-    var authenticatorName: String { get }
-
     // MARK: - Methods
 
     /// Attempt OAuth authentication for the given flow.

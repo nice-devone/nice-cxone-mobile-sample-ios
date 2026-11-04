@@ -33,9 +33,10 @@ struct SDKDemoApp: App {
         let chatProvider = CXoneChat()
         let chatPresenter = ChatPresenter(chatProvider: chatProvider)
         let router = AppRouter(chatPresenter: chatPresenter)
+        let dependencies = AppDependencies(router: router, chatPresenter: chatPresenter)
         self._chatPresenter = StateObject(wrappedValue: chatPresenter)
         self._router = StateObject(wrappedValue: router)
-        self._dependencies = StateObject(wrappedValue: AppDependencies(router: router, chatPresenter: chatPresenter))
+        self._dependencies = StateObject(wrappedValue: dependencies)
         // Wire the provider through the adaptor's wrapped value, not `UIApplication.shared.delegate`.
         // `App.init()` runs before UIApplicationMain installs the app delegate, so the shared
         // delegate is still nil at this point and a cast-and-assign would silently no-op — the
@@ -43,6 +44,36 @@ struct SDKDemoApp: App {
         // the exact instance that later receives didRegisterForRemoteNotificationsWithDeviceToken,
         // so assigning through the wrapper is safe this early.
         appDelegate.chatProvider = chatProvider
+
+        // Registered here rather than in `didFinishLaunching`, which runs *after* this initialiser: a
+        // predefined configuration for a different brand tears the session down below, and that teardown
+        // signs out through `OAuthenticatorsManager.authenticator`. With the registration left in the app
+        // delegate, whether the authenticator exists by the time that sign-out runs comes down to when the
+        // app delegate happens to be installed — and when it does not, the previous brand's OAuth state is
+        // left sitting in the Keychain. Reading `GoogleService-Info.plist` has no dependency on UIKit or
+        // Firebase being set up, so it is safe this early.
+        do {
+            OAuthenticatorsManager.register(authenticator: try GoogleAuthenticator())
+        } catch {
+            error.logError("Failed to set up Google authenticator")
+        }
+
+        // Applied here, in `init`, rather than from a view lifecycle hook: `body` has not been
+        // evaluated yet, so the root is already settled by the time the first frame is rendered and
+        // `ConfigurationView` is never presented at all.
+        switch LaunchConfigurationReader.read() {
+        case .absent:
+            // An ordinary launch. Whatever `AppRouter.init` chose from persisted state stands.
+            break
+        case .rejected:
+            // Deliberately overrides the `.login(persistedConfiguration)` root `AppRouter.init` may have
+            // just chosen. A launch that asked for a channel and got it wrong has to stop where the
+            // mistake is visible; falling through to the previous run's channel would execute the whole
+            // suite against the wrong backend on the strength of a single stdout warning.
+            router.showConfiguration()
+        case .supplied(let predefined):
+            dependencies.applyPredefinedConfiguration(predefined)
+        }
     }
 
     // MARK: - Builder

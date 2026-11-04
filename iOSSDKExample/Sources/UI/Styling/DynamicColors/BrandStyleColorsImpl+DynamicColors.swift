@@ -16,33 +16,32 @@
 import CXoneChatUI
 
 extension BrandStyleColorsImpl {
-    private typealias Theme = Asset.Colors.ChatDefaultTheme
     
     @MainActor
     static var lightColors: BrandStyleColorsImpl {
         BrandStyleColorsImpl(
-            primary: LocalStorageManager.brandPrimaryLightColor ?? Theme.Brand.primaryLight.swiftUIColor,
-            onPrimary: LocalStorageManager.brandOnPrimaryLightColor ?? Theme.Brand.onPrimaryLight.swiftUIColor,
-            primaryContainer: LocalStorageManager.brandPrimaryContainerLightColor ?? Theme.Brand.primaryContainerLight.swiftUIColor,
-            onPrimaryContainer: LocalStorageManager.brandOnPrimaryContainerLightColor ?? Theme.Brand.onPrimaryContainerLight.swiftUIColor,
-            secondary: LocalStorageManager.brandSecondaryLightColor ?? Theme.Brand.secondaryLight.swiftUIColor,
-            onSecondary: LocalStorageManager.brandOnSecondaryLightColor ?? Theme.Brand.onSecondaryLight.swiftUIColor,
-            secondaryContainer: LocalStorageManager.brandSecondaryContainerLightColor ?? Theme.Brand.secondaryContainerLight.swiftUIColor,
-            onSecondaryContainer: LocalStorageManager.brandOnSecondaryContainerLightColor ?? Theme.Brand.onSecondaryContainerLight.swiftUIColor
+            primary: ChatThemeColors.color(for: .brand(.primary), isDark: false),
+            onPrimary: ChatThemeColors.color(for: .brand(.onPrimary), isDark: false),
+            primaryContainer: ChatThemeColors.color(for: .brand(.primaryContainer), isDark: false),
+            onPrimaryContainer: ChatThemeColors.color(for: .brand(.onPrimaryContainer), isDark: false),
+            secondary: ChatThemeColors.color(for: .brand(.secondary), isDark: false),
+            onSecondary: ChatThemeColors.color(for: .brand(.onSecondary), isDark: false),
+            secondaryContainer: ChatThemeColors.color(for: .brand(.secondaryContainer), isDark: false),
+            onSecondaryContainer: ChatThemeColors.color(for: .brand(.onSecondaryContainer), isDark: false)
         )
     }
     
     @MainActor
     static var darkColors: BrandStyleColorsImpl {
         BrandStyleColorsImpl(
-            primary: LocalStorageManager.brandPrimaryDarkColor ?? Theme.Brand.primaryDark.swiftUIColor,
-            onPrimary: LocalStorageManager.brandOnPrimaryDarkColor ?? Theme.Brand.onPrimaryDark.swiftUIColor,
-            primaryContainer: LocalStorageManager.brandPrimaryContainerDarkColor ?? Theme.Brand.primaryContainerDark.swiftUIColor,
-            onPrimaryContainer: LocalStorageManager.brandOnPrimaryContainerDarkColor ?? Theme.Brand.onPrimaryContainerDark.swiftUIColor,
-            secondary: LocalStorageManager.brandSecondaryDarkColor ?? Theme.Brand.secondaryDark.swiftUIColor,
-            onSecondary: LocalStorageManager.brandOnSecondaryDarkColor ?? Theme.Brand.onSecondaryDark.swiftUIColor,
-            secondaryContainer: LocalStorageManager.brandSecondaryContainerDarkColor ?? Theme.Brand.secondaryContainerDark.swiftUIColor,
-            onSecondaryContainer: LocalStorageManager.brandOnSecondaryContainerDarkColor ?? Theme.Brand.onSecondaryContainerDark.swiftUIColor
+            primary: ChatThemeColors.color(for: .brand(.primary), isDark: true),
+            onPrimary: ChatThemeColors.color(for: .brand(.onPrimary), isDark: true),
+            primaryContainer: ChatThemeColors.color(for: .brand(.primaryContainer), isDark: true),
+            onPrimaryContainer: ChatThemeColors.color(for: .brand(.onPrimaryContainer), isDark: true),
+            secondary: ChatThemeColors.color(for: .brand(.secondary), isDark: true),
+            onSecondary: ChatThemeColors.color(for: .brand(.onSecondary), isDark: true),
+            secondaryContainer: ChatThemeColors.color(for: .brand(.secondaryContainer), isDark: true),
+            onSecondaryContainer: ChatThemeColors.color(for: .brand(.onSecondaryContainer), isDark: true)
         )
     }
 }

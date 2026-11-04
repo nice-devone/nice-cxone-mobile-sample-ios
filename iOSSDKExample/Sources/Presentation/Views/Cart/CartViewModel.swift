@@ -31,7 +31,7 @@ class CartViewModel: AnalyticsReporter, ObservableObject {
     @Published var cart = [ProductOrderEntity]()
 
     var totalAmount: Double {
-        cart.reduce(0) { $0 + ($1.product.price * Double($1.quantity)) }
+        cart.totalAmount
     }
 
     // MARK: - Init

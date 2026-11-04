@@ -178,7 +178,52 @@ targetTemplates:
         name: Generate Build Number
         basedOnDependencyAnalysis: false
       - script: |
-          ${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run
+          CRASHLYTICS_RUN="${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+          CRASHLYTICS_LOG="${TARGET_TEMP_DIR}/crashlytics-upload-symbols.log"
+          CRASHLYTICS_TIMEOUT_SECONDS=30
+
+          # `Crashlytics/run` validates synchronously in the foreground (no `&`) before
+          # backgrounding the actual symbol upload — the background half already redirects
+          # its own output to /dev/null, so it can't hold this phase's pipe open. It's that
+          # foreground validation call that can hang: on a network that can't reach
+          # Firebase's upload endpoint, it has been observed to hang indefinitely (stuck in
+          # DNS/route resolution, no established connection) instead of failing fast,
+          # wedging this build phase — and with it the whole build queue — until the
+          # process is killed by hand. Run it detached with its own log and a hard deadline
+          # so a stalled validation can never hang the build again; a healthy run finishes
+          # in a couple of seconds.
+          "$CRASHLYTICS_RUN" < /dev/null > "$CRASHLYTICS_LOG" 2>&1 &
+          crashlyticsPid=$!
+
+          # `kill "$watchdogPid"` below only terminates this subshell, not the `sleep` it's
+          # blocked in — that sleep is orphaned rather than killed and survives until its
+          # countdown ends. Redirected here (rather than left inheriting the build phase's
+          # own stdout/stderr) so that orphan can never hold the phase's pipe open — `>>`
+          # (append, not `>`) because `$CRASHLYTICS_RUN` above already opened the same file
+          # truncating; two truncating writers on one path would race.
+          (
+            sleep "$CRASHLYTICS_TIMEOUT_SECONDS"
+            if kill -0 "$crashlyticsPid" 2>/dev/null; then
+              echo "warning: Crashlytics dSYM upload exceeded ${CRASHLYTICS_TIMEOUT_SECONDS}s — killing it so the build doesn't hang. See $CRASHLYTICS_LOG"
+              pkill -9 -P "$crashlyticsPid" 2>/dev/null
+              kill -9 "$crashlyticsPid" 2>/dev/null
+            fi
+          ) < /dev/null >> "$CRASHLYTICS_LOG" 2>&1 &
+          watchdogPid=$!
+
+          wait "$crashlyticsPid" 2>/dev/null
+          crashlyticsStatus=$?
+          kill "$watchdogPid" 2>/dev/null
+          wait "$watchdogPid" 2>/dev/null
+
+          # A nonzero status here is either the watchdog's kill above (already logged) or a
+          # genuine failure (bad path, missing GoogleService-Info.plist, bad credentials) —
+          # surface it as a build warning instead of letting `exit 0` below hide it silently.
+          if [ "$crashlyticsStatus" -ne 0 ]; then
+            echo "warning: Crashlytics dSYM upload exited ${crashlyticsStatus}. See $CRASHLYTICS_LOG"
+          fi
+
+          exit 0
         inputFiles:
           - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
           - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}

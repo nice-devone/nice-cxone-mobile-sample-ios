@@ -22,9 +22,11 @@ targetTemplates:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
+        LSSupportsOpeningDocumentsInPlace: true
         NSCameraUsageDescription: "Allow access to camera to take pictures for sending as attachment."
         NSMicrophoneUsageDescription: "Allow access to microphone to be able to record a voice message."
         UIApplicationSupportsIndirectInputEvents: true
+        UIFileSharingEnabled: true
         UIBackgroundModes:
           - remote-notification
         UIRequiredDeviceCapabilities:

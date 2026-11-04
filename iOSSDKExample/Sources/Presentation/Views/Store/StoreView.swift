@@ -20,7 +20,6 @@ struct StoreView: View {
 
     // MARK: - Properties
 
-    @EnvironmentObject private var router: AppRouter
     @EnvironmentObject private var chatPresenter: ChatPresenter
 
     @ObservedObject var viewModel: StoreViewModel
@@ -66,29 +65,12 @@ struct StoreView: View {
         }
         .onAppear(perform: viewModel.onAppear)
         .onDisappear(perform: viewModel.onDisappear)
-        .sheet(
-            isPresented: Binding(
-                get: { chatPresenter.isPresented && chatPresenter.presentationStyle != .fullScreen },
-                set: { isPresented in
-                    if !isPresented {
-                        chatPresenter.dismiss()
-                    }
-                }
-            ),
-            content: {
-                LazyView {
-                    chatContent(presentModally: true)
-                }
+        .sheet(isPresented: chatPresentationBinding(\.isPresentedModally)) {
+            LazyView {
+                chatContent(presentModally: true)
             }
-        )
-        .navigationDestination(isPresented: Binding(
-            get: { chatPresenter.isPresented && chatPresenter.presentationStyle == .fullScreen },
-            set: { isPresented in
-                if !isPresented {
-                    chatPresenter.dismiss()
-                }
-            }
-        )) {
+        }
+        .navigationDestination(isPresented: chatPresentationBinding(\.isPresentedFullScreen)) {
             LazyView {
                 chatContent(presentModally: false)
             }
@@ -136,14 +118,31 @@ private extension StoreView {
     var chatThreadId: String? {
         if case .thread(let id) = chatPresenter.deeplinkOption {
             return id
+        } else {
+            return nil
         }
-
-        return nil
     }
 
-    @ViewBuilder
+    func chatPresentationBinding(_ isPresented: KeyPath<ChatPresenter, Bool>) -> Binding<Bool> {
+        Binding(
+            get: {
+                chatPresenter[keyPath: isPresented]
+            },
+            set: { newValue in
+                if !newValue {
+                    chatPresenter.dismiss()
+                }
+            }
+        )
+    }
+
     func chatContent(presentModally: Bool) -> some View {
-        chatPresenter.chatCoordinator.content(
+        chatPresenter.chatCoordinator.onSessionExpired = { [weak chatPresenter, weak viewModel] in
+            chatPresenter?.dismiss()
+            viewModel?.handleSessionExpired()
+        }
+
+        return chatPresenter.chatCoordinator.content(
             threadId: chatThreadId,
             presentModally: presentModally,
             onFinish: chatPresenter.dismiss

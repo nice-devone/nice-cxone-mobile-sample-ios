@@ -75,10 +75,7 @@ struct CartSummaryView: View {
             .buttonStyle(.primary)
             .padding(.top, 24)
         }
-        .padding([.top, .leading, .trailing], 16)
-        .padding(.bottom, UIDevice.hasHomeButton ? 16 : 32)
-        .background(Color(.systemGray6))
-        .cornerRadius(20, corners: [.topLeft, .topRight])
+        .bottomCardStyle()
         .padding(.top, -14)
         .shadow(color: .black.opacity(0.1), radius: 4, y: -4)
     }

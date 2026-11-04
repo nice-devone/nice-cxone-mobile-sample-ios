@@ -40,7 +40,7 @@ class PaymentViewModel: AnalyticsReporter, ObservableObject {
     }
     
     var totalAmount: Double {
-        getCart().reduce(0) { $0 + ($1.product.price * Double($1.quantity)) }
+        getCart().totalAmount
     }
     
     // MARK: - Init

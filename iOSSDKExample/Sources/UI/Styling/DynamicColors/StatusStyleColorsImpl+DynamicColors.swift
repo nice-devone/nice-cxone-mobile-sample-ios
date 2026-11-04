@@ -16,41 +16,40 @@
 import CXoneChatUI
 
 extension StatusStyleColorsImpl {
-    private typealias Theme = Asset.Colors.ChatDefaultTheme
     
     @MainActor
     static var lightColors: StatusStyleColorsImpl {
         StatusStyleColorsImpl(
-            success: LocalStorageManager.statusSuccessLightColor ?? Theme.Status.successLight.swiftUIColor,
-            onSuccess: LocalStorageManager.statusOnSuccessLightColor ?? Theme.Status.onSuccessLight.swiftUIColor,
-            successContainer: LocalStorageManager.statusSuccessContainerLightColor ?? Theme.Status.successContainerLight.swiftUIColor,
-            onSuccessContainer: LocalStorageManager.statusOnSuccessContainerLightColor ?? Theme.Status.onSuccessContainerLight.swiftUIColor,
-            warning: LocalStorageManager.statusWarningLightColor ?? Theme.Status.warningLight.swiftUIColor,
-            onWarning: LocalStorageManager.statusOnWarningLightColor ?? Theme.Status.onWarningLight.swiftUIColor,
-            warningContainer: LocalStorageManager.statusWarningContainerLightColor ?? Theme.Status.warningContainerLight.swiftUIColor,
-            onWarningContainer: LocalStorageManager.statusOnWarningContainerLightColor ?? Theme.Status.onWarningContainerLight.swiftUIColor,
-            error: LocalStorageManager.statusErrorLightColor ?? Theme.Status.errorLight.swiftUIColor,
-            onError: LocalStorageManager.statusOnErrorLightColor ?? Theme.Status.onErrorLight.swiftUIColor,
-            errorContainer: LocalStorageManager.statusErrorContainerLightColor ?? Theme.Status.errorContainerLight.swiftUIColor,
-            onErrorContainer: LocalStorageManager.statusOnErrorContainerLightColor ?? Theme.Status.onErrorContainerLight.swiftUIColor
+            success: ChatThemeColors.color(for: .status(.success), isDark: false),
+            onSuccess: ChatThemeColors.color(for: .status(.onSuccess), isDark: false),
+            successContainer: ChatThemeColors.color(for: .status(.successContainer), isDark: false),
+            onSuccessContainer: ChatThemeColors.color(for: .status(.onSuccessContainer), isDark: false),
+            warning: ChatThemeColors.color(for: .status(.warning), isDark: false),
+            onWarning: ChatThemeColors.color(for: .status(.onWarning), isDark: false),
+            warningContainer: ChatThemeColors.color(for: .status(.warningContainer), isDark: false),
+            onWarningContainer: ChatThemeColors.color(for: .status(.onWarningContainer), isDark: false),
+            error: ChatThemeColors.color(for: .status(.error), isDark: false),
+            onError: ChatThemeColors.color(for: .status(.onError), isDark: false),
+            errorContainer: ChatThemeColors.color(for: .status(.errorContainer), isDark: false),
+            onErrorContainer: ChatThemeColors.color(for: .status(.onErrorContainer), isDark: false)
         )
     }
     
     @MainActor
     static var darkColors: StatusStyleColorsImpl {
         StatusStyleColorsImpl(
-            success: LocalStorageManager.statusSuccessDarkColor ?? Theme.Status.successDark.swiftUIColor,
-            onSuccess: LocalStorageManager.statusOnSuccessDarkColor ?? Theme.Status.onSuccessDark.swiftUIColor,
-            successContainer: LocalStorageManager.statusSuccessContainerDarkColor ?? Theme.Status.successContainerDark.swiftUIColor,
-            onSuccessContainer: LocalStorageManager.statusOnSuccessContainerDarkColor ?? Theme.Status.onSuccessContainerDark.swiftUIColor,
-            warning: LocalStorageManager.statusWarningDarkColor ?? Theme.Status.warningDark.swiftUIColor,
-            onWarning: LocalStorageManager.statusOnWarningDarkColor ?? Theme.Status.onWarningDark.swiftUIColor,
-            warningContainer: LocalStorageManager.statusWarningContainerDarkColor ?? Theme.Status.warningContainerDark.swiftUIColor,
-            onWarningContainer: LocalStorageManager.statusOnWarningContainerDarkColor ?? Theme.Status.onWarningContainerDark.swiftUIColor,
-            error: LocalStorageManager.statusErrorDarkColor ?? Theme.Status.errorDark.swiftUIColor,
-            onError: LocalStorageManager.statusOnErrorDarkColor ?? Theme.Status.onErrorDark.swiftUIColor,
-            errorContainer: LocalStorageManager.statusErrorContainerDarkColor ?? Theme.Status.errorContainerDark.swiftUIColor,
-            onErrorContainer: LocalStorageManager.statusOnErrorContainerDarkColor ?? Theme.Status.onErrorContainerDark.swiftUIColor
+            success: ChatThemeColors.color(for: .status(.success), isDark: true),
+            onSuccess: ChatThemeColors.color(for: .status(.onSuccess), isDark: true),
+            successContainer: ChatThemeColors.color(for: .status(.successContainer), isDark: true),
+            onSuccessContainer: ChatThemeColors.color(for: .status(.onSuccessContainer), isDark: true),
+            warning: ChatThemeColors.color(for: .status(.warning), isDark: true),
+            onWarning: ChatThemeColors.color(for: .status(.onWarning), isDark: true),
+            warningContainer: ChatThemeColors.color(for: .status(.warningContainer), isDark: true),
+            onWarningContainer: ChatThemeColors.color(for: .status(.onWarningContainer), isDark: true),
+            error: ChatThemeColors.color(for: .status(.error), isDark: true),
+            onError: ChatThemeColors.color(for: .status(.onError), isDark: true),
+            errorContainer: ChatThemeColors.color(for: .status(.errorContainer), isDark: true),
+            onErrorContainer: ChatThemeColors.color(for: .status(.onErrorContainer), isDark: true)
         )
     }
 }
