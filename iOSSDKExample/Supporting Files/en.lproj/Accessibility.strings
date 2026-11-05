@@ -17,3 +17,12 @@
 
 "store.button_open_chat.label" = "Open chat";
 "store.button_open_chat.hint" = "Double-tap to open chat";
+
+// MARK: - Login
+
+"login.guest.first_name.text_field.label" = "First Name";
+"login.guest.first_name.text_field.hint" = "Double-tap to edit first name";
+"login.guest.last_name.text_field.label" = "Last Name";
+"login.guest.last_name.text_field.hint" = "Double-tap to edit last name";
+"login.guest.button_continue.label" = "Continue as guest";
+"login.guest.button_continue.hint" = "Double-tap to continue as guest";

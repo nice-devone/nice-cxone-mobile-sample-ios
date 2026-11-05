@@ -16,21 +16,20 @@
 import CXoneChatUI
 
 extension BorderStyleColorsImpl {
-    private typealias Theme = Asset.Colors.ChatDefaultTheme
     
     @MainActor
     static var lightColors: BorderStyleColorsImpl {
         BorderStyleColorsImpl(
-            default: LocalStorageManager.borderDefaultLightColor ?? Theme.Border.defaultLight.swiftUIColor,
-            subtle: LocalStorageManager.borderSubtleLightColor ?? Theme.Border.subtleLight.swiftUIColor
+            default: ChatThemeColors.color(for: .border(.default), isDark: false),
+            subtle: ChatThemeColors.color(for: .border(.subtle), isDark: false)
         )
     }
     
     @MainActor
     static var darkColors: BorderStyleColorsImpl {
         BorderStyleColorsImpl(
-            default: LocalStorageManager.borderDefaultDarkColor ?? Theme.Border.defaultDark.swiftUIColor,
-            subtle: LocalStorageManager.borderSubtleDarkColor ?? Theme.Border.subtleDark.swiftUIColor
+            default: ChatThemeColors.color(for: .border(.default), isDark: true),
+            subtle: ChatThemeColors.color(for: .border(.subtle), isDark: true)
         )
     }
 }

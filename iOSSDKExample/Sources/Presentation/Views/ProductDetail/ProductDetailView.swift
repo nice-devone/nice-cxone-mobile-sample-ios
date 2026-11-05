@@ -68,10 +68,7 @@ struct ProductDetailView: View {
                 }
                 .padding(.top, 20)
             }
-            .padding([.top, .leading, .trailing], 16)
-            .padding(.bottom, UIDevice.hasHomeButton ? 16 : 32)
-            .background(Color(.systemGray6))
-            .cornerRadius(20, corners: [.topLeft, .topRight])
+            .bottomCardStyle()
             .padding(.top, -24)
             .shadow(color: .black.opacity(0.1), radius: 4, y: -4)
             .ignoresSafeArea(edges: .bottom)
@@ -159,7 +156,6 @@ private extension ProductDetailView {
 
 // MARK: - Preview
 
-// swiftlint:disable force_unwrapping
 #Preview {
     let chatProvider = MockChatProvider()
 
@@ -186,4 +182,3 @@ private extension ProductDetailView {
         )
     }
 }
-// swiftlint:enable force_unwrapping

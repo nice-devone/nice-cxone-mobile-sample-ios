@@ -150,7 +150,6 @@ private struct CarouselPageIndicator: View {
 
 // MARK: - Preview
 
-// swiftlint:disable force_unwrapping
 struct ImageCarouselView_Previews: PreviewProvider {
     
     static var previews: some View {
@@ -177,4 +176,3 @@ struct ImageCarouselView_Previews: PreviewProvider {
         
     }
 }
-// swiftlint:enable force_unwrapping

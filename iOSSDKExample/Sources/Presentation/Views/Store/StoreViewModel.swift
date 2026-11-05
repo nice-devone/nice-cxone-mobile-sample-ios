@@ -78,19 +78,7 @@ extension StoreViewModel {
     func signOut() {
         Log.trace("Signing out")
 
-        Task {
-            // Drop the provider session, including the auth state persisted in the Keychain.
-            try? await OAuthenticatorsManager.authenticator?.signOut()
-        }
-
-        chatProvider.customer.setTokenDelegateListener(nil)
-        chatProvider.signOut()
-        LocalStorageManager.reset()
-        FileManager.default.eraseDocumentsFolder()
-        RemoteNotificationsManager.shared.unregister()
-
-        // Reconfigure Logger
-        Log.configure(isWriteToFileEnabled: true)
+        ChatSessionReset.perform(chatProvider: chatProvider)
 
         router.showConfiguration()
     }
@@ -118,6 +106,18 @@ extension StoreViewModel {
 
         router.showProductDetail(product)
     }
+
+    /// Called when the explicit-PKCE session's refresh-grant recovery fails and no further
+    /// automatic recovery is possible - the persisted flow is no longer usable, so clear it and
+    /// send the customer back to interactive login rather than letting `restoreSession()` retry
+    /// the same rejected credential on next launch.
+    func handleSessionExpired() {
+        Log.trace("Explicit OAuth session expired - returning to login")
+
+        LocalStorageManager.oAuthFlow = nil
+
+        router.showLoginOrConfiguration()
+    }
 }
 
 // MARK: - Private methods
@@ -127,7 +127,7 @@ private extension StoreViewModel {
     func loadCart() {
         Log.trace("Loading cart")
         
-        itemsInCart = getCart().reduce(0) { $0 + $1.quantity }
+        itemsInCart = getCart().itemCount
     }
     
     func loadProducts() {

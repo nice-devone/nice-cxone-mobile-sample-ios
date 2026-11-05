@@ -27,6 +27,18 @@ class AppRouter: ObservableObject {
         case configuration
         case login(Configuration)
         case store
+        
+        // MARK: - Properties
+        
+        /// Login for the saved configuration, or the configuration screen when none is saved.
+        @MainActor
+        static var saved: Root {
+            if let configuration = LocalStorageManager.configuration {
+                return .login(configuration)
+            } else {
+                return .configuration
+            }
+        }
     }
     
     // MARK: - Properties
@@ -53,11 +65,7 @@ class AppRouter: ObservableObject {
     init(chatPresenter: any ChatPresenting) {
         self.chatPresenter = chatPresenter
         
-        if let configuration = LocalStorageManager.configuration {
-            root = .login(configuration)
-        } else {
-            root = .configuration
-        }
+        root = Root.saved
         
         deeplinkObserver = NotificationCenter.default.addObserver(
             forName: .cxoneDeeplinkNotification,
@@ -106,6 +114,15 @@ class AppRouter: ObservableObject {
         }
     }
     
+    /// Navigate to login for the saved configuration, or to the configuration screen when none is saved.
+    func showLoginOrConfiguration() {
+        if case .login(let configuration) = Root.saved {
+            showLogin(configuration)
+        } else {
+            showConfiguration()
+        }
+    }
+    
     /// Switch the root to `.store`. Chat (if any pending deeplink) is opened from
     /// `StoreViewModel.onAppear` once `StoreView` is in the view hierarchy.
     func showStore() {
@@ -137,6 +154,24 @@ class AppRouter: ObservableObject {
         path = NavigationPath()
     }
     
+    /// Land on login for a configuration supplied through the launch environment, replacing whatever
+    /// `init` had settled on.
+    ///
+    /// - Important: Deliberately *not* implemented in terms of ``showLogin(_:)``. From a
+    ///     `.configuration` root that method pushes onto `path`, leaving `ConfigurationView` mounted
+    ///     underneath and reachable by a back swipe. A predefined configuration must genuinely
+    ///     replace it: the whole point is that the configuration screen is never presented.
+    ///
+    /// - Note: `init` has already assigned `root` by the time this is called, but both happen inside
+    ///     `SDKDemoApp.init()` — before `body` is first evaluated — so the swap is invisible and
+    ///     `ConfigurationView` is never rendered.
+    func applyPredefinedConfiguration(_ configuration: Configuration) {
+        Log.trace("Applying a predefined configuration")
+
+        root = .login(configuration)
+        path = NavigationPath()
+    }
+
     // MARK: - Deep Link
     
     func handleDeepLink(_ url: URL) {

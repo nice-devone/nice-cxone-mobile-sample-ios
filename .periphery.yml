@@ -16,12 +16,19 @@
 project: iOSSDKExample.xcodeproj
 schemes:
 - iOSSDKExample
-targets:
-- iOSSDKExample
 report_exclude:
+- ../cxone-chat-sdk/**
+- ../cxone-chat-ui/**
+- ../cxone-guide-utility/**
 - "iOSSDKExample/Supporting Files/Generated/*"
 index_store_path: derivedData/Index.noindex/DataStore/
 skip_build: true
+# Periphery's defaults plus `**/checkouts/**`: CI clones packages with -clonedSourcePackagesDirPath,
+# which puts them under <dir>/checkouts/ instead of SourcePackages/checkouts/
+index_exclude:
+- "**/*?.build/**/*"
+- "**/SourcePackages/checkouts/**"
+- "**/checkouts/**"
 verbose: false
 relative_results: true
 quiet: true

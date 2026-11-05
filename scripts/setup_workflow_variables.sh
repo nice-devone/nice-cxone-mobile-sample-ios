@@ -32,8 +32,9 @@ prepare_env() {
 
 # Common
 prepare_env SWIFTGEN_VERSION '6.6.3'
-prepare_env SWIFTLINT_VERSION '0.63.3'
-prepare_env XCODEGEN_VERSION '2.45.3'
+prepare_env SWIFTLINT_VERSION '0.65.1'
+prepare_env PERIPHERY_VERSION '3.8.0'
+prepare_env XCODEGEN_VERSION '2.46.0'
 prepare_env XCODE_VERSION '26.5'
 prepare_env IOS_VERSION '26.5'
 prepare_env IPHONE_DEVICE 'iPhone 17'

@@ -17,13 +17,9 @@ import UIKit
 
 extension UIDevice {
 
+    @MainActor
     static var hasHomeButton: Bool {
-        let keyWindow = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first(where: \.isKeyWindow)
-
-        guard let safeAreaBottom = keyWindow?.safeAreaInsets.bottom else {
+        guard let safeAreaBottom = UIWindowScene.activeKeyWindow?.safeAreaInsets.bottom else {
             return false
         }
 

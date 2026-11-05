@@ -162,8 +162,16 @@ extension LocalStorageKey: CaseIterable {
     
     static var allCases: [LocalStorageKey] {
         [.configuration, .firstName, .lastName, .chatPresentationStyle, .additionalCustomerCustomFields, .additionalContactCustomFields, .oAuthFlow]
-            + Theme.allCases.map { .chatLightTheme($0) }
-            + Theme.allCases.map { .chatDarkTheme($0) }
+            + themeCases
+    }
+    
+    /// Light and dark variants of every theme token.
+    static var themeCases: [LocalStorageKey] {
+        Theme.allCases.map { theme in
+            .chatLightTheme(theme)
+        } + Theme.allCases.map { theme in
+            .chatDarkTheme(theme)
+        }
     }
 }
 

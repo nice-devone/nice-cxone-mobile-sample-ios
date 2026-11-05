@@ -40,8 +40,6 @@ final class GoogleAuthenticator: OAuthenticator, @unchecked Sendable {
 
     // MARK: - Properties
 
-    let authenticatorName = "Google"
-
     private let configuration: OIDServiceConfiguration
     private let clientId: String
     private let redirectURL: URL
@@ -220,11 +218,9 @@ private enum AuthStateStore {
 private extension GoogleAuthenticator {
 
     enum Constants {
-        // swiftlint:disable force_unwrapping
         // These literals are fixed, well-formed Google OAuth 2.0 endpoints — they cannot fail to parse.
         static let authorizationEndpoint = URL(string: "https://accounts.google.com/o/oauth2/v2/auth")!
         static let tokenEndpoint = URL(string: "https://oauth2.googleapis.com/token")!
-        // swiftlint:enable force_unwrapping
         static let scopes = [OIDScopeOpenID, OIDScopeProfile, OIDScopeEmail]
     }
 
@@ -322,27 +318,15 @@ private extension GoogleAuthenticator {
         let nsError = error as NSError
         if nsError.domain == OIDGeneralErrorDomain, nsError.code == OIDErrorCode.userCanceledAuthorizationFlow.rawValue {
             return OAError.cancelled
+        } else {
+            return error
         }
-
-        return error
     }
 
     /// Finds the top-most presented view controller to anchor the AppAuth browser session.
     @MainActor
     static func topViewController() -> UIViewController? {
-        let activeScene = UIApplication.shared.connectedScenes
-            .compactMap { scene in
-                scene as? UIWindowScene
-            }
-            .first { scene in
-                scene.activationState == .foregroundActive
-            }
-
-        let keyWindow = activeScene?.windows.first { window in
-            window.isKeyWindow
-        } ?? activeScene?.windows.first
-
-        var top = keyWindow?.rootViewController
+        var top = UIWindowScene.activeKeyWindow?.rootViewController
 
         while let presented = top?.presentedViewController {
             top = presented

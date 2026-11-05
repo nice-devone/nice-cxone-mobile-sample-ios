@@ -116,7 +116,6 @@ private extension CartItem {
 
 // MARK: - Preview
 
-// swiftlint:disable force_unwrapping
 struct CartItem_Previews: PreviewProvider {
     static var previews: some View {
         Group {
@@ -171,4 +170,3 @@ struct CartItem_Previews: PreviewProvider {
         }
     }
 }
-// swiftlint:enable force_unwrapping

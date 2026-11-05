@@ -2,6 +2,19 @@
 # [Unreleased]
 
 
+<a name="4.1.0"></a>
+# [4.1.0] - 2026-11-04
+
+## Features
+- The app can be launched with a channel already configured, supplied as environment variables on the app process, so the configuration screen is skipped entirely. Adding a guest name skips the login screen too, opening straight on the store with chat ready. Intended for test automation and local development; see `sample/docs/cs-predefined-configuration.md` for the list of variables and the full contract
+- Setting the `CXONE_SKIP_NOTIFICATION_PROMPT=1` launch environment variable skips the notification permission request on the login screen. Intended for UI-test automation on iOS 26 simulators, where the system prompt is invisible to WebDriverAgent and blocks every test at login; without the variable, behaviour is unchanged
+- The guest login screen's name fields and continue button now carry accessibility identifiers (`login.guest.first_name.text_field`, `login.guest.last_name.text_field`, `login.guest.button_continue`), so UI tests no longer have to locate them by placeholder text
+- The app's Documents folder is now exposed through file sharing and the Files app (On My iPhone → SDK Demo), so UI tests can push attachment fixtures onto a device and pick them via "Choose from files". The app's log file moved from Documents to Application Support so it is not exposed with it: a log left in Documents by an earlier build is deleted at launch, and a session reset now deletes the log explicitly. A session reset (switching channels, signing out, or returning to the configuration screen) erases the folder, so push fixtures only once the app is past those steps. When upgrading an existing install, launch the app once right away (or delete `Documents/CXoneChatSampleAppLogs` first): until that first launch removes it, the earlier build's log is visible through file sharing
+
+## Changes
+- Deeplinks are now matched strictly, and every entry point (`onOpenURL`, push-notification taps and the router) accepts the same URLs. A thread deeplink must have `threads` as its host (`scheme://threads?…`) or as a whole path component (`scheme://{channelId}/threads?…`), and must carry an `idOnExternalPlatform` query item. A URL that only mentions `threads` or `idOnExternalPlatform` elsewhere, such as `myapp://chat?idOnExternalPlatform=X`, no longer opens a thread.
+
+
 <a name="4.0.0"></a>
 # [4.0.0] - 2026-08-05
 
@@ -427,7 +440,8 @@
   - typing start/end
 
 
-[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/4.0.0...HEAD
+[Unreleased]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/4.1.0...HEAD
+[4.1.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/4.0.0...4.1.0
 [4.0.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.3.1...4.0.0
 [3.3.1]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/nice-devone/nice-cxone-mobile-sample-ios/compare/3.2.0...3.3.0

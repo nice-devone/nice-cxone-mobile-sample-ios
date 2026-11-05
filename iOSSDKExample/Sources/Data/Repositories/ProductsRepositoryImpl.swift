@@ -60,7 +60,6 @@ actor ProductsRepositoryImpl: ProductsRepository {
 
 // MARK: - Preview Mock
 
-// swiftlint:disable force_unwrapping
 final class MockProductsRepositoryImpl: ProductsRepository {
 
     // MARK: - Properties
@@ -91,7 +90,6 @@ final class MockProductsRepositoryImpl: ProductsRepository {
             ]
         )
     ]
-// swiftlint:enable force_unwrapping
 
     // MARK: - Methods
 

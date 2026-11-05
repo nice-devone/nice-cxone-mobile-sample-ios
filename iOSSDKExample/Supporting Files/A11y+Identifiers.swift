@@ -19,3 +19,20 @@ extension A11y.Store.ButtonOpenChat {
     /// `store.button_open_chat`
     static let identifier = "store.button_open_chat"
 }
+
+// MARK: - Login
+
+extension A11y.Login.Guest.FirstName.TextField {
+    /// `login.guest.first_name.text_field`
+    static let identifier = "login.guest.first_name.text_field"
+}
+
+extension A11y.Login.Guest.LastName.TextField {
+    /// `login.guest.last_name.text_field`
+    static let identifier = "login.guest.last_name.text_field"
+}
+
+extension A11y.Login.Guest.ButtonContinue {
+    /// `login.guest.button_continue`
+    static let identifier = "login.guest.button_continue"
+}

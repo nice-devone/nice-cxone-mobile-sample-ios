@@ -57,13 +57,6 @@ extension Color {
         self.init(.sRGB, red: Double(red) / 255, green: Double(green) / 255, blue: Double(blue) / 255, opacity: Double(alpha) / 255)
     }
     
-    // MARK: - Static methods
-    
-    @MainActor
-    static func themedColor(light: Color, dark: Color) -> Color {
-        UIApplication.isDarkModeActive ? dark : light
-    }
-    
     // MARK: - Methods
     
     var toHexString: String {

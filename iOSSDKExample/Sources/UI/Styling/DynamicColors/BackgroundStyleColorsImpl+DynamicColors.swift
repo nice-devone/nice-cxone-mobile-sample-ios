@@ -16,13 +16,12 @@
 import CXoneChatUI
 
 extension BackgroundStyleColorsImpl {
-    private typealias Theme = Asset.Colors.ChatDefaultTheme
     
     @MainActor
     static var lightColors: BackgroundStyleColorsImpl {
         BackgroundStyleColorsImpl(
-            default: LocalStorageManager.backgroundDefaultLightColor ?? Theme.Background.defaultLight.swiftUIColor,
-            inverse: LocalStorageManager.backgroundInverseLightColor ?? Theme.Background.inverseLight.swiftUIColor,
+            default: ChatThemeColors.color(for: .background(.default), isDark: false),
+            inverse: ChatThemeColors.color(for: .background(.inverse), isDark: false),
             surface: BackgroundSurfaceStyleColorsImpl.lightColors
         )
     }
@@ -30,8 +29,8 @@ extension BackgroundStyleColorsImpl {
     @MainActor
     static var darkColors: BackgroundStyleColorsImpl {
         BackgroundStyleColorsImpl(
-            default: LocalStorageManager.backgroundDefaultDarkColor ?? Theme.Background.defaultDark.swiftUIColor,
-            inverse: LocalStorageManager.backgroundInverseDarkColor ?? Theme.Background.inverseDark.swiftUIColor,
+            default: ChatThemeColors.color(for: .background(.default), isDark: true),
+            inverse: ChatThemeColors.color(for: .background(.inverse), isDark: true),
             surface: BackgroundSurfaceStyleColorsImpl.darkColors
         )
     }

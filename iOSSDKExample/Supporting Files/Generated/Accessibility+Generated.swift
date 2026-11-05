@@ -10,6 +10,32 @@ import Foundation
 // swiftlint:disable explicit_type_interface function_parameter_count identifier_name line_length
 // swiftlint:disable nesting type_body_length type_name vertical_whitespace_opening_braces
 internal enum A11y {
+  internal enum Login {
+    internal enum Guest {
+      internal enum ButtonContinue {
+        /// Double-tap to continue as guest
+        internal static let hint = A11y.tr("Accessibility", "login.guest.button_continue.hint", fallback: "Double-tap to continue as guest")
+        /// Continue as guest
+        internal static let label = A11y.tr("Accessibility", "login.guest.button_continue.label", fallback: "Continue as guest")
+      }
+      internal enum FirstName {
+        internal enum TextField {
+          /// Double-tap to edit first name
+          internal static let hint = A11y.tr("Accessibility", "login.guest.first_name.text_field.hint", fallback: "Double-tap to edit first name")
+          /// First Name
+          internal static let label = A11y.tr("Accessibility", "login.guest.first_name.text_field.label", fallback: "First Name")
+        }
+      }
+      internal enum LastName {
+        internal enum TextField {
+          /// Double-tap to edit last name
+          internal static let hint = A11y.tr("Accessibility", "login.guest.last_name.text_field.hint", fallback: "Double-tap to edit last name")
+          /// Last Name
+          internal static let label = A11y.tr("Accessibility", "login.guest.last_name.text_field.label", fallback: "Last Name")
+        }
+      }
+    }
+  }
   internal enum Store {
     internal enum ButtonOpenChat {
       /// Double-tap to open chat

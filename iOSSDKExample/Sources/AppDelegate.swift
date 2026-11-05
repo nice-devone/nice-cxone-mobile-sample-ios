@@ -63,12 +63,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, @unchecked Sendable {
         // Setup User Notification Center for real device
         UNUserNotificationCenter.current().delegate = self
 
-        // Register the Google OAuth authenticator for the sample app's sign-in flows
-        do {
-            OAuthenticatorsManager.register(authenticator: try GoogleAuthenticator())
-        } catch {
-            error.logError("Failed to set up Google authenticator")
-        }
+        // The Google OAuth authenticator is registered in `SDKDemoApp.init()`, which runs before this —
+        // a launch-time session reset needs it already in place. See the comment there.
 
         return true
     }
@@ -244,9 +240,7 @@ private extension AppDelegate {
 
     /// Logs build number, version, and git branch information
     func logBuildInfo() {
-        if let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-            Log.trace("Build Number: \(buildNumber)")
-        }
+        Log.trace("Build Number: \(Bundle.main.buildVersion)")
 
         // Log device information
         Log.trace("Device Model: \(UIDevice.current.model)")

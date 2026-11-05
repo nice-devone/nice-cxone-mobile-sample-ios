@@ -24,6 +24,8 @@ struct ValidatedTextField: View {
     let title: String
     let validator: ((String) -> String?)?
     let hint: String?
+    /// Applied to the inner `TextField` only, so the label and validation texts do not inherit it.
+    let accessibilityIdentifier: String?
 
     @Binding var text: String
 
@@ -37,7 +39,8 @@ struct ValidatedTextField: View {
         validator: ((String) -> String?)? = nil,
         label: String? = nil,
         error: String? = nil,
-        hint: String? = nil
+        hint: String? = nil,
+        accessibilityIdentifier: String? = nil
     ) {
         self.title = title
         self._text = text
@@ -45,6 +48,7 @@ struct ValidatedTextField: View {
         self.error = error
         self.label = label
         self.hint = hint
+        self.accessibilityIdentifier = accessibilityIdentifier
     }
 
     // MARK: - Builder
@@ -64,6 +68,9 @@ struct ValidatedTextField: View {
                     .font(.body)
                     .autocorrectionDisabled()
                     .autocapitalization(.none)
+                    .ifLet(accessibilityIdentifier) { view, identifier in
+                        view.accessibilityIdentifier(identifier)
+                    }
 
                 Divider()
                     .background(error == nil ? Color(.separator) : .red)

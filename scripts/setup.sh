@@ -18,4 +18,17 @@
 
 clean
 
+# Mirrors the QA channel config into shared/ BEFORE setup(), which runs `xcodegen
+# generate` for the sample: XcodeGen bakes each file under shared/assets into
+# project.pbxproj as an individual build-file reference at generate time — running the
+# fetch afterward would leave environment.json out of that reference until a *second*
+# `xcodegen generate` picked it up. Guarded on the script's presence so it's a no-op
+# where it isn't available. Failure here is non-fatal — under `-e` a failing command
+# inside this `then` block would otherwise abort the rest of setup.sh, even though it
+# only leaves the Configuration screen's custom-channel picker empty.
+if [ -x scripts/fetch_sample_environments.sh ]; then
+    scripts/fetch_sample_environments.sh \
+        || echo "warning: failed to fetch sample environment config — shared/ left as-is" >&2
+fi
+
 setup

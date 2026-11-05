@@ -29,3 +29,20 @@ struct ProductOrderEntity {
         ProductOrderEntity(product: product, quantity: quantity - 1)
     }
 }
+
+// MARK: - Cart Totals
+
+extension Array where Element == ProductOrderEntity {
+    
+    var totalAmount: Double {
+        reduce(0) { total, order in
+            total + order.product.price * Double(order.quantity)
+        }
+    }
+    
+    var itemCount: Int {
+        reduce(0) { count, order in
+            count + order.quantity
+        }
+    }
+}
